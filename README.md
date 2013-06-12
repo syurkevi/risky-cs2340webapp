@@ -1,6 +1,4 @@
-project
-=======
+tomcat-todo
+===========
 
-I'll update the name as more information on the project comes in. This is an update, no?
-
-Another update. 
+Demo app for CS 2340 lecture
