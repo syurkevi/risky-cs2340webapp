@@ -1,7 +1,7 @@
-<project name="todo" default="compile" basedir=".">
+<project name="risky" default="compile" basedir=".">
 
   <property environment="env"/>
-  <property name="app.name"      value="cs2340-team6"/>
+  <property name="app.name"      value="risky"/>
   <property name="app.path"      value="/${app.name}"/>
   <property name="app.version"   value="0.1-dev"/>
   <property name="build.home"    value="${basedir}/target"/>
