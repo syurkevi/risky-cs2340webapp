@@ -4,10 +4,18 @@ import java.util.ArrayList;
 
 public class Lobby {
     
-    public String name;
+    private String name;
     public ArrayList<Player> players = new ArrayList<Player>();
-
+    
     public Lobby(String name) {
         this.name = name;
     }
+
+    public ArrayList<Player> getPlayers(){
+        return players; 
+    }
+
+    public String getName(){
+        return name;
+    } 
 }
