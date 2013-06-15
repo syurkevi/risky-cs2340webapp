@@ -15,8 +15,6 @@
 </head>
 
 <body ng-controller="LobbyController">
-
-
     <% if (lobby != null) { %>
         <div>Recieved the following data:</div>
         <div>name: <%=lobby.getName() %></div>
@@ -29,10 +27,7 @@
         <div>player count: <%=lobby.players.size() %></div>
         <div>Player turn Order: <%=turnList.PlayerOrder() %></div>
         <%Player p;%>
-        <div>Simulating player
-        <input type="button" class="btn btn-success" ng-click="updateCurrentPlayer()" value="Take Turn" />
-        <div>p: </div>
-        <% for (int i=0;i<20;++i) { %>
+        <% for (int i=0 ; i < lobby.players.size() ; ++i) { %>
             <% p=turnList.getNextPlayer(); %>
             <div>p: <%=p.name %> (<%=192/lobby.players.size() %> armies)</div>
         <% } %>
@@ -78,7 +73,5 @@
             </form>
         </div>
     <% } %>
-
 </body>
-
 </html>
