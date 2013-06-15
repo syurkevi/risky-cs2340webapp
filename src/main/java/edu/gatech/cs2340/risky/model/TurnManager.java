@@ -50,6 +50,7 @@ public class TurnManager{
     }   
     //this method will only work if there is atleast 1 living player
     //round will be updated if next/first player is returned
+    //@dare-- do it with iterators...
     public Player getNextPlayer(){
         if(round==0){
             round++;//ensures players are only added on game start
