@@ -16,6 +16,11 @@ body {
 .input-micro {
     width: 45px;}
 
+.color-swatch {
+    display: inline-block;
+    width: 20px;
+    height: 20px;}
+
 #map {
     border: 1px dotted gray;}
 
@@ -29,21 +34,48 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
+var scale = 10;
+
 /*
 Notes:
 Setting the width or height, even the current value, will clear the canvas
 */
+function labelPoint(context, point) {
+    var text = "(" + point[0] + ", " + point[1] + ")";
+    var x = point[0]*scale, y = point[1]*scale;
+    var textSize = context.measureText(text);
+    x -= textSize.width/2;
+    x = Math.min(745, Math.max(x, 0));
+    y -= 5;
+    y = Math.min(495, Math.max(y, 10));
+    context.fillStyle = "#fff";
+    context.fillText(text, x+0.5, y+0.5);
+    context.fillStyle = "#333";
+    context.fillText(text, x, y);
+}
+
 function drawPolygons(canvas, context, polys) {
     canvas.width = canvas.width;//clears
     context.strokeStyle = "#333";
     for (var i=0 ; i < polys.length ; i++) {
-        context.moveTo(polys[i].vertexes[0][0] - 0.5, polys[i].vertexes[0][1] - 0.5);
+        if (!polys[i].color) polys[i].color = "#"+Math.floor(Math.random()*16777215).toString(16);
+        context.fillStyle = polys[i].color;
+        context.beginPath();
+        context.moveTo(polys[i].vertexes[0][0]*scale - 0.5, polys[i].vertexes[0][1]*scale - 0.5);
         for (var j=1 ; j < polys[i].vertexes.length ; j++) {
             var point = polys[i].vertexes[j];
-            context.lineTo(point[0] - 0.5, point[1] - 0.5);
+            context.lineTo(point[0]*scale - 0.5, point[1]*scale - 0.5);
         }
-        context.lineTo(polys[i].vertexes[0][0] - 0.5, polys[i].vertexes[0][1] - 0.5);
+        context.lineTo(polys[i].vertexes[0][0]*scale - 0.5, polys[i].vertexes[0][1]*scale - 0.5);
+        context.closePath();
+        context.fill();
         context.stroke();// commit the strokes to the canvas
+    }
+    context.fillStyle = "#333";
+    for (var i=0 ; i < polys.length ; i++) {
+        for (var j=0 ; j < polys[i].vertexes.length ; j++) {
+            labelPoint(context, polys[i].vertexes[j]);
+        }
     }
 }
 
@@ -62,7 +94,7 @@ ce.controller("CanvasController", function ($scope) {
     $scope.exportCommand;
     
     $scope.polygons = [{
-        vertexes: [[50, 50], [60, 50], [50, 60]]
+        vertexes: [[1, 1], [2, 1], [1, 2]]
     }];
     
     var storagons = localStorage.getItem("polygons");
@@ -71,7 +103,7 @@ ce.controller("CanvasController", function ($scope) {
     }
     
     $scope.addVertexToPolygon = function (polygon) {
-        polygon.vertexes.push([50, 50]);
+        polygon.vertexes.push([3, 3]);
     };
     
     $scope.removeVertexFromPolygon = function (index, polygon) {
@@ -79,7 +111,13 @@ ce.controller("CanvasController", function ($scope) {
     };
     
     $scope.newPolyAdd = function () {
-        $scope.polygons.push(angular.copy($scope.polygons[$scope.polygons.length-1]));
+        var copy = angular.copy($scope.polygons[$scope.polygons.length-1]);
+        copy.color = '';
+        $scope.polygons.push(copy);
+    };
+
+    $scope.resetColor = function (index) {
+        $scope.polygons[i].color = '';
     };
     
     $scope.removePolygon = function (index) {
@@ -105,12 +143,21 @@ ce.controller("CanvasController", function ($scope) {
 
 <div class="oneof2">
     <canvas id="map" width="750" height="500"></canvas>
-    <p>Dotted border due to CSS styling, not &lt;canvas&gt; drawing. Best viewed with resolution >= 1550x800. Any changes to the right are saved in localStorage, so you <i>should</i> be able to refresh. </p>
+    <p>
+        <h4>Notes</h4>
+        <ul>
+            <li>Dotted border due to CSS styling, not &lt;canvas&gt; drawing</li>
+            <li>Best viewed with resolution >= 1550x800</li>
+            <li>Any changes to the right are saved in localStorage, so you <i>should</i> be able to refresh</li>
+            <li>Click a color swatch on the right to change the display color</li>
+        </ul>
+    </p>
 </div>
 
 <div class="oneof2">
     <h4>Polygons</h4>
     <div ng-repeat="polygon in polygons">
+        <span class="color-swatch" style="background-color: {{polygon.color}}" ng-click="polygon.color = ''"></span>
         <span ng-repeat="vertex in polygon.vertexes">(<input type="text" class="input-micro" ng-model="vertex[0]" value="vertex[0]" />, <input type="text" class="input-micro" ng-model="vertex[1]" value="vertex[1]" />) <a class="btn btn-warning btn-mini" ng-click="removeVertexFromPolygon($index, polygon)">-</a> </span>
         <a class="btn btn-success btn-mini" ng-click="addVertexToPolygon(polygon)">+vert</a>
         <a class="btn btn-danger btn-mini" ng-click="removePolygon($index)">-poly</a>
