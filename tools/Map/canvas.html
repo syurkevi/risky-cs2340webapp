@@ -1,0 +1,130 @@
+<html ng-app="CanvasExperiment">
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+<script type="text/javascript" src="angular.min.js"></script>
+<title>&lt;canvas&gt; experiement</title>
+<style>
+
+body {
+    margin: 0 auto;
+    width: 1550px;}
+
+.oneof2 {
+    float: left;
+    width: 50%;}
+
+.input-micro {
+    width: 45px;}
+
+#map {
+    border: 1px dotted gray;}
+
+</style>
+<script type="text/javascript">
+
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};
+
+/*
+Notes:
+Setting the width or height, even the current value, will clear the canvas
+*/
+function drawPolygons(canvas, context, polys) {
+    canvas.width = canvas.width;//clears
+    context.strokeStyle = "#333";
+    for (var i=0 ; i < polys.length ; i++) {
+        context.moveTo(polys[i].vertexes[0][0] - 0.5, polys[i].vertexes[0][1] - 0.5);
+        for (var j=1 ; j < polys[i].vertexes.length ; j++) {
+            var point = polys[i].vertexes[j];
+            context.lineTo(point[0] - 0.5, point[1] - 0.5);
+        }
+        context.lineTo(polys[i].vertexes[0][0] - 0.5, polys[i].vertexes[0][1] - 0.5);
+        context.stroke();// commit the strokes to the canvas
+    }
+}
+
+var ce = angular.module("CanvasExperiment", []);
+
+ce.filter('iif', function () {
+    return function(input, trueValue, falseValue) {
+        return input ? trueValue : falseValue;
+    };
+});
+
+ce.controller("CanvasController", function ($scope) {
+    var canvas = document.getElementById("map");
+    var context = canvas.getContext("2d");
+    
+    $scope.exportCommand;
+    
+    $scope.polygons = [{
+        vertexes: [[50, 50], [60, 50], [50, 60]]
+    }];
+    
+    var storagons = localStorage.getItem("polygons");
+    if (storagons) {
+        $scope.polygons = JSON.parse(storagons);
+    }
+    
+    $scope.addVertexToPolygon = function (polygon) {
+        polygon.vertexes.push([50, 50]);
+    };
+    
+    $scope.removeVertexFromPolygon = function (index, polygon) {
+        polygon.vertexes.remove(index);
+    };
+    
+    $scope.newPolyAdd = function () {
+        $scope.polygons.push(angular.copy($scope.polygons[$scope.polygons.length-1]));
+    };
+    
+    $scope.removePolygon = function (index) {
+        if ($scope.polygons.length < 2) return;
+        $scope.polygons.remove(index);
+    };
+    
+    $scope.export = function () {
+        $scope.exportCommand = 'localStorage.setItem("polygons", \'' + JSON.stringify(angular.copy($scope.polygons)) + '\');';
+    };
+    
+    $scope.$watch("polygons", function () {
+        drawPolygons(canvas, context, $scope.polygons);
+        localStorage.setItem("polygons", JSON.stringify($scope.polygons));
+    }, true);
+});
+
+</script>
+</head>
+<body ng-controller="CanvasController">
+
+<h2>&lt;canvas&gt; experiment</h2>
+
+<div class="oneof2">
+    <canvas id="map" width="750" height="500"></canvas>
+    <p>Dotted border due to CSS styling, not &lt;canvas&gt; drawing. Best viewed with resolution >= 1550x800. Any changes to the right are saved in localStorage, so you <i>should</i> be able to refresh. </p>
+</div>
+
+<div class="oneof2">
+    <h4>Polygons</h4>
+    <div ng-repeat="polygon in polygons">
+        <span ng-repeat="vertex in polygon.vertexes">(<input type="text" class="input-micro" ng-model="vertex[0]" value="vertex[0]" />, <input type="text" class="input-micro" ng-model="vertex[1]" value="vertex[1]" />) <a class="btn btn-warning btn-mini" ng-click="removeVertexFromPolygon($index, polygon)">-</a> </span>
+        <a class="btn btn-success btn-mini" ng-click="addVertexToPolygon(polygon)">+vert</a>
+        <a class="btn btn-danger btn-mini" ng-click="removePolygon($index)">-poly</a>
+    </div>
+    <div><a class="btn btn-primary btn-mini" ng-click="newPolyAdd()">+poly</a></div>
+    
+    <h4>Code</h4>
+    <pre>var polygons = [<span ng-repeat="polygon in polygons">{{$index > 0 | iif : "," : ""}}
+    {"id": {{$index}}, "vertexes": [<span ng-repeat="vertex in polygon.vertexes">{{$index > 0 | iif : ", " : ""}}[{{vertex[0]}}, {{vertex[1]}}]</span>]}</span>
+];</pre>
+    
+    <a class="btn btn-primary btn" ng-click="export()">Export</a>
+    <p><pre ng-show="exportCommand">{{exportCommand}}</pre></p>
+</div>
+
+</body>
+</html>
