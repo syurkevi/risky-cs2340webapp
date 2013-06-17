@@ -7,10 +7,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import sun.management.counter.Variability;
-import sun.net.www.protocol.gopher.GopherClient;
-
 import edu.gatech.cs2340.risky.model.Lobby;
 import edu.gatech.cs2340.risky.model.Player;
 
