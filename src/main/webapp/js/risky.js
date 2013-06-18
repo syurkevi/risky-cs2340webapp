@@ -11,9 +11,7 @@ risky.controller('LobbyController', function ($scope) {
         if ($scope.playerName.length <= 0) return;
         var name = $scope.playerName;
         for (var id in $scope.players) {
-            if ($scope.players[id] === name) {
-                return;// disallow players with the same name
-            }
+            if ($scope.players[id] === name) return;// disallow players with the same name
         }
         $scope.players[$scope.playerCount++] = name;
         $scope.playerName = '';
