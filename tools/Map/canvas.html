@@ -37,6 +37,8 @@ function generateColor() {
     return "#"+Math.floor(Math.random()*16777215).toString(16);
 }
 
+var playerColors = ["#f00", "#0f0", "#00f", "#ff0", "#f0f", "#0ff", "#000"];
+
 function labelPoint(canvas, context, point, config) {
     var text = "(" + point[0] + ", " + point[1] + ")";
     var x = point[0]*config.scale, y = point[1]*config.scale;
@@ -61,7 +63,13 @@ function drawPolygons(canvas, context, polys, config) {
         if (!polys[i].color) polys[i].color = generateColor();
         if (polys[i].visible === false) continue;// skip if !visible
         
-        context.fillStyle = (!config.greyed) ? polys[i].color : "#ddd";
+        if (config.greyed) {
+            context.fillStyle = "#ddd";
+        } else if (config.pretendPlayers) {
+            context.fillStyle = playerColors[Math.floor(Math.random()*config.pretendPlayersNum)];
+        } else {
+            context.fillStyle = polys[i].color;
+        }
         
         context.beginPath();
         context.moveTo(polys[i].vertexes[0][0]*config.scale - 0.5, polys[i].vertexes[0][1]*config.scale - 0.5);
@@ -99,13 +107,17 @@ ce.controller("CanvasController", function ($scope) {
     
     $scope.exportCommand;
     
-    $scope.mouseScaledX = "unknown";
-    $scope.mouseScaledY = "unknown";
+    $scope.mouse = {
+        "scaledX": "unknown",
+        "scaledY": "unknown"
+    }
     
     $scope.config = {
         "scale": 10,
         "labels": true,
-        "greyed": false
+        "greyed": false,
+        "pretendPlayers": false,
+        "pretendPlayersNum": 3,
     };
     
     $scope.polygons = [
@@ -161,13 +173,13 @@ ce.controller("CanvasController", function ($scope) {
         var x = e.pageX - canvas.offsetLeft, y = e.pageY - canvas.offsetTop;
         x /= $scope.config.scale;
         y /= $scope.config.scale;
-        $scope.mouseScaledX = Math.floor(x);
-        $scope.mouseScaledY = Math.floor(y);
+        $scope.mouse.scaledX = Math.floor(x);
+        $scope.mouse.scaledY = Math.floor(y);
     };
     
     $scope.clearMouse = function (e) {
-        $scope.mouseScaledX = "unknown";
-        $scope.mouseScaledY = "unknown";
+        $scope.mouse.scaledX = "unknown";
+        $scope.mouse.scaledY = "unknown";
     };
     
     $scope.export = function () {
@@ -209,14 +221,14 @@ ce.controller("CanvasController", function ($scope) {
             <li>Dotted border due to CSS styling, not &lt;canvas&gt; drawing</li>
             <li>Best viewed with resolution >= 1920x900</li>
             <li>Everything is stored in your browser, so refresh with free will</li>
-            <li>Single click a color swatch to toggle visibility</li>
-            <li>The mouse is at ({{mouseScaledX}}, {{mouseScaledY}})</li>
+            <li>Single click a color square to toggle visibility; Double click to change polygon color</li>
+            <li>The mouse is at ({{mouse.scaledX}}, {{mouse.scaledY}})</li>
         </ul>
     </p>
     <p>
         <h4>Actions</h4>
         <ul>
-            <li>Clear cached polygons <a class="btn btn-danger btn-mini" ng-click="clearCachedPolygons()">go</a></li>
+            <li>Clear cached polygons (revert to preloaded polygons) <a class="btn btn-danger btn-mini" ng-click="clearCachedPolygons()">go</a></li>
         </ul>
     </p>
 </div>
@@ -224,8 +236,10 @@ ce.controller("CanvasController", function ($scope) {
 <div class="oneof2">
     <h4>Polygons</h4>
     <div>
-        <label for="showLabels">Show Labels: <input type="checkbox" ng-model="config.labels" /></label>
-        <label for="greyed">Grey: <input type="checkbox" ng-model="config.greyed" /></label>
+        <label for="showLabels">Show Labels: <input type="checkbox" ng-model="config.labels" id="showLabels" /></label>
+        <label for="greyed">Grey: <input type="checkbox" ng-model="config.greyed" id="greyed" /></label>
+        <label for="pretendPlayers">Pretend players: <input type="checkbox" ng-model="config.pretendPlayers" id="pretendPlayers" /></label>
+        <label for="pretendPlayersNum">Number players: <input type="text" ng-model="config.pretendPlayersNum" id="pretendPlayersNum" /></label>
     </div>
     <div ng-repeat="polygon in polygons">
         <span class="color-swatch" style="background-color: {{polygon.color}}" ng-dblclick="polygon.color = ''" ng-click="polygon.visible = !polygon.visible"></span>
@@ -241,7 +255,8 @@ ce.controller("CanvasController", function ($scope) {
 ];</pre>
     
     <a class="btn btn-primary btn" ng-click="export()">Export</a>
-    <p><pre ng-show="exportCommand">{{exportCommand}}</pre></p>
+    <p><pre ng-show="exportCommand">// You can run this line in your browser's JavaScript console to load the polygons:
+{{exportCommand}}</pre></p>
 </div>
 
 </body>
