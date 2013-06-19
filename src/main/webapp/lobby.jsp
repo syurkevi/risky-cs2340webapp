@@ -27,7 +27,7 @@
         
         <div>player count: <%=lobby.players.size() %></div>
         <div>Player turn Order: <%=turnList.PlayerOrder() %></div>
-        <%Player p;%>
+        <% Player p; %>
         <% for (int i=0 ; i < lobby.players.size() ; ++i) { %>
             <% p=turnList.getNextPlayer(); %>
             <div>p: <%=p.name %> (<%=p.armies %> armies)</div>
