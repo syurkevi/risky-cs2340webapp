@@ -41,7 +41,7 @@
         <hr></hr>
 
         <h3>List players</h3>
-        <p><div ng-repeat="(id, name) in players">{{name}} <span ng-click="removePlayer(id)"><i class="icon-remove"></i></span></div></p>
+        <p><div ng-repeat="player in players">{{player}} <span ng-click="removePlayer($index)"><i class="icon-remove"></i></span></div></p>
         <div>
             <div class="input-append">
                 <input type="text" ng-model="playerName" name="playerName" />
@@ -52,9 +52,9 @@
         <hr></hr>
 
         <h3>Get ready to rumble!</h3>
-        <div ng-show="playerCount < 3" class="">Not yet though, <span class="badge badge-important">3</span> player minimum</div>
-        <div ng-show="playerCount > 6">Woah there, <span class="badge badge-important">6</span> player maximum</div>
-        <div ng-show="playerCount >= 3 && playerCount <= 6">
+        <div ng-show="players.length < 3" class="">Not yet though, <span class="badge badge-important">3</span> player minimum</div>
+        <div ng-show="players.length > 6">Woah there, <span class="badge badge-important">6</span> player maximum</div>
+        <div ng-show="players.length >= 3 && players.length <= 6">
             <div ng-show="!lobby.title" class="badge badge-warning">Mind naming your lobby for me?</div>
             <div ng-show="lobby.title">
                 <h4>So here's what I've got:</h4>
@@ -65,11 +65,11 @@
                         <li ng-repeat="(id, player) in players">{{player}}</li>
                     </ul>
                 </div>
-                <div><input type="button" class="btn btn-primary" ng-click="startMatch()" value="Start Match" /> <small ng-show="playerCount < 6">Up to <span class="badge badge-info">{{6 - playerCount}}</span> more players</small><small ng-show="playerCount == 6">No more players</small></div>
+                <div><input type="button" class="btn btn-primary" ng-click="startMatch()" value="Start Match" /> <small ng-show="players.length < 6">Up to <span class="badge badge-info">{{6 - players.length}}</span> more players</small><small ng-show="players.length == 6">No more players</small></div>
             </div>
             <form action="/risky/lobby/create" method="post" id="submitForm">
                 <input type="hidden" value="{{lobby.title}}" name="title" />
-                <input type="hidden" ng-repeat="(id, name) in players" name="player{{id}}" value="{{name}}" />
+                <input type="hidden" ng-repeat="name in players" name="player{{$index}}" value="{{name}}" />
             </form>
         </div>
     <% } %>
