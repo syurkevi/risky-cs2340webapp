@@ -43,6 +43,8 @@ public class LobbyServlet extends HttpServlet {
                 this.lobby.players.add(new Player(name));
             }
             
+            this.lobby.allocateArmies();
+            
             request.setAttribute("lobby", this.lobby);
             RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/lobby.jsp");
             dispatcher.forward(request, response);

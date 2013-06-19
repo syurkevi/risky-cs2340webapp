@@ -1,0 +1,263 @@
+<html ng-app="CanvasExperiment">
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+<script type="text/javascript" src="angular.min.js"></script>
+<title>&lt;canvas&gt; experiement</title>
+<style>
+body {
+    margin: 0 auto;
+    width: 1860px;}
+
+.oneof2 {
+    float: left;
+    width: 50%;}
+
+.input-micro {
+    height: 20px;
+    width: 30px;}
+
+.color-swatch {
+    display: inline-block;
+    height: 20px;
+    width: 20px;}
+
+#map {
+    border: 1px dotted gray;}
+</style>
+<script type="text/javascript">
+
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};
+
+function generateColor() {
+    return "#"+Math.floor(Math.random()*16777215).toString(16);
+}
+
+var playerColors = ["#f44", "#4f4", "#44f", "#ff4", "#f4f", "#4ff", "#444"];
+
+function labelPoint(canvas, context, point, config) {
+    var text = "(" + point[0] + ", " + point[1] + ")";
+    var x = point[0]*config.scale, y = point[1]*config.scale;
+    var textSize = context.measureText(text);
+    
+    x -= textSize.width/2;// center horizontally
+    x = Math.min(canvas.width-5, Math.max(x, 0));// keep it within the canvas bounds
+    y -= 5;// move it above the point
+    y = Math.min(canvas.height-5, Math.max(y, 10));
+    
+    context.fillStyle = "#fff";// white drop-shadow
+    context.fillText(text, x+0.5, y+0.5);
+    
+    context.fillStyle = "#333";// dark grey text
+    context.fillText(text, x, y);
+}
+
+function drawPolygons(canvas, context, polys, config) {
+    canvas.width = canvas.width;// clears the canvas
+    context.strokeStyle = "#333";
+    for (var i=0 ; i < polys.length ; i++) {
+        if (!polys[i].color) polys[i].color = generateColor();
+        if (polys[i].visible === false) continue;// skip if !visible
+        
+        if (config.greyed) {
+            context.fillStyle = "#ddd";
+        } else if (config.pretendPlayers) {
+            context.fillStyle = playerColors[Math.floor(Math.random()*config.pretendPlayersNum)];
+        } else {
+            context.fillStyle = polys[i].color;
+        }
+        
+        context.beginPath();
+        context.moveTo(polys[i].vertexes[0][0]*config.scale - 0.5, polys[i].vertexes[0][1]*config.scale - 0.5);
+        
+        for (var j=1 ; j < polys[i].vertexes.length ; j++) {
+            var point = polys[i].vertexes[j];
+            context.lineTo(point[0]*config.scale - 0.5, point[1]*config.scale - 0.5);
+        }
+        
+        context.closePath();// pretends to "context.moveTo(first vertex)"
+        context.fill();
+        context.stroke();// commit the strokes to the canvas
+    }
+    if (config.labels === true) {
+        context.fillStyle = "#333";
+        for (var i=0 ; i < polys.length ; i++) {
+            for (var j=0 ; j < polys[i].vertexes.length ; j++) {
+                labelPoint(canvas, context, polys[i].vertexes[j], config);
+            }
+        }
+    }
+}
+
+var ce = angular.module("CanvasExperiment", []);
+
+ce.filter("iif", function () {// fake ternary operator in {{}}'d things
+    return function(input, trueValue, falseValue) {
+        return input ? trueValue : falseValue;
+    };
+});
+
+ce.controller("CanvasController", function ($scope) {
+    var canvas = document.getElementById("map");
+    var context = canvas.getContext("2d");
+    
+    $scope.exportCommand;
+    
+    $scope.mouse = {
+        "scaledX": "unknown",
+        "scaledY": "unknown"
+    }
+    
+    $scope.config = {
+        "scale": 10,
+        "labels": true,
+        "greyed": false,
+        "pretendPlayers": false,
+        "pretendPlayersNum": 3,
+    };
+    
+    $scope.polygons = [
+        {"id": 0, "vertexes": [[4, 4], [16, 4], [12, 20], [6, 18]]},
+        {"id": 1, "vertexes": [[16, 4], [14, 12], [20, 18], [24, 10]]},
+        {"id": 2, "vertexes": [[20, 7], [28, 6], [26, 18], [20, 18], [24, 10]]},
+        {"id": 3, "vertexes": [[12, 20], [14, 12], [20, 18], [26, 18], [24, 24], [16, 22]]},
+        {"id": 4, "vertexes": [[30, 24], [34, 20], [38, 22], [36, 24], [32, 26]]},
+        {"id": 5, "vertexes": [[34, 8], [42, 4], [50, 6], [58, 4], [50, 12]]},
+        {"id": 6, "vertexes": [[58, 4], [68, 6], [66, 14], [56, 6]]},
+        {"id": 7, "vertexes": [[56, 6], [66, 14], [62, 16], [54, 8]]},
+        {"id": 8, "vertexes": [[58, 12], [58, 21], [65, 22], [68, 18], [70, 12], [67, 10], [66, 14], [62, 16]]},
+        {"id": 9, "vertexes": [[42, 10], [50, 12], [54, 8], [58, 12], [58, 18], [52, 18]]},
+        {"id": 10, "vertexes": [[46, 20], [47, 14], [52, 18], [58, 18], [58, 21], [55, 23]]},
+        {"id": 11, "vertexes": [[68, 18], [65, 22], [62, 40], [68, 36], [71, 24]]},
+        {"id": 12, "vertexes": [[55, 23], [58, 21], [65, 22], [64, 28], [58, 30]]},
+        {"id": 13, "vertexes": [[52, 22], [55, 23], [58, 30], [56, 34], [54, 32]]},
+        {"id": 14, "vertexes": [[57, 32], [58, 30], [64, 28], [63, 34], [61, 32]]},
+        {"id": 15, "vertexes": [[55, 36], [57, 32], [61, 32], [63, 34], [62, 40]]},
+        {"id": 16, "vertexes": [[46, 34], [50, 38], [48, 42], [42, 38]]},
+        {"id": 17, "vertexes": [[46, 34], [44, 36], [42, 38], [45, 40], [38, 42], [35, 41], [32, 38], [36, 36]]},
+        {"id": 18, "vertexes": [[35, 41], [30, 44], [26, 40], [28, 38], [32, 38]]},
+        {"id": 19, "vertexes": [[34, 37], [30, 34], [27, 35], [28, 38], [32, 38]]},
+        {"id": 20, "vertexes": [[27, 35], [28, 38], [26, 40], [27, 41], [22, 42], [20, 34]]},
+        {"id": 21, "vertexes": [[28, 42], [18, 46], [12, 34], [20, 34], [22, 42], [27, 41]]},
+        {"id": 22, "vertexes": [[16, 42], [4, 40], [2, 30], [11, 32]]},
+        {"id": 23, "vertexes": [[32, 26], [36, 24], [38, 22], [40, 24], [37, 27], [33, 27]]}
+    ];
+    
+    var storedagons = localStorage.getItem("polygons");
+    if (storedagons) $scope.polygons = JSON.parse(storedagons);
+    
+    $scope.addVertexToPolygon = function (polygon) {
+        polygon.vertexes.push([3, 3]);
+    };
+    
+    $scope.removeVertexFromPolygon = function (index, polygon) {
+        polygon.vertexes.remove(index);
+    };
+    
+    $scope.newPolyAdd = function () {
+        var copy = angular.copy($scope.polygons[$scope.polygons.length-1]);// removes the hidden binding attributes
+        copy.color = generateColor();
+        $scope.polygons.push(copy);
+    };
+    
+    $scope.removePolygon = function (index) {
+        if ($scope.polygons.length < 2) return;
+        $scope.polygons.remove(index);
+    };
+    
+    $scope.trackMouse = function (e) {
+        var x = e.pageX - canvas.offsetLeft, y = e.pageY - canvas.offsetTop;
+        x /= $scope.config.scale;
+        y /= $scope.config.scale;
+        $scope.mouse.scaledX = Math.floor(x);
+        $scope.mouse.scaledY = Math.floor(y);
+    };
+    
+    $scope.clearMouse = function (e) {
+        $scope.mouse.scaledX = "unknown";
+        $scope.mouse.scaledY = "unknown";
+    };
+    
+    $scope.export = function () {
+        $scope.exportCommand = "localStorage.setItem(\"polygons\", '" + JSON.stringify(angular.copy($scope.polygons)) + "');";
+    };
+    
+    $scope.clearCachedPolygons = function () {
+        localStorage.setItem("polygons", "");
+    };
+    
+    function redraw() {
+        drawPolygons(canvas, context, $scope.polygons, $scope.config);
+    }
+    
+    // read as: when $scope.polygons changes, redraw and save. oh, and deeply check the fields
+    // a "deep" check look into the fields of the fields, i.e. each x and y of each vertex of each polygon
+    // this is more expensive, but required
+    $scope.$watch("polygons", function () {
+        redraw();
+        localStorage.setItem("polygons", JSON.stringify($scope.polygons));
+    }, true);
+    
+    $scope.$watch("config", function () {
+        redraw();
+    }, true);
+});
+
+</script>
+</head>
+<body ng-controller="CanvasController">
+
+<h2>&lt;canvas&gt; experiment</h2>
+
+<div class="oneof2">
+    <canvas id="map" width="800" height="500" ng-mousemove="trackMouse($event)" ng-mouseleave="clearMouse($event)"></canvas>
+    <p>
+        <h4>Notes</h4>
+        <ul>
+            <li>Dotted border due to CSS styling, not &lt;canvas&gt; drawing</li>
+            <li>Best viewed with resolution >= 1920x900</li>
+            <li>Everything is stored in your browser, so refresh with free will</li>
+            <li>Single click a color square to toggle visibility; Double click to change polygon color</li>
+            <li>The mouse is at ({{mouse.scaledX}}, {{mouse.scaledY}})</li>
+        </ul>
+    </p>
+    <p>
+        <h4>Actions</h4>
+        <ul>
+            <li>Clear cached polygons (revert to preloaded polygons) <a class="btn btn-danger btn-mini" ng-click="clearCachedPolygons()">go</a></li>
+        </ul>
+    </p>
+</div>
+
+<div class="oneof2">
+    <h4>Polygons</h4>
+    <div>
+        <label for="showLabels">Show Labels: <input type="checkbox" ng-model="config.labels" id="showLabels" /></label>
+        <label for="greyed">Grey: <input type="checkbox" ng-model="config.greyed" id="greyed" /></label>
+        <label for="pretendPlayers">Pretend players: <input type="checkbox" ng-model="config.pretendPlayers" id="pretendPlayers" /></label>
+        <label for="pretendPlayersNum">Number players: <input type="text" ng-model="config.pretendPlayersNum" id="pretendPlayersNum" /></label>
+    </div>
+    <div ng-repeat="polygon in polygons">
+        <span class="color-swatch" style="background-color: {{polygon.color}}" ng-dblclick="polygon.color = ''" ng-click="polygon.visible = !polygon.visible"></span>
+        <span ng-repeat="vertex in polygon.vertexes">(<input type="text" class="input-micro" ng-model="vertex[0]" value="vertex[0]" />, <input type="text" class="input-micro" ng-model="vertex[1]" value="vertex[1]" />) <a class="btn btn-warning btn-mini" ng-click="removeVertexFromPolygon($index, polygon)">-</a> </span>
+        <a class="btn btn-success btn-mini" ng-click="addVertexToPolygon(polygon)">+</a>
+        <a class="btn btn-danger btn-mini" ng-click="removePolygon($index)">del</a>
+    </div>
+    <div><a class="btn btn-primary btn-mini" ng-click="newPolyAdd()">+poly</a></div>
+    
+    <h4>Code</h4>
+    <pre>var polygons = [<span ng-repeat="polygon in polygons">{{$index > 0 | iif : "," : ""}}
+    {"id": {{polygon.id}}, "vertexes": [<span ng-repeat="vertex in polygon.vertexes">{{$index > 0 | iif : ", " : ""}}[{{vertex[0]}}, {{vertex[1]}}]</span>]}</span>
+];</pre>
+    
+    <a class="btn btn-primary btn" ng-click="export()">Export</a>
+    <p><pre ng-show="exportCommand">// You can run this line in your browser's JavaScript console to load the polygons:
+{{exportCommand}}</pre></p>
+</div>
+
+</body>
+</html>
