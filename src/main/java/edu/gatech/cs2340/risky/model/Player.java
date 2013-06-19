@@ -15,11 +15,11 @@ public class Player {
         this(name, 0);
     }
     
-    public void setDead(){
+    public void setDead() {
         playing=false;
     }
 
-    public boolean stillAlive(){
+    public boolean stillAlive() {
         return playing;
     }
 }
