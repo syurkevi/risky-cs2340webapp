@@ -8,7 +8,7 @@ import java.util.Collections;
  * Class that will act as a reference
  * to current players and their turns
  */
-public class TurnManager{
+public class TurnManager {
     private static final int MAX_PLAYERS = 6;
 
     private ArrayList<Player> turnList;
@@ -16,12 +16,12 @@ public class TurnManager{
     private Iterator<Player> currentPlayer;
     private int round = 0;
     
-    public TurnManager(){
+    public TurnManager() {
         turnList = new ArrayList<Player>(MAX_PLAYERS);
         currentPlayer = turnList.iterator();
     }
 
-    public boolean addPlayer(Player p){
+    public boolean addPlayer(Player p) {
         if (round == 0) {
             if (turnList.size() <= MAX_PLAYERS) {
                 turnList.add(p);

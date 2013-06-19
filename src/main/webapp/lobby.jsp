@@ -18,8 +18,8 @@
     <% if (lobby != null) { %>
         <div>Recieved the following data:</div>
         <div>name: <%=lobby.getName() %></div>
-        <% TurnManager turnList=new TurnManager();%>
-        <%for(Player p:lobby.players){%>
+        <% TurnManager turnList = new TurnManager(); %>
+        <% for (Player p : lobby.players) { %>
             <% turnList.addPlayer(p);%>
         <% } %>
         <% turnList.shuffleOrder(); %>
@@ -29,7 +29,7 @@
         <%Player p;%>
         <% for (int i=0 ; i < lobby.players.size() ; ++i) { %>
             <% p=turnList.getNextPlayer(); %>
-            <div>p: <%=p.name %> (<%=192/lobby.players.size() %> armies)</div>
+            <div>p: <%=p.name %> (<%=p.armies %> armies)</div>
         <% } %>
 
     <% } else { %>
