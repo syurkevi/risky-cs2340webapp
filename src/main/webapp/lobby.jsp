@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="/risky/css/style.css">
     <script type="text/javascript" src="/risky/js/angular.min.js"></script>
     <script type="text/javascript" src="/risky/js/risky.js"></script>
+    <script type="text/javascript" src="/risky/js/lobby.js"></script>
     <title>Risky Web App</title>
 </head>
 
@@ -67,7 +68,7 @@
                 </div>
                 <div><input type="button" class="btn btn-primary" ng-click="startMatch()" value="Start Match" /> <small ng-show="players.length < 6">Up to <span class="badge badge-info">{{6 - players.length}}</span> more players</small><small ng-show="players.length == 6">No more players</small></div>
             </div>
-            <form action="/risky/lobby/create" method="post" id="submitForm">
+            <form action="/risky/game/create" method="post" id="submitForm">
                 <input type="hidden" value="{{lobby.title}}" name="title" />
                 <input type="hidden" ng-repeat="name in players" name="player{{$index}}" value="{{name}}" />
             </form>

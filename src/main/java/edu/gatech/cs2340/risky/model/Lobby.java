@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Lobby {
     
-    private String name;
+    public String name;
     public ArrayList<Player> players = new ArrayList<Player>();
     
     public Lobby(String name) {

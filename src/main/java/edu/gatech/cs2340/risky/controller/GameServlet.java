@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import edu.gatech.cs2340.risky.model.Game;
+import edu.gatech.cs2340.risky.model.Lobby;
+import edu.gatech.cs2340.risky.model.Player;
 
 @WebServlet(urlPatterns = {
         "/game", // GET
@@ -34,11 +36,22 @@ public class GameServlet extends HttpServlet {
             doDelete(request, response);
             
         } else {
-            int lobbyId = Integer.parseInt(request.getParameter("lobbyId"));
+            String title = request.getParameter("title");
             
-            this.game = new Game(lobbyId);
+            Lobby lobby = new Lobby(title);
             
-            request.setAttribute("game", game);
+            String name;
+            for (int i=0 ; true ; i++) {
+                name = request.getParameter("player" + i);
+                if (name == null) break;
+                lobby.players.add(new Player(name));
+            }
+            
+            lobby.allocateArmies();
+            
+            this.game = new Game(lobby);
+            
+            request.setAttribute("game", this.game);
             RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
             dispatcher.forward(request, response);
         }
@@ -49,7 +62,7 @@ public class GameServlet extends HttpServlet {
      * link).
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        request.setAttribute("game", game);
+        request.setAttribute("game", this.game);
         RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
         dispatcher.forward(request, response);
     }

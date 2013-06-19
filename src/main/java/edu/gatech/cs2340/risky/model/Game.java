@@ -1,20 +1,21 @@
 package edu.gatech.cs2340.risky.model;
+
 import java.util.ArrayList;
 
 public class Game {
 
-    private Lobby lobby;
-    private int gameRound;
+    public Lobby lobby;
+    public int gameRound;
     
-    private TurnManager turnManager=new TurnManager();
+    private TurnManager turnManager = new TurnManager();
 
     public Game(Lobby lobby) {
         this.lobby = lobby;
     }
 
-    public void addPlayersFromLobby(){
-        ArrayList<Player> players=lobby.getPlayers();
-        for(Player p:players){
+    public void addPlayersFromLobby() {
+        ArrayList<Player> players = lobby.getPlayers();
+        for (Player p : players) {
            turnManager.addPlayer(p); 
         }
     }
@@ -23,7 +24,7 @@ public class Game {
         this(new Lobby("lobbyId#" + lobbyId));
         //this(Lobby.getById(lobbyId));
     }
-    public Lobby getLobby(){
+    public Lobby getLobby() {
         return lobby;
     }
 }
