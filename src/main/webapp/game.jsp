@@ -28,10 +28,9 @@
     <% if (game == null) { %>
         <a href="/risky/lobby">Create a lobby first</a>
     <% } else { %>
-        <h1>Your game</h1>
-        <%=game.lobby.name %>
         <canvas id="map" width="800" height="500"></canvas>
         <div class="row-fluid">
+        <hr>
             <div class="span2">
                 <div ng-repeat="player in players" ng-class="$index == turnOwner | iif : 'hasTurn' : ''">
                    <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
