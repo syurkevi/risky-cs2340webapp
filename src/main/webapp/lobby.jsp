@@ -31,7 +31,7 @@
         <% for (int i=0 ; i < lobby.players.size() ; ++i) { %>
             <% p=turnList.getNextPlayer(); %>
             <div>p: <%=p.name %> (<%=p.armies %> armies)</div>
-        <% } %>
+        <% } t pu%>
 
     <% } else { %>
 
