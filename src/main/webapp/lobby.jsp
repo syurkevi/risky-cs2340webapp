@@ -11,12 +11,12 @@
     <link rel="stylesheet" type="text/css" href="/risky/css/style.css">
     <script type="text/javascript" src="/risky/js/angular.min.js"></script>
     <script type="text/javascript" src="/risky/js/risky.js"></script>
-    <title>Risky Web App</title>
+    <title>Soldiers and Arms!</title>
 </head>
 
 <body ng-controller="LobbyController">
     <% if (lobby != null) { %>
-        <div>Recieved the following data:</div>
+        <div>Received the following data:</div>
         <div>name: <%=lobby.getName() %></div>
         <% TurnManager turnList = new TurnManager(); %>
         <% for (Player p : lobby.players) { %>
@@ -55,7 +55,6 @@
         <div ng-show="players.length < 3" class="">Not yet though, <span class="badge badge-important">3</span> player minimum</div>
         <div ng-show="players.length > 6">Woah there, <span class="badge badge-important">6</span> player maximum</div>
         <div ng-show="players.length >= 3 && players.length <= 6">
-            <div ng-show="!lobby.title" class="badge badge-warning">Mind naming your lobby for me?</div>
             <div ng-show="lobby.title">
                 <h4>So here's what I've got:</h4>
                 <div>Lobby name: {{lobby.title}}</div>
