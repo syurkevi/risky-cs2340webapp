@@ -41,7 +41,7 @@ risky.controller('GameController', function ($scope, modelloader) {
         }
         var polcolor = (shuffle[i % shuffle.length]+1).toString(2); // dec to bin string
         while(polcolor.length<3)polcolor='C'+polcolor;
-        polygons[i].owner = {"id":shuffle[i % shuffle.length], "color": '#'+((polcolor.replace(/1/ig,'DD')).replace(/C/ig,'CC')).replace(/0/ig,'CC')}; // bin to color, only works well up to 7
+        polygons[i].owner = {"id":shuffle[i % shuffle.length], "color": '#'+((polcolor.replace(/1/ig,'DD')).replace(/C/ig,'CC')).replace(/0/ig,'CC'),"armies":$scope.players[shuffle[i%shuffle.length]].armies}; // bin to color, only works well up to 7
             if(polygons[i].owner.id==$scope.turnOwner){
                 polygons[i].owner.color=polygons[i].owner.color.replace(/DD/ig,'D0');
                 polygons[i].owner.color=polygons[i].owner.color.replace(/CC/ig,'40');

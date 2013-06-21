@@ -19,7 +19,8 @@
             <% if (i > 0) { %>
             ,
             <% } %>
-            {"name": "<%=player.name %>"}
+            {"name": "<%=player.name %>",
+            "armies": <%=player.armies()%>}
         <% } %>
     ]</script>
     <title>Risky Web App</title>

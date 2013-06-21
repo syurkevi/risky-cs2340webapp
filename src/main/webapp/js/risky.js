@@ -17,6 +17,7 @@ risky.service('modelloader', function () {
 });
 
 risky.filter("iif", function () {// fake ternary operator in {{}}'d things
+    //we must go deeper!
     return function(input, trueValue, falseValue) {
         return input ? trueValue : falseValue;
     };
@@ -49,7 +50,8 @@ Map.prototype.labelPolygon = function (polygon) {
     x=(xa[xa.length-1]*this.config.scale+xa[0]*this.config.scale)/2;
     y=(ya[ya.length-1]*this.config.scale+ya[0]*this.config.scale)/2;
     this.context.fillStyle = "#000"
-    this.context.fillText("15",x,y);
+    this.context.fillText(polygon.owner.armies,x,y);
+
 };
 
 /*Map.prototype.inPolygon = function (polygon,x,y) { //Mouse coords
