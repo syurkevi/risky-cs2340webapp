@@ -3,18 +3,23 @@ risky.controller('GameController', function ($scope, modelloader) {
     
     $scope.turnOwner = 0;
     
+    var shuffle = new Array();
+    for(i=0;i<$scope.players.length;i++) {
+        shuffle[i]=i;
+    }
+
     var polygons = [
         {"id": 0, "vertexes": [[4, 4], [16, 4], [12, 20], [6, 18]]},
         {"id": 1, "vertexes": [[16, 4], [14, 12], [20, 18], [24, 10]]},
         {"id": 2, "vertexes": [[20, 7], [28, 6], [26, 18], [20, 18], [24, 10]]},
-        {"id": 3, "vertexes": [[12, 20], [14, 12], [20, 18], [26, 18], [24, 24], [16, 22]]},
+        {"id": 3, "vertexes": [[12, 20], [14, 12], [20, 18], [26, 18], [24, 24], [16, 32]]},
         {"id": 4, "vertexes": [[30, 24], [34, 20], [38, 22], [36, 24], [32, 26]]},
         {"id": 5, "vertexes": [[34, 8], [42, 4], [50, 6], [58, 4], [50, 12]]},
         {"id": 6, "vertexes": [[58, 4], [68, 6], [66, 14], [56, 6]]},
         {"id": 7, "vertexes": [[56, 6], [66, 14], [62, 16], [54, 8]]},
         {"id": 8, "vertexes": [[58, 12], [58, 21], [65, 22], [68, 18], [70, 12], [67, 10], [66, 14], [62, 16]]},
         {"id": 9, "vertexes": [[42, 10], [50, 12], [54, 8], [58, 12], [58, 18], [52, 18]]},
-        {"id": 10, "vertexes": [[46, 20], [47, 14], [52, 18], [58, 18], [58, 21], [55, 23]]},
+        {"id": 10, "vertexes": [[48, 26], [47, 14], [52, 18], [58, 18], [58, 21], [55, 23]]},
         {"id": 11, "vertexes": [[68, 18], [65, 22], [62, 40], [68, 36], [71, 24]]},
         {"id": 12, "vertexes": [[55, 23], [58, 21], [65, 22], [64, 28], [58, 30]]},
         {"id": 13, "vertexes": [[52, 22], [55, 23], [58, 30], [56, 34], [54, 32]]},
@@ -29,11 +34,37 @@ risky.controller('GameController', function ($scope, modelloader) {
         {"id": 22, "vertexes": [[16, 42], [4, 40], [2, 30], [11, 32]]},
         {"id": 23, "vertexes": [[32, 26], [36, 24], [38, 22], [40, 24], [37, 27], [33, 27]]}
     ];
-    
+
+    for(i=0;i<polygons.length;i++) {
+        if(shuffle.length != 0 && i % shuffle.length === 0) {
+            shuffle.sort(function(){return Math.floor(Math.random() * 4);}); // Lightly random sorting
+        }
+        var polcolor = (shuffle[i % shuffle.length]+1).toString(2); // dec to bin string
+        while(polcolor.length<3)polcolor='C'+polcolor;
+        polygons[i].owner = {"id":shuffle[i % shuffle.length], "color": '#'+((polcolor.replace(/1/ig,'DD')).replace(/C/ig,'CC')).replace(/0/ig,'CC')}; // bin to color, only works well up to 7
+            if(polygons[i].owner.id==$scope.turnOwner){
+                polygons[i].owner.color=polygons[i].owner.color.replace(/DD/ig,'D0');
+                polygons[i].owner.color=polygons[i].owner.color.replace(/CC/ig,'40');
+            }else{
+                polygons[i].owner.color=polygons[i].owner.color.replace(/D0/ig,'DD');
+                polygons[i].owner.color=polygons[i].owner.color.replace(/40/ig,'CC');
+            }
+    } 
     var map = new Map(document.getElementById("map"), polygons, {});
     map.draw();
     
     $scope.nextTurn = function () {
         $scope.turnOwner = ($scope.turnOwner+1) % $scope.players.length;
+        for(i=0;i<polygons.length;i++){
+            if(polygons[i].owner.id==$scope.turnOwner){
+                polygons[i].owner.color=polygons[i].owner.color.replace(/DD/ig,'D0');
+                polygons[i].owner.color=polygons[i].owner.color.replace(/CC/ig,'40');
+            }else{
+                polygons[i].owner.color=polygons[i].owner.color.replace(/D0/ig,'DD');
+                polygons[i].owner.color=polygons[i].owner.color.replace(/40/ig,'CC');
+            }
+        }
+        var map = new Map(document.getElementById("map"), polygons, {});
+        map.draw();
     };
 });

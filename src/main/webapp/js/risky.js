@@ -39,8 +39,27 @@ function Map(canvas, polygons, config) {
 }
 
 Map.prototype.labelPolygon = function (polygon) {
-    
+    var xa=new Array();ya=new Array(),x=0,y=0;
+    for(i=0;i<polygon.vertexes.length;i++){
+        xa.push(polygon.vertexes[i][0]);
+        ya.push(polygon.vertexes[i][1]);
+    }
+    xa.sort(function(a,b){return a-b});
+    ya.sort(function(a,b){return a-b});
+    x=(xa[xa.length-1]*this.config.scale+xa[0]*this.config.scale)/2;
+    y=(ya[ya.length-1]*this.config.scale+ya[0]*this.config.scale)/2;
+    this.context.fillStyle = "#000"
+    this.context.fillText("15",x,y);
 };
+
+/*Map.prototype.inPolygon = function (polygon,x,y) { //Mouse coords
+    var crossing=0;
+    for(i=0;i<polygon.vertexes.length;i++) { //add check for last/first points
+        if(y<polygon.vertexes[i][1] && y>polygon.vertexes[i+1][1] || y>polygon.vertexes[i][1] && y<polygon.vertexes[i+1][1]) { //if y-axis is within the edge range
+            if(true) //if point intersects an edge along the x-axis
+                crossing++;
+    }
+};*/
 
 Map.prototype.drawPolygon = function (polygon) {
     this.context.fillStyle = (polygon.owner) ? polygon.owner.color : "#ddd";
