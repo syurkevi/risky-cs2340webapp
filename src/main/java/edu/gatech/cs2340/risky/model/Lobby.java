@@ -19,8 +19,8 @@ public class Lobby {
         return name;
     }
     
-    public int calculateArmies(int numPlayers) {
-        switch (numPlayers) {
+    public int calculateArmies() {
+        switch (players.size()) {
         case 3:
             return 35;
         case 4:
@@ -35,7 +35,7 @@ public class Lobby {
 
     public void allocateArmies() {
         for (Player player : this.players) {
-            player.armies = this.calculateArmies(this.players.size());
+            player.setArmy(this.calculateArmies());
         }
     } 
 }

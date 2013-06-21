@@ -29,7 +29,7 @@
         <%Player p;%>
         <% for (int i=0 ; i < lobby.players.size() ; ++i) { %>
             <% p=turnList.getNextPlayer(); %>
-            <div>p: <%=p.name %> (<%=p.armies %> armies)</div>
+            <div>p: <%=p.name %> (<%=p.getArmy() %> armies)</div>
         <% } %>
 
     <% } else { %>
