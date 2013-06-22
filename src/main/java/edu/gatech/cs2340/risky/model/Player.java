@@ -1,20 +1,25 @@
 package edu.gatech.cs2340.risky.model;
+import java.util.HashMap;
 
 public class Player {
-    //TODO: fix public variables...>_>
-    public String name;
-    public int armies=0;//temporary
+    private String name;
+    private int armies=0;
     private boolean playing = true;
+    private HashMap<Integer,Integer> delegatedArmies;
 
     public Player(String name, int armies) {
         this.name = name;
         this.armies = armies;
     }
-    
+     
     public Player(String name) {
         this(name, 0);
     }
     
+    public void setTotalArmies(int armies){
+        this.armies=armies;
+    }
+
     public void setDead() {
         playing = false;
     }
@@ -25,5 +30,9 @@ public class Player {
     
     public int armies(){
         return armies;
+    }
+    
+    public String name(){
+        return name;
     }
 }

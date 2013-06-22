@@ -1,8 +1,10 @@
 var risky = angular.module('risky', []);
 risky.service('modelloader', function () {
+    $http.get("/info").success(function(q){alert(q);});
     // loads properties of <script type="text/model-data">{this: "object"}</script> into the local data
-    var data = {};
-    
+    //var data = {};
+    //$scope.players = modelloader.get('players');
+    /*
     this.get = function (key) {
         var modelData = document.querySelectorAll("script[type='text/model-data'][for='" + key + "']")[0];
         try {
@@ -14,6 +16,7 @@ risky.service('modelloader', function () {
         data[key] = modelData;
         return data[key];
     };
+    */
 });
 
 risky.filter("iif", function () {// fake ternary operator in {{}}'d things

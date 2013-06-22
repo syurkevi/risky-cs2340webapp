@@ -1,7 +1,6 @@
 package edu.gatech.cs2340.risky.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Collections;
 
 /**
@@ -13,12 +12,10 @@ public class TurnManager {
 
     private ArrayList<Player> turnList;
     private int playerIndex = 0;
-    private Iterator<Player> currentPlayer;
     private int round = 0;
     
     public TurnManager() {
         turnList = new ArrayList<Player>(MAX_PLAYERS);
-        currentPlayer = turnList.iterator();
     }
 
     public boolean addPlayer(Player p) {
@@ -66,10 +63,14 @@ public class TurnManager {
         return p;
     }   
 
-    public String PlayerOrder() {
+    //JSON compatible player list
+    public String playerOrder() {
         String order = new String();
         for (Player p : turnList){
-            order = order.concat(p.name + ",  ");
+            order = order.concat(", \"name\" : "+p.name());
+        }
+        if(order.length()>1){
+            order=order.substring(1,order.length());//remove first comma
         }
         return order;
     }

@@ -35,7 +35,7 @@ public class Lobby {
 
     public void allocateArmies() {
         for (Player player : this.players) {
-            player.armies = this.calculateArmies(this.players.size());
+            //player.armies = this.calculateArmies(this.players.size());
         }
     } 
 }

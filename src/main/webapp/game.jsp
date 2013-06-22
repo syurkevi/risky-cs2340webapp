@@ -1,9 +1,7 @@
 <%@ page import="edu.gatech.cs2340.risky.model.Game" %>
-<%@ page import="edu.gatech.cs2340.risky.model.Lobby" %>
 <%@ page import="edu.gatech.cs2340.risky.model.Player" %>
 <%@ page import="java.util.*" %>
 
-<% Lobby lobby = (Lobby) request.getAttribute("lobby"); %>
 <% Game game = (Game) request.getAttribute("game"); %>
 
 <html ng-app="risky">
@@ -13,22 +11,14 @@
     <script type="text/javascript" src="/risky/js/angular.min.js"></script>
     <script type="text/javascript" src="/risky/js/risky.js"></script>
     <script type="text/javascript" src="/risky/js/game.js"></script>
-    <script type="text/model-data" for="players">[
-        <% for (int i=0 ; i < game.lobby.players.size() ; i++) { %>
-            <% Player player = game.lobby.players.get(i); %>
-            <% if (i > 0) { %>
-            ,
-            <% } %>
-            {"name": "<%=player.name %>",
-            "armies": <%=player.armies()%>}
-        <% } %>
-    ]</script>
     <title>Risky Web App</title>
 </head>
 <body ng-controller="GameController">
     <% if (game == null) { %>
         <a href="/risky/lobby">Create a lobby first</a>
     <% } else { %>
+        <div ng-controller="httptest">
+        </div>
         <canvas id="map" width="800" height="500"></canvas>
         <div class="row-fluid">
         <hr>

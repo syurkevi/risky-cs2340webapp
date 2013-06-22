@@ -1,6 +1,11 @@
+risky.controller('httptest', function ($scope,$http) {
+
+            alert("test");
+            $http.get("/info").success(function(q){alert(q);}).error(function(q,a){alert(q+" | "+a)});
+
+});
 risky.controller('GameController', function ($scope, modelloader) {
-    $scope.players = modelloader.get('players');
-    
+/*    
     $scope.turnOwner = 0;
     
     var shuffle = new Array();
@@ -67,4 +72,4 @@ risky.controller('GameController', function ($scope, modelloader) {
         var map = new Map(document.getElementById("map"), polygons, {});
         map.draw();
     };
-});
+*/});

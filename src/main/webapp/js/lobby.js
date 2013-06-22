@@ -1,9 +1,9 @@
 risky.controller('LobbyController', function ($scope) {
     $scope.playerCount = 0;
     $scope.players = [];
-    $scope.lobby = {
+    /*$scope.lobby = {
         'title': ''
-    };
+    };*/
     
     $scope.addPlayer = function () {
         if ($scope.playerName.length <= 0) return;
