@@ -1,14 +1,15 @@
 package edu.gatech.cs2340.risky.model;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.HashSet;
+import java.util.Set;
 
 public class Player {
     private String name;
     private int armies=0;
     private boolean playing = true;
-    private HashMap<Integer,Integer> delegatedArmies;
+    private HashMap<Integer,Integer> delegatedArmies=new HashMap<Integer,Integer>();
 
     public Player(String name, int armies) {
         this.name = name;
@@ -26,15 +27,6 @@ public class Player {
             totalArmies+=army;
         }
         return totalArmies;
-    }
-    public int[] ownsTerritories(){
-        HashSet<Integer> ownedTerritoriesSet=(HashSet<Integer>)delegatedArmies.keySet();
-        Iterator<Integer> it=ownedTerritoriesSet.iterator();
-        int[] ownedTerritories=new int[ownedTerritoriesSet.size()];
-        for(int i=0;i<ownedTerritoriesSet.size();++i){
-            ownedTerritories[i]=it.next();
-        }
-        return ownedTerritories;
     }
 
     public int armiesAtTerritory(int territory){
@@ -58,5 +50,18 @@ public class Player {
     
     public String name(){
         return name;
+    }
+    
+    //JSON compatible territory-army pairs
+    //{"territories":[{"id": terrId,"armies": armyNum}, ...]}
+    public String JSON_TerritoryArmies() {
+        String terrArmyPairs=new String();
+        for(Map.Entry<Integer,Integer> entry : delegatedArmies.entrySet()) {
+            terrArmyPairs=terrArmyPairs.concat(",{\"id\":"+entry.getKey()+0+",\"armies\":"+entry.getValue()+"}");
+        }
+        if(terrArmyPairs.length()>1){
+            terrArmyPairs=terrArmyPairs.substring(1,terrArmyPairs.length());//remove first comma
+        }
+        return (terrArmyPairs);
     }
 }

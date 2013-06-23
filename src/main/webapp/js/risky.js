@@ -1,32 +1,25 @@
 var risky = angular.module('risky', []);
-risky.service('modelloader', function ($q,$http) {
+risky.service('asynchttp', function ($q,$http) {
     // loads properties of <script type="text/model-data">{this: "object"}</script> into the local data
-    this.get = function() {
+    this.get = function(key) {
+        if(key==null){
+            console.error("No key for http request to get");
+            return null;
+        }
         var deferred = $q.defer();
-        $http({"method":'GET',"url":"../game","params":{"info":"name"}}).success(function(r){
-            deferred.resolve(r.players);
-        }).error(function(r,h){
-            deferred.reject(null);
-            console.error("Failed request with\nResponse: "+r+"\nHeader: "+h);
-        });
+        if(key=="players"){
+            $http({"method":'GET',"url":"../game","params":{"info":"name"}}).then(function(r){
+                deferred.resolve(angular.fromJson(r.data).players);
+            });
+        }
+        if(key=="map") {
+            $http({"method":'GET',"url":"../js/map.json"}).then(function(r){
+                polygons=angular.fromJson(r.data).map;
+                deferred.resolve(polygons);
+            });
+        }
         return deferred.promise;
     }
-    //var data = {};
-    //$scope.players = modelloader.get('players');
-    /*this.get = function (key) {
-    var modelData= new Object();
-    $http({"method":'GET',"url":"../game","params":{"info":"name"}}).success(function(r){modelData=r}).error(function(q,a){alert(q+" | "+a)});
-    return modelData;
-        /*var modelData = document.querySelectorAll("script[type='text/model-data'][for='" + key + "']")[0];
-        try {
-            modelData = JSON.parse(modelData.innerText);
-        } catch (e) {
-            if (e instanceof SyntaxError) console.error('Could not parse model-data starting with \'' + modelData.innerText.replace(/\s+/, '').substring(0, 100) + '\'');
-            else throw e;
-        }* /
-        //data[key] = modelData;
-        //return data[key];
-    };*/
 });
 
 risky.filter("iif", function () {// fake ternary operator in {{}}'d things
@@ -63,7 +56,7 @@ Map.prototype.labelPolygon = function (polygon) {
     x=(xa[xa.length-1]*this.config.scale+xa[0]*this.config.scale)/2;
     y=(ya[ya.length-1]*this.config.scale+ya[0]*this.config.scale)/2;
     this.context.fillStyle = "#000"
-    this.context.fillText(polygon.owner.armies,x,y);
+    this.context.fillText((polygon.owner)?polygon.owner.armies:"15",x,y);
 
 };
 
