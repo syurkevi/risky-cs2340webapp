@@ -1,6 +1,6 @@
 body {
     margin: 0 auto;
-    padding 1em;
+    padding: 1em;
     max-width: 800px;}
 
 .oneof2 {
@@ -24,3 +24,6 @@ body {
 
 .left-align {
     text-align: left;}
+
+.action-bar {
+	font-size: 85%;}

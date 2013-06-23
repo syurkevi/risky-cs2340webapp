@@ -33,29 +33,29 @@
         <canvas id="map" width="800" height="500"></canvas>
         <div class="row-fluid">
             <div class="span2">
-                <div ng-repeat="player in players" ng-class="$index == turnOwner | iif : 'hasTurn' : """>
+                <div ng-repeat="player in players" ng-class="$index == turnOwner | iif : 'hasTurn' : ''">
                    <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
                 </div>
             </div>
-            <div class="span10 row-fluid no-left-gutter">
+            <div class="span10 row-fluid no-left-gutter action-bar">
                 <div class="span3">
                     <h4>Place armies</h4>
-                    <small>Click one of your territories to place an army</small>
-                    <small>Hit 'u' to undo an placement</small>
+                    <div>Click one of your territories to place an army</div>
+                    <div>Hit 'u' to undo an placement</div>
                 </div>
                 <div class="span3">
                     <h4>Attack</h4>
-                    <small>Choose a territory to attack</small>
-                    <small>Choose a territory to attack from</small>
-                    <small>Repeat as necessary</small>
+                    <div>Choose a territory to attack</div>
+                    <div>Choose a territory to attack from</div>
+                    <div>Repeat as necessary</div>
                 </div>
                 <div class="span3">
                     <h4>Fortify</h4>
-                    <small>You have one shot to seize everything you ever wanted. Capture it; don't let it slip!</small>
+                    <div>You have one shot to seize everything you ever wanted. Capture it; don't let it slip!</div>
                 </div>
                 <div class="span3">
                     <h4>End turn</h4>
-                    <small>Call it quits already</small>
+                    <div>Call it quits already</div>
                     <a class="btn btn-primary btn-mini" ng-click="nextTurn()">End</a>
                 </div>
             </div>
