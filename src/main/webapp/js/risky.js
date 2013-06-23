@@ -1,22 +1,32 @@
 var risky = angular.module('risky', []);
-risky.service('modelloader', function () {
-    $http.get("/info").success(function(q){alert(q);});
+risky.service('modelloader', function ($q,$http) {
     // loads properties of <script type="text/model-data">{this: "object"}</script> into the local data
+    this.get = function() {
+        var deferred = $q.defer();
+        $http({"method":'GET',"url":"../game","params":{"info":"name"}}).success(function(r){
+            deferred.resolve(r.players);
+        }).error(function(r,h){
+            deferred.reject(null);
+            console.error("Failed request with\nResponse: "+r+"\nHeader: "+h);
+        });
+        return deferred.promise;
+    }
     //var data = {};
     //$scope.players = modelloader.get('players');
-    /*
-    this.get = function (key) {
-        var modelData = document.querySelectorAll("script[type='text/model-data'][for='" + key + "']")[0];
+    /*this.get = function (key) {
+    var modelData= new Object();
+    $http({"method":'GET',"url":"../game","params":{"info":"name"}}).success(function(r){modelData=r}).error(function(q,a){alert(q+" | "+a)});
+    return modelData;
+        /*var modelData = document.querySelectorAll("script[type='text/model-data'][for='" + key + "']")[0];
         try {
             modelData = JSON.parse(modelData.innerText);
         } catch (e) {
             if (e instanceof SyntaxError) console.error('Could not parse model-data starting with \'' + modelData.innerText.replace(/\s+/, '').substring(0, 100) + '\'');
             else throw e;
-        }
-        data[key] = modelData;
-        return data[key];
-    };
-    */
+        }* /
+        //data[key] = modelData;
+        //return data[key];
+    };*/
 });
 
 risky.filter("iif", function () {// fake ternary operator in {{}}'d things

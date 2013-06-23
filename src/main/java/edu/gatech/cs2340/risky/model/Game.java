@@ -53,9 +53,23 @@ public class Game {
     }
 
     public void allocateArmies() {
+        int territoriesPerPlayer=territories/players.size();
+        int armiesPerTerritory=territoriesPerPlayer/calculateArmies(players.size());
+        int extraArmies=territoriesPerPlayer%calculateArmies(players.size());
         
+        int territoryIterator=0;
         for (Player player : players) {
-            //player.setTotalArmies();
+            for(int i=0; i<territoriesPerPlayer; ++i) {
+                if(i==0) {
+                    player.setArmiesPerTerritory(territoryIterator++, armiesPerTerritory+extraArmies);
+                    continue;
+                }
+                player.setArmiesPerTerritory(territoryIterator++, armiesPerTerritory);
+            }
+        }
+        //lucky player... todo fix?
+        while(players.get(0)!=null && territoryIterator<territories){
+            players.get(0).setArmiesPerTerritory(territoryIterator++, armiesPerTerritory);
         }
     } 
     

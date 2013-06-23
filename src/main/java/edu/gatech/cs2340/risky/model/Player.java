@@ -1,5 +1,8 @@
 package edu.gatech.cs2340.risky.model;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.HashSet;
 
 public class Player {
     private String name;
@@ -16,8 +19,29 @@ public class Player {
         this(name, 0);
     }
     
-    public void setTotalArmies(int armies){
-        this.armies=armies;
+    public int totalArmies(){
+        int totalArmies=0;
+        ArrayList<Integer> armyCount=(ArrayList<Integer>)delegatedArmies.values();
+        for(Integer army : armyCount){
+            totalArmies+=army;
+        }
+        return totalArmies;
+    }
+    public int[] ownsTerritories(){
+        HashSet<Integer> ownedTerritoriesSet=(HashSet<Integer>)delegatedArmies.keySet();
+        Iterator<Integer> it=ownedTerritoriesSet.iterator();
+        int[] ownedTerritories=new int[ownedTerritoriesSet.size()];
+        for(int i=0;i<ownedTerritoriesSet.size();++i){
+            ownedTerritories[i]=it.next();
+        }
+        return ownedTerritories;
+    }
+
+    public int armiesAtTerritory(int territory){
+        return (delegatedArmies.get(territory)==null)?0:delegatedArmies.get(territory);
+    }
+    public void setArmiesPerTerritory(int territory, int armies){
+        delegatedArmies.put(territory,armies);
     }
 
     public void setDead() {

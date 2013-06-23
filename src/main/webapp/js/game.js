@@ -1,17 +1,6 @@
-risky.controller('httptest', function ($scope,$http) {
-
-            alert("test");
-            $http.get("/info").success(function(q){alert(q);}).error(function(q,a){alert(q+" | "+a)});
-
-});
-risky.controller('GameController', function ($scope, modelloader) {
-/*    
+risky.controller('GameController', function ($scope, $q, modelloader) {
     $scope.turnOwner = 0;
     
-    var shuffle = new Array();
-    for(i=0;i<$scope.players.length;i++) {
-        shuffle[i]=i;
-    }
 
     var polygons = [
         {"id": 0, "vertexes": [[4, 4], [16, 4], [12, 20], [6, 18]]},
@@ -39,24 +28,37 @@ risky.controller('GameController', function ($scope, modelloader) {
         {"id": 22, "vertexes": [[16, 42], [4, 40], [2, 30], [11, 32]]},
         {"id": 23, "vertexes": [[32, 26], [36, 24], [38, 22], [40, 24], [37, 27], [33, 27]]}
     ];
-
     for(i=0;i<polygons.length;i++) {
-        if(shuffle.length != 0 && i % shuffle.length === 0) {
-            shuffle.sort(function(){return Math.floor(Math.random() * 4);}); // Lightly random sorting
-        }
-        var polcolor = (shuffle[i % shuffle.length]+1).toString(2); // dec to bin string
-        while(polcolor.length<3)polcolor='C'+polcolor;
-        polygons[i].owner = {"id":shuffle[i % shuffle.length], "color": '#'+((polcolor.replace(/1/ig,'DD')).replace(/C/ig,'CC')).replace(/0/ig,'CC'),"armies":$scope.players[shuffle[i%shuffle.length]].armies}; // bin to color, only works well up to 7
-            if(polygons[i].owner.id==$scope.turnOwner){
-                polygons[i].owner.color=polygons[i].owner.color.replace(/DD/ig,'D0');
-                polygons[i].owner.color=polygons[i].owner.color.replace(/CC/ig,'40');
-            }else{
-                polygons[i].owner.color=polygons[i].owner.color.replace(/D0/ig,'DD');
-                polygons[i].owner.color=polygons[i].owner.color.replace(/40/ig,'CC');
-            }
-    } 
+        polygons[i].owner=({"color":"#EEE","armies":0});
+    }
     var map = new Map(document.getElementById("map"), polygons, {});
     map.draw();
+
+    $scope.players=$q.when(modelloader.get());
+    $scope.players.then(function(ret_players){
+        var shuffle = new Array();
+        for(i=0;i<ret_players.length;i++) {
+            shuffle[i]=i;
+        }
+
+        for(i=0;i<polygons.length;i++) {
+            if(shuffle.length != 0 && i % shuffle.length === 0) {
+                shuffle.sort(function(){return Math.floor(Math.random() * 4);}); // Lightly random sorting
+            }
+            var polcolor = (shuffle[i % shuffle.length]+1).toString(2); // dec to bin string
+            while(polcolor.length<3)polcolor='C'+polcolor;
+            polygons[i].owner = {"id":shuffle[i % shuffle.length], "color": '#'+((polcolor.replace(/1/ig,'DD')).replace(/C/ig,'CC')).replace(/0/ig,'CC'),"armies":/*ret_players[shuffle[i%shuffle.length]].armies*/15}; // bin to color, only works well up to 7
+                if(polygons[i].owner.id==$scope.turnOwner){
+                    polygons[i].owner.color=polygons[i].owner.color.replace(/DD/ig,'D0');
+                    polygons[i].owner.color=polygons[i].owner.color.replace(/CC/ig,'40');
+                }else{
+                    polygons[i].owner.color=polygons[i].owner.color.replace(/D0/ig,'DD');
+                    polygons[i].owner.color=polygons[i].owner.color.replace(/40/ig,'CC');
+                }
+        } 
+        map.draw();
+        return ret_players;
+    },function(ret_error){console.error(ret_error);});
     
     $scope.nextTurn = function () {
         $scope.turnOwner = ($scope.turnOwner+1) % $scope.players.length;
@@ -72,4 +74,4 @@ risky.controller('GameController', function ($scope, modelloader) {
         var map = new Map(document.getElementById("map"), polygons, {});
         map.draw();
     };
-*/});
+});

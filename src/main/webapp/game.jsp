@@ -17,8 +17,6 @@
     <% if (game == null) { %>
         <a href="/risky/lobby">Create a lobby first</a>
     <% } else { %>
-        <div ng-controller="httptest">
-        </div>
         <canvas id="map" width="800" height="500"></canvas>
         <div class="row-fluid">
         <hr>

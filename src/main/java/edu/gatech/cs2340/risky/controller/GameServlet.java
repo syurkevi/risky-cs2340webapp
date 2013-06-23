@@ -54,12 +54,17 @@ public class GameServlet extends HttpServlet {
      * link).
      */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        request.setAttribute("game", this.game);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
+        String info = (String) request.getParameter("info");
+        if(info==null){
+            request.setAttribute("game", this.game);
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
 
-        response.setContentType("application/json"); 
-        response.getWriter().write(game.getPlayerOrder());     
-        dispatcher.forward(request, response);
+            dispatcher.forward(request, response);
+        }else{
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"players\":["+game.getPlayerOrder()+"]}");
+        }
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {

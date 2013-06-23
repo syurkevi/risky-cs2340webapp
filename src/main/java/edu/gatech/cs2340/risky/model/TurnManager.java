@@ -67,7 +67,7 @@ public class TurnManager {
     public String playerOrder() {
         String order = new String();
         for (Player p : turnList){
-            order = order.concat(", \"name\" : "+p.name());
+            order = order.concat(", {\"name\" : \""+p.name()+"\"}");
         }
         if(order.length()>1){
             order=order.substring(1,order.length());//remove first comma
