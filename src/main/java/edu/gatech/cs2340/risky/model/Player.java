@@ -3,8 +3,8 @@ package edu.gatech.cs2340.risky.model;
 public class Player {
     
     public String name;
-    private int armies;
-    private boolean playing=true;
+    public int armies;
+    private boolean playing = true;
 
     public Player(String name, int armies) {
         this.name = name;
@@ -21,13 +21,5 @@ public class Player {
 
     public boolean stillAlive() {
         return playing;
-    }
-    
-    public int getArmy() {
-        return armies;
-    }
-    
-    public void setArmy(int armySize) {
-    	   armies = armySize;
     }
 }
