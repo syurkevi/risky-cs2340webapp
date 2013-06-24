@@ -4,7 +4,7 @@ public class Player {
     
     public String name;
     public int armies;
-    private boolean playing = true;
+    public boolean playing = true;
 
     public Player(String name, int armies) {
         this.name = name;
