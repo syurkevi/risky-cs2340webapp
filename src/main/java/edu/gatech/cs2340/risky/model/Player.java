@@ -16,7 +16,7 @@ public class Player {
     }
     
     public void setDead() {
-        playing=false;
+        playing = false;
     }
 
     public boolean stillAlive() {

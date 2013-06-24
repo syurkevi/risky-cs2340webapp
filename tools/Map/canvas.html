@@ -39,6 +39,54 @@ function generateColor() {
 
 var playerColors = ["#f44", "#4f4", "#44f", "#ff4", "#f4f", "#4ff", "#444"];
 
+function linesIntersect(la1, la2, lb1, lb2) {
+    var v1x1 = la1[0], v1y1 = la1[1], v1x2 = la2[0], v1y2 = la2[1];
+    var v2x1 = lb1[0], v2y1 = lb1[1], v2x2 = lb2[0], v2y2 = lb2[1];
+    
+    var d1, d2;
+    var a1, a2, b1, b2, c1, c2;
+    
+    a1 = v1y2 - v1y1;
+    b1 = v1x1 - v1x2;
+    c1 = (v1x2 * v1y1) - (v1x1 * v1y2);
+
+    d1 = (a1 * v2x1) + (b1 * v2y1) + c1;
+    d2 = (a1 * v2x2) + (b1 * v2y2) + c1;
+
+    if (d1 > 0 && d2 > 0) return false;
+    if (d1 < 0 && d1 < 0) return false;
+
+    a2 = v2y2 - v2y1;
+    b2 = v2x1 - v2x2;
+    c2 = (v2x2 * v1y1) - (v2x1 * v2y2);
+
+    d1 = (a2 * v1x1) + (b2 * v1y1) + c2;
+    d2 = (a2 * v1x2) + (b2 * v1y2) + c2;
+
+    if (d1 > 0 && d2 > 0) return false;
+    if (d1 < 0 && d2 < 0) return false;
+
+    if ((a1 * b2) - (a2 * b1) === 0.0) return true;// collinear
+    
+    return true;
+}
+
+function pointIsInPolygon(point, polygon) {
+    var intersectionCount = 0;
+    for (var i=0 ; i < polygon.vertexes.length-1 ; i++) {
+        if (linesIntersect([0, 0], point, polygon.vertexes[i], polygon.vertexes[i+1])) {
+            intersectionCount++;
+        }
+    }
+console.log(intersectionCount);
+console.log(polygon);
+    if (intersectionCount % 2 == 1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function labelPoint(canvas, context, point, config) {
     var text = "(" + point[0] + ", " + point[1] + ")";
     var x = point[0]*config.scale, y = point[1]*config.scale;
@@ -147,6 +195,10 @@ ce.controller("CanvasController", function ($scope) {
         {"id": 23, "vertexes": [[32, 26], [36, 24], [38, 22], [40, 24], [37, 27], [33, 27]]}
     ];
     
+    console.log(pointIsInPolygon([5, 5], $scope.polygons[0]));
+    console.log(pointIsInPolygon([4, 3], $scope.polygons[0]));
+    console.log(pointIsInPolygon([12, 15], $scope.polygons[0]));
+
     var storedagons = localStorage.getItem("polygons");
     if (storedagons) $scope.polygons = JSON.parse(storedagons);
     
@@ -167,6 +219,17 @@ ce.controller("CanvasController", function ($scope) {
     $scope.removePolygon = function (index) {
         if ($scope.polygons.length < 2) return;
         $scope.polygons.remove(index);
+    };
+
+    $scope.onCanvasClick = function (e) {
+        var point = [(e.pageX - canvas.offsetLeft) / $scope.config.scale, (e.pageY - canvas.offsetTop) / $scope.config.scale];
+        console.log(point);
+        for (var i=0 ; i < $scope.polygons.length ; i++) {
+            if (pointIsInPolygon(point, $scope.polygons[i])) {
+                $scope.polygons[i].color = generateColor();
+                redraw();
+            }
+        }
     };
     
     $scope.trackMouse = function (e) {
@@ -214,7 +277,7 @@ ce.controller("CanvasController", function ($scope) {
 <h2>&lt;canvas&gt; experiment</h2>
 
 <div class="oneof2">
-    <canvas id="map" width="800" height="500" ng-mousemove="trackMouse($event)" ng-mouseleave="clearMouse($event)"></canvas>
+    <canvas id="map" width="800" height="500" ng-click="onCanvasClick($event)" ng-mousemove="trackMouse($event)" ng-mouseleave="clearMouse($event)"></canvas>
     <p>
         <h4>Notes</h4>
         <ul>
@@ -223,6 +286,7 @@ ce.controller("CanvasController", function ($scope) {
             <li>Everything is stored in your browser, so refresh with free will</li>
             <li>Single click a color square to toggle visibility; Double click to change polygon color</li>
             <li>The mouse is at ({{mouse.scaledX}}, {{mouse.scaledY}})</li>
+            <li>{{clickedPolygon.id}}</li>
         </ul>
     </p>
     <p>

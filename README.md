@@ -1,4 +1,4 @@
-cs2340-team6-jonathantrevorh
+cs2340-team6
 ========================
 
 Requires
