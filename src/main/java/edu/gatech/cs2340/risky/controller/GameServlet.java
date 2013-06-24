@@ -42,7 +42,7 @@ public class GameServlet extends HttpServlet {
                 game.addPlayer(new Player(name));
             }
             game.calculateTurnOrder();
-            this.game.allocateArmies();
+            game.allocateArmies();
             
             request.setAttribute("game", this.game);
             RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
@@ -64,7 +64,8 @@ public class GameServlet extends HttpServlet {
         }else{
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"players\":["+game.getPlayerOrder()+"],\"terr\":["+game.getTerritoryArmyFromPlayers()+"]}");
+            //response.getWriter().write("{\"players\":["+game.getPlayerOrder()+"],\"terr\":["+game.getTerritoryArmyFromPlayers()+"]}");
+            response.getWriter().write(game.getTerritoryArmyFromPlayers());
         }
     }
 

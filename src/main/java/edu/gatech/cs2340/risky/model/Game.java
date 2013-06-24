@@ -55,8 +55,8 @@ public class Game {
 
     public void allocateArmies() {
         int territoriesPerPlayer=territories/players.size();
-        int armiesPerTerritory=territoriesPerPlayer/calculateArmies(players.size());
-        int extraArmies=territoriesPerPlayer%calculateArmies(players.size());
+        int armiesPerTerritory=territoriesPerPlayer/calculateArmies(playerNum);
+        int extraArmies=territoriesPerPlayer%calculateArmies(playerNum);
         
         int territoryIterator=0;
         for (Player player : players) {
@@ -69,7 +69,7 @@ public class Game {
             }
         }
         //lucky player... todo fix?
-        while(players.get(0)!=null && territoryIterator<territories){
+        while(players.get(0)!=null && territoryIterator<=territories){
             players.get(0).setArmiesPerTerritory(territoryIterator++, armiesPerTerritory);
         }
     } 
@@ -82,10 +82,10 @@ public class Game {
         ArrayList<Player> orderedPlayers=turnManager.playerOrder();
         String playerData=new String();
         for(Player p : orderedPlayers){
-            playerData=playerData.concat(","+p.JSON_TerritoryArmies());
+            playerData=playerData.concat(", {\"name\" : \""+p.name()+"\",\"territories\" : "+p.JSON_TerritoryArmies()+"}");
         }
         playerData=playerData.substring(1,playerData.length());
-        return playerData;
+        return "{\"players\" : ["+playerData+"]}";
     }
 
 

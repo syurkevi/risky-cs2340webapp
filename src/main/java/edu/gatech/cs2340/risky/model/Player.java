@@ -57,11 +57,11 @@ public class Player {
     public String JSON_TerritoryArmies() {
         String terrArmyPairs=new String();
         for(Map.Entry<Integer,Integer> entry : delegatedArmies.entrySet()) {
-            terrArmyPairs=terrArmyPairs.concat(",{\"id\":"+entry.getKey()+0+",\"armies\":"+entry.getValue()+"}");
+            terrArmyPairs=terrArmyPairs.concat(",{\"id\":"+entry.getKey()+",\"armies\":"+entry.getValue()+"}");
         }
         if(terrArmyPairs.length()>1){
             terrArmyPairs=terrArmyPairs.substring(1,terrArmyPairs.length());//remove first comma
         }
-        return (terrArmyPairs);
+        return ("["+terrArmyPairs+"]");
     }
 }
