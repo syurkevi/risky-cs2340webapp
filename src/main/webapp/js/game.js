@@ -12,14 +12,13 @@ risky.controller('GameController', function ($scope, modelloader) {
         }
     };
     
-    $scope.nextTurn = function () {
-        if ($scope.turnOwner == $scope.players.length-1) {// if last player
+    $scope.nextTurn = function (forceful) {
+        if ($scope.turnOwner == $scope.players.length-1 && !forceful) {// if last player
             if ($scope.states[$scope.state].deinit) {
                 $scope.states[$scope.state].deinit();// deinitialize the state
             }
         } else {// otherwise
-            $scope.turnOwner++;// move to the next player
-            $scope.currentAction = 0;
+            $scope.turnOwner = ++$scope.turnOwner % $scope.players.length;// move to the next player
             if ($scope.states[$scope.state].actions[$scope.currentAction].init) {
                 $scope.states[$scope.state].actions[$scope.currentAction = 0].init();// reset action and initialize
             }
@@ -59,13 +58,16 @@ risky.controller('GameController', function ($scope, modelloader) {
                         if (territory.owner) return; // alert user of already taken territory
                         territory.owner = $scope.players[$scope.turnOwner];
                         map.draw();
-                        if (map.allTerritoriesOwned()) $scope.setState('placearmies');
                         $scope.nextTurn();
                     }
                 }
             },
             'deinit': function () {
-                $scope.setState('placearmies');
+                if (map.allTerritoriesOwned()) {
+                    $scope.setState('placearmies');
+                } else {
+                    $scope.nextTurn(true);
+                }
             }
         },
         'placearmies': {
@@ -98,9 +100,10 @@ risky.controller('GameController', function ($scope, modelloader) {
             'actions': {
                 0: {
                     'init': function () {
-                        var allocation = Math.min(territory.owner.armies.available, 5);
-                        territory.owner.armies.available -= allocation;
-                        territory.owner.armies.availableThisTurn += allocation;
+                        var player = $scope.players[$scope.turnOwner];
+                        var allocation = Math.min(player.armies.available, 5);
+                        player.armies.available -= allocation;
+                        player.armies.availableThisTurn += allocation;
                     },
                     'mapClick': function (e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
@@ -161,7 +164,7 @@ risky.controller('GameController', function ($scope, modelloader) {
     map.draw();
     
     $scope.onMapClick = function (e) {
-        $scope.state[$scope.game.state].actions[$scope.game.currentAction].mapClick(e);
+        $scope.states[$scope.state].actions[$scope.currentAction].mapClick(e);
     };
     
     $scope.automateTerritorySelection = function () {
@@ -180,11 +183,11 @@ risky.controller('GameController', function ($scope, modelloader) {
         var each = Math.floor(armies / territories.length);
         
         if (!territories[0].armies) territories[0].armies = 0;
-        territories[0].armies = armies - (territories.length-1)*each;
+        territories[0].armies += armies - (territories.length-1)*each;
         
         for (var i=1 ; i < territories.length ; i++) {
             if (!territories[i].armies) territories[i].armies = 0;
-            territories[i].armies = each;
+            territories[i].armies += each;
         }
         map.draw();
         $scope.nextTurn();
