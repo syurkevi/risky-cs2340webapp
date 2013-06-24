@@ -16,7 +16,7 @@ import edu.gatech.cs2340.risky.model.Player;
 })
 public class LobbyServlet extends HttpServlet {
 
-   Game game = null;
+   Game game = null;//figure out how to unify this instance with game servlet's instance
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -42,8 +42,10 @@ public class LobbyServlet extends HttpServlet {
                 if (name == null) break;
                 this.game.addPlayer(new Player(name));
             }
-            
-            this.game.allocateArmies();
+
+            String territoryCount;
+            territoryCount = request.getParameter("polys");
+            this.game.setTerritoryNum(23);//this number needs to be from polys, not inline
             
             request.setAttribute("game", this.game);
             RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/lobby.jsp");

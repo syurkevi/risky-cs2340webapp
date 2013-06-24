@@ -5,6 +5,7 @@ risky.controller('GameController', function ($scope, $q, asynchttp) {
     players_promise = asynchttp.get("players");
     var map = new Map(document.getElementById("map"), polygon_promise, {});
 
+<<<<<<< HEAD
     polygon_promise.then(function(ret_polygons){
         $scope.polygons=ret_polygons;
         map.draw();
@@ -25,6 +26,8 @@ risky.controller('GameController', function ($scope, $q, asynchttp) {
 
 /*
     $scope.turnOwner = 0;
+=======
+>>>>>>> df56a7d734c3f51c4e7a29d20738a8db82ade4dd
     polygonspromise=asynchttp.get("map");
     polygonspromise.then(function(ret_map){
         polygons=ret_map;

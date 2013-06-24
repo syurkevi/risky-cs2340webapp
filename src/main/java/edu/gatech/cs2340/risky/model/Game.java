@@ -5,8 +5,9 @@ import java.util.ArrayList;
 public class Game {
     private ArrayList<Player> players = new ArrayList<Player>();
     private TurnManager turnManager = new TurnManager();
-    private int territories;
-    private int playerNum=0;
+    private int playerNum;
+    private int territories=23;//todo, get this number from lobby.html with a post request
+    //i've had issues with angular overwriting my input field
 
     public Game() {
 
@@ -74,8 +75,19 @@ public class Game {
     } 
     
     public String getPlayerOrder() {
-        return turnManager.playerOrder();
+        return turnManager.JSONplayerOrder();
     }
+    
+    public String getTerritoryArmyFromPlayers() {
+        ArrayList<Player> orderedPlayers=turnManager.playerOrder();
+        String playerData=new String();
+        for(Player p : orderedPlayers){
+            playerData=playerData.concat(","+p.JSON_TerritoryArmies());
+        }
+        playerData=playerData.substring(1,playerData.length());
+        return playerData;
+    }
+
 
     public void calculateTurnOrder(){
         turnManager.shuffleOrder();

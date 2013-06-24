@@ -63,8 +63,16 @@ public class TurnManager {
         return p;
     }   
 
+    public ArrayList<Player> playerOrder(){
+        ArrayList<Player> lineup=new ArrayList<Player>();
+        for (Player p : turnList) {
+            lineup.add(p); 
+        }
+        return lineup;
+    }
+
     //JSON compatible player list
-    public String playerOrder() {
+    public String JSONplayerOrder() {
         String order = new String();
         for (Player p : turnList){
             order = order.concat(", {\"name\" : \""+p.name()+"\"}");
