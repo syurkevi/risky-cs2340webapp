@@ -1,7 +1,6 @@
 package edu.gatech.cs2340.risky.controller;
 
 import java.io.IOException;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,6 +13,7 @@ import edu.gatech.cs2340.risky.model.Player;
 
 @WebServlet(urlPatterns = {
         "/game", // GET
+        "/game/", // GET
         "/game/create", // POST
         "/game/update/*", // PUT
         "/game/delete/*" // DELETE
@@ -50,10 +50,9 @@ public class GameServlet extends HttpServlet {
             lobby.allocateArmies();
             
             this.game = new Game(lobby);
-            
             request.setAttribute("game", this.game);
-            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
-            dispatcher.forward(request, response);
+            
+            response.sendRedirect("/risky/game/");
         }
     }
 
@@ -62,6 +61,10 @@ public class GameServlet extends HttpServlet {
      * link).
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        if (this.game == null) {
+            response.sendRedirect("/risky/lobby/");
+            return;
+        }
         request.setAttribute("game", this.game);
         RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
         dispatcher.forward(request, response);

@@ -1,39 +1,192 @@
 risky.controller('GameController', function ($scope, modelloader) {
-    $scope.players = modelloader.get('players');
     
-    $scope.turnOwner = 0;
-    
-    var polygons = [
-        {"id": 0, "vertexes": [[4, 4], [16, 4], [12, 20], [6, 18]]},
-        {"id": 1, "vertexes": [[16, 4], [14, 12], [20, 18], [24, 10]]},
-        {"id": 2, "vertexes": [[20, 7], [28, 6], [26, 18], [20, 18], [24, 10]]},
-        {"id": 3, "vertexes": [[12, 20], [14, 12], [20, 18], [26, 18], [24, 24], [16, 22]]},
-        {"id": 4, "vertexes": [[30, 24], [34, 20], [38, 22], [36, 24], [32, 26]]},
-        {"id": 5, "vertexes": [[34, 8], [42, 4], [50, 6], [58, 4], [50, 12]]},
-        {"id": 6, "vertexes": [[58, 4], [68, 6], [66, 14], [56, 6]]},
-        {"id": 7, "vertexes": [[56, 6], [66, 14], [62, 16], [54, 8]]},
-        {"id": 8, "vertexes": [[58, 12], [58, 21], [65, 22], [68, 18], [70, 12], [67, 10], [66, 14], [62, 16]]},
-        {"id": 9, "vertexes": [[42, 10], [50, 12], [54, 8], [58, 12], [58, 18], [52, 18]]},
-        {"id": 10, "vertexes": [[46, 20], [47, 14], [52, 18], [58, 18], [58, 21], [55, 23]]},
-        {"id": 11, "vertexes": [[68, 18], [65, 22], [62, 40], [68, 36], [71, 24]]},
-        {"id": 12, "vertexes": [[55, 23], [58, 21], [65, 22], [64, 28], [58, 30]]},
-        {"id": 13, "vertexes": [[52, 22], [55, 23], [58, 30], [56, 34], [54, 32]]},
-        {"id": 14, "vertexes": [[57, 32], [58, 30], [64, 28], [63, 34], [61, 32]]},
-        {"id": 15, "vertexes": [[55, 36], [57, 32], [61, 32], [63, 34], [62, 40]]},
-        {"id": 16, "vertexes": [[46, 34], [50, 38], [48, 42], [42, 38]]},
-        {"id": 17, "vertexes": [[46, 34], [44, 36], [42, 38], [45, 40], [38, 42], [35, 41], [32, 38], [36, 36]]},
-        {"id": 18, "vertexes": [[35, 41], [30, 44], [26, 40], [28, 38], [32, 38]]},
-        {"id": 19, "vertexes": [[34, 37], [30, 34], [27, 35], [28, 38], [32, 38]]},
-        {"id": 20, "vertexes": [[27, 35], [28, 38], [26, 40], [27, 41], [22, 42], [20, 34]]},
-        {"id": 21, "vertexes": [[28, 42], [18, 46], [12, 34], [20, 34], [22, 42], [27, 41]]},
-        {"id": 22, "vertexes": [[16, 42], [4, 40], [2, 30], [11, 32]]},
-        {"id": 23, "vertexes": [[32, 26], [36, 24], [38, 22], [40, 24], [37, 27], [33, 27]]}
-    ];
-    
-    var map = new Map(document.getElementById("map"), polygons, {});
-    map.draw();
+    $scope.setState = function (newState) {
+        $scope.state = newState;
+        $scope.turnOwner = 0;
+        $scope.currentAction = 0;
+        if ($scope.states[$scope.state].init) {
+            $scope.states[$scope.state].init();
+        }
+        if ($scope.states[$scope.state].actions[0].init) {
+            $scope.states[$scope.state].actions[0].init();
+        }
+    };
     
     $scope.nextTurn = function () {
-        $scope.turnOwner = ($scope.turnOwner+1) % $scope.players.length;
+        if ($scope.turnOwner == $scope.players.length-1) {// if last player
+            if ($scope.states[$scope.state].deinit) {
+                $scope.states[$scope.state].deinit();// deinitialize the state
+            }
+        } else {// otherwise
+            $scope.turnOwner++;// move to the next player
+            $scope.currentAction = 0;
+            if ($scope.states[$scope.state].actions[$scope.currentAction].init) {
+                $scope.states[$scope.state].actions[$scope.currentAction = 0].init();// reset action and initialize
+            }
+        }
+    };
+    
+    $scope.nextAction = function () {
+        if ($scope.states[$scope.state].actions[$scope.currentAction].deinit) {
+            $scope.states[$scope.state].actions[$scope.currentAction].deinit();// deinitialize the previous action
+        }
+        if ($scope.currentAction == $scope.states[$scope.state].actions.length-1) {// if last action
+            $scope.nextTurn();// move to the next player
+        } else if ($scope.states[$scope.state].actions[++$scope.currentAction].init) {
+            $scope.states[$scope.state].actions[++$scope.currentAction].init();// otherwise move to next state
+        }
+    };
+    
+    $scope.states = {
+        /*'default': {
+            'init': function () {},
+            'actions': {
+                0: {
+                    'init': function () {},
+                    'mapClick': function () {},
+                    'deinit': funciton () {}
+                }
+            },
+            'deinit': function () {}
+        },*/
+        'setup': {
+            'init': function () {},
+            'actions': {
+                0: {
+                    'mapClick': function (e) {
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (!territory) return; // alert user of invalid territory
+                        if (territory.owner) return; // alert user of already taken territory
+                        territory.owner = $scope.players[$scope.turnOwner];
+                        map.draw();
+                        if (map.allTerritoriesOwned()) $scope.setState('placearmies');
+                        $scope.nextTurn();
+                    }
+                }
+            },
+            'deinit': function () {
+                $scope.setState('placearmies');
+            }
+        },
+        'placearmies': {
+            'init': function () {},
+            'actions': {
+                0: {
+                    'init': function () {
+                        var player = $scope.players[$scope.turnOwner];
+                        player.armies.availableThisTurn += 1*player.armies.available;
+                        player.armies.available = 0;
+                    },
+                    'mapClick': function (e) {
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (!territory) return; // alert user of invalid territory
+                        if (territory.owner != $scope.players[$scope.turnOwner]) return;
+                        
+                        if (!territory.armies) territory.armies = 0;
+                        territory.armies++;
+                        if (--territory.owner.armies.availableThisTurn <= 0) $scope.nextTurn();
+                        map.draw();
+                    }
+                }
+            },
+            'deinit': function () {
+                $scope.setState('play');
+            }
+        },
+        'play': {
+            'init': function () {},
+            'actions': {
+                0: {
+                    'init': function () {
+                        var allocation = Math.min(territory.owner.armies.available, 5);
+                        territory.owner.armies.available -= allocation;
+                        territory.owner.armies.availableThisTurn += allocation;
+                    },
+                    'mapClick': function (e) {
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (!territory) return;
+                        if (territory.owner != $scope.players[$scope.turnOwner]) return;
+                        
+                        territory.armies++;
+                        if (--territory.owner.armies.availableThisTurn <= 0) $scope.nextTurn();
+                    }
+                }, 
+                1: {
+                    'mapClick': function (e) {
+                        
+                    }
+                }, 
+                2: {
+                    'mapClick': function (e) {
+                        
+                    }
+                }, 
+                3: {
+                    'mapClick': function (e) {
+                        
+                    }
+                }
+            },
+            'deinit': function () {
+                $scope.setState('play');
+            }
+        }
+    }
+    
+    $scope.setState('setup');
+    
+    var playerColors = ['#0971B2', '#FFFC19', '#B21212', '#11C422', '#AC15B2', '#B26012'];
+    
+    $scope.players = modelloader.get('players');
+    for (var i=0 ; i < $scope.players.length ; i++) {
+        $scope.players[i].color = (i < 5) ? playerColors[i] : generateRandomColor();
+        $scope.players[i].armies = {
+            'availableThisTurn': 0,
+            'available': $scope.players[i].armies,
+            'total': $scope.players[i].armies
+        };
+        $scope.players[i].getTerritories = function () {
+            var owned = [];
+            for (var j=0 ; j < map.polygons.length ; j++) {
+                if (map.polygons[j].owner.name == this.name) {
+                    owned.push(map.polygons[j]);
+                }
+            }
+            return owned;
+        };
+    }
+    
+    var polygons = modelloader.get('territories');
+    var map = new Map(document.getElementById('map'), polygons, {});
+    map.draw();
+    
+    $scope.onMapClick = function (e) {
+        $scope.state[$scope.game.state].actions[$scope.game.currentAction].mapClick(e);
+    };
+    
+    $scope.automateTerritorySelection = function () {
+        for (var i=0 ; i < map.polygons.length ; i++) {
+            map.polygons[i].owner = $scope.players[i % $scope.players.length];
+        }
+        map.draw();
+        $scope.states.setup.deinit();
+    };
+    
+    $scope.automateArmySelection = function (playerIndex) {
+        var player = $scope.players[playerIndex || $scope.turnOwner];
+        
+        var territories = player.getTerritories();
+        var armies = player.armies.availableThisTurn;
+        var each = Math.floor(armies / territories.length);
+        
+        if (!territories[0].armies) territories[0].armies = 0;
+        territories[0].armies = armies - (territories.length-1)*each;
+        
+        for (var i=1 ; i < territories.length ; i++) {
+            if (!territories[i].armies) territories[i].armies = 0;
+            territories[i].armies = each;
+        }
+        map.draw();
+        $scope.nextTurn();
     };
 });
