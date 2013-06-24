@@ -1,0 +1,116 @@
+<html ng-app="CanvasExperiment">
+<head>
+<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+<script type="text/javascript" src="angular.min.js"></script>
+<title>&lt;canvas&gt; experiement</title>
+<style>
+body {
+    margin: 0 auto;
+    width: 800px;}
+
+#map {
+    border: 1px dotted gray;}
+</style>
+<script type="text/javascript">
+
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+};
+
+function generateColor() {
+    return "#"+Math.floor(Math.random()*16777215).toString(16);
+}
+
+function pointInPoly(point, polygon) {
+	var i, j, c = false, vertexes = polygon.vertexes;
+	for (i = 0, j = vertexes.length - 1; i < vertexes.length; j = i++) {
+		if (((vertexes[i][1] > point[1]) != (vertexes[j][1] > point[1])) && (point[0] < (vertexes[j][0] - vertexes[i][0]) * (point[1] - vertexes[i][1]) / (vertexes[j][1] - vertexes[i][1]) + vertexes[i][0])) {
+			c = !c;
+		}
+	}
+	return c;
+}
+
+function Map(canvas, polygons, config) {
+    this.canvas = canvas;
+    this.context = this.canvas.getContext("2d");
+    this.polygons = polygons;
+    this.config = {
+        "scale": config.scale || 10
+    };
+}
+
+Map.prototype.labelPolygon = function (polygon) {
+    
+};
+
+Map.prototype.drawPolygon = function (polygon) {
+    this.context.fillStyle = polygon.color || '#ddd';
+    this.context.beginPath();
+    
+    this.context.moveTo(polygon.vertexes[0][0]*this.config.scale - 0.5, polygon.vertexes[0][1]*this.config.scale - 0.5);
+    
+    for (var j=1 ; j < polygon.vertexes.length ; j++) {;
+        this.context.lineTo(polygon.vertexes[j][0]*this.config.scale - 0.5, polygon.vertexes[j][1]*this.config.scale - 0.5);
+    }
+    
+    this.context.closePath();// pretends to "context.moveTo(first vertex)"
+    this.context.fill();
+    
+    this.context.stroke();// commit the strokes to the canvas
+    
+    this.labelPolygon(polygon);
+};
+
+Map.prototype.draw = function () {
+    this.canvas.width = this.canvas.width;// clears the canvas
+    this.context.strokeStyle = "#333";
+    for (var i=0 ; i < this.polygons.length ; i++) {
+        this.drawPolygon(this.polygons[i]);
+    }
+};
+
+Map.prototype.click = function (e) {
+    var point = [(e.pageX - this.canvas.offsetLeft) / this.config.scale, (e.pageY - this.canvas.offsetTop) / this.config.scale];
+    for (var i=0 ; i < this.polygons.length ; i++) {
+        if (pointInPoly(point, this.polygons[i])) {
+            this.polygons[i].color = generateColor();
+        }
+    }
+    this.draw();
+};
+
+var ce = angular.module("CanvasExperiment", []);
+
+ce.controller("CanvasController", function ($scope) {
+    
+    $scope.polygons = [
+        {"id": 0, "vertexes": [[4, 4], [16, 4], [12, 20], [6, 18]]},
+        {"id": 1, "vertexes": [[16, 4], [14, 12], [20, 18], [24, 10]]},
+        {"id": 2, "vertexes": [[20, 7], [28, 6], [26, 18], [20, 18], [24, 10]]},
+        {"id": 3, "vertexes": [[12, 20], [14, 12], [20, 18], [26, 18], [24, 24], [16, 22]]}
+    ];
+    var map = new Map(document.getElementById("map"), $scope.polygons, {});
+    map.draw();
+
+    $scope.onCanvasClick = function (e) {
+        map.click(e);
+    };
+    
+    $scope.$watch("polygons", function () {
+        map.draw();
+    }, true);
+});
+
+</script>
+</head>
+<body ng-controller="CanvasController">
+
+<h2>&lt;canvas&gt; experiment</h2>
+<canvas id="map" width="400" height="300" ng-click="onCanvasClick($event)"></canvas>
+
+</body>
+</html>

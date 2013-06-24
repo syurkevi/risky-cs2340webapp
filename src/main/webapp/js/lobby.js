@@ -1,5 +1,4 @@
 risky.controller('LobbyController', function ($scope) {
-    $scope.playerCount = 0;
     $scope.players = [];
     $scope.lobby = {
         'title': ''
@@ -19,7 +18,12 @@ risky.controller('LobbyController', function ($scope) {
         $scope.players.remove(index);
     };
     
+    $scope.buildDefaultLobby = function () {
+        $scope.lobby.title = 'House of the Pizza Power';
+        $scope.players = ['Lenny', 'Ralph', 'Don', 'Mikey'];
+    };
+    
     $scope.startMatch = function () {
         document.getElementById('submitForm').submit();
-    }
+    };
 });
