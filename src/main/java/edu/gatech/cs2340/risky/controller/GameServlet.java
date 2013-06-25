@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import edu.gatech.cs2340.risky.model.Game;
+import edu.gatech.cs2340.risky.model.Player;
 
 @WebServlet(urlPatterns = {
         "/game", // GET
@@ -26,19 +27,24 @@ public class GameServlet extends HttpServlet {
         if (null == operation) {
             operation = "POST";
         }
-        
         if (operation.equalsIgnoreCase("PUT")) {
             doPut(request, response);
             
         } else if (operation.equalsIgnoreCase("DELETE")) {
             doDelete(request, response);
+        }else{
+            this.game = new Game();
             
-        } else {
-            int lobbyId = Integer.parseInt(request.getParameter("lobbyId"));
+            String name;
+            for (int i=0 ; true ; i++) {
+                name = request.getParameter("player" + i);
+                if (name == null) break;
+                game.addPlayer(new Player(name));
+            }
+            game.calculateTurnOrder();
+            game.allocateArmies();
             
-            this.game = new Game(lobbyId);
-            
-            request.setAttribute("game", game);
+            request.setAttribute("game", this.game);
             RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
             dispatcher.forward(request, response);
         }
@@ -48,10 +54,19 @@ public class GameServlet extends HttpServlet {
      * Called when HTTP method is GET (e.g., from an <a href="...">...</a>
      * link).
      */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        request.setAttribute("game", game);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
-        dispatcher.forward(request, response);
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String info = (String) request.getParameter("info");
+        if(info==null){
+            request.setAttribute("game", this.game);
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
+
+            dispatcher.forward(request, response);
+        }else{
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            //response.getWriter().write("{\"players\":["+game.getPlayerOrder()+"],\"terr\":["+game.getTerritoryArmyFromPlayers()+"]}");
+            response.getWriter().write(game.getTerritoryArmyFromPlayers());
+        }
     }
 
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
