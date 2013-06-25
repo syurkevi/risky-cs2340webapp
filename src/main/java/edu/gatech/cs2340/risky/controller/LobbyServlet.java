@@ -12,6 +12,7 @@ import edu.gatech.cs2340.risky.model.Player;
 
 @WebServlet(urlPatterns = {
         "/lobby", // GET
+        "/lobby/", // GET
         "/lobby/create" // POST
 })
 public class LobbyServlet extends HttpServlet {

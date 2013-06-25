@@ -27,6 +27,7 @@ public class TurnManager {
         }
         return false;
     }
+    
     public void shuffleOrder() {
         Collections.shuffle(turnList);    
     }

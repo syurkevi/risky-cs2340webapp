@@ -6,10 +6,17 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class Player {
+<<<<<<< HEAD
     private String name;
     private int armies=0;
     private boolean playing = true;
     private HashMap<Integer,Integer> delegatedArmies=new HashMap<Integer,Integer>();
+=======
+    
+    public String name;
+    public int armies;
+    public boolean playing = true;
+>>>>>>> c86a785b3d620bead6e4dfb40b025d4293f804cb
 
     public Player(String name, int armies) {
         this.name = name;

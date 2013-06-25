@@ -226,9 +226,8 @@ ce.controller("CanvasController", function ($scope) {
         console.log(point);
         for (var i=0 ; i < $scope.polygons.length ; i++) {
             if (pointIsInPolygon(point, $scope.polygons[i])) {
-                $scope.polygons[i].color = '#666';
+                $scope.polygons[i].color = generateColor();
                 redraw();
-                return;
             }
         }
     };
