@@ -1,3 +1,8 @@
+<%@ page import="edu.gatech.cs2340.risky.models.*" %>
+<%@ page import="java.util.*" %>
+
+<% Lobby lobby = (Lobby) request.getAttribute("lobby"); %>
+
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="/risky/css/bootstrap.css">
@@ -38,7 +43,7 @@
 
     <h3>Get ready to rumble!</h3>
     <div><% if (!lobby.hasEnoughPlayers()) { %>Not yet though, <span class="badge badge-important">3</span> player minimum<% }
-    else if (lobby.hasTooManyPlayer()) { %>Woah there, <span class="badge badge-important">6</span> player maximum<% }
+    else if (lobby.hasTooManyPlayers()) { %>Woah there, <span class="badge badge-important">6</span> player maximum<% }
     else { %>
         <a class="btn btn-primary" href="/risky/game/">Start Match</a>
         <small><% if (lobby.players.size() == lobby.MAX_PLAYERS) { %>No more players<% }

@@ -1,4 +1,4 @@
-package edu.gatech.cs2340.risky.controller;
+package edu.gatech.cs2340.risky.controllers;
 
 import java.io.IOException;
 import javax.servlet.RequestDispatcher;
@@ -7,8 +7,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import edu.gatech.cs2340.risky.model.Lobby;
-import edu.gatech.cs2340.risky.model.Player;
+import edu.gatech.cs2340.risky.models.Lobby;
+import edu.gatech.cs2340.risky.models.Player;
 import edu.gatech.cs2340.risky.RiskyServlet;
 
 @WebServlet(urlPatterns = {

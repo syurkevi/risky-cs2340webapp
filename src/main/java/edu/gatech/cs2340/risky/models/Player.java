@@ -1,4 +1,4 @@
-package edu.gatech.cs2340.risky.model;
+package edu.gatech.cs2340.risky.models;
 
 import edu.gatech.cs2340.risky.Model;
 

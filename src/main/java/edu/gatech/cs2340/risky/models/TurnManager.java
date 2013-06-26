@@ -1,4 +1,4 @@
-package edu.gatech.cs2340.risky.model;
+package edu.gatech.cs2340.risky.models;
 
 import java.util.ArrayList;
 import java.util.Iterator;

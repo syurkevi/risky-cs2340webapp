@@ -1,4 +1,4 @@
-package edu.gatech.cs2340.risky.controller.api;
+package edu.gatech.cs2340.risky.controllers.api;
 
 import java.io.IOException;
 import javax.servlet.RequestDispatcher;
@@ -10,8 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import edu.gatech.cs2340.risky.ApiServlet;
 import edu.gatech.cs2340.risky.database.HashMapDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
-import edu.gatech.cs2340.risky.model.Lobby;
-import edu.gatech.cs2340.risky.model.Player;
+import edu.gatech.cs2340.risky.models.*;
 import java.io.PrintWriter;
 
 @WebServlet(urlPatterns = {
@@ -34,14 +33,16 @@ public class PlayerServlet extends ApiServlet {
         String name = (String) request.getParameter("name");
         Player player = new Player(name);
         int playerId = playerDb.create(player);
-        request.setAttribute("model", playerId);
-        dispatch(request, response);
+        dispatch(playerId);
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Integer playerId = getId(request);
-        request.setAttribute("model", playerDb.get(playerId));
-        dispatch(request, response);
+        try {
+            Integer playerId = getId(request);
+            dispatch(playerDb.get(playerId));
+        } catch (Exception e) {
+            dispatch(playerDb.getAll());
+        }
     }
     
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -62,19 +63,17 @@ public class PlayerServlet extends ApiServlet {
             player.playing = isAlive;
         }
         
-        request.setAttribute("model", player);
-        dispatch(request, response);
+        dispatch(player);
     }
     
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             int playerId = getId(request);
             Player p = this.playerDb.delete(playerId);
-            request.setAttribute("model", p);
+            dispatch(p);
         } catch (Exception e) {
-            request.setAttribute("model", e);
+            dispatch(e);
         }
-        dispatch(request, response);
     }
     
 }
