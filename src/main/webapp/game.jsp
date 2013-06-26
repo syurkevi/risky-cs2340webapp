@@ -1,6 +1,4 @@
-<%@ page import="edu.gatech.cs2340.risky.model.Game" %>
-<%@ page import="edu.gatech.cs2340.risky.model.Lobby" %>
-<%@ page import="edu.gatech.cs2340.risky.model.Player" %>
+<%@ page import="edu.gatech.cs2340.risky.model.*" %>
 <%@ page import="java.util.*" %>
 
 <% Lobby lobby = (Lobby) request.getAttribute("lobby"); %>
