@@ -3,14 +3,18 @@
 
 <% Lobby lobby = (Lobby) request.getAttribute("lobby"); %>
 
-<html>
+<html ng-app="risky">
 <head>
     <link rel="stylesheet" type="text/css" href="/risky/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/risky/css/style.css">
+    <script type="text/javascript" src="/risky/js/angular.min.js"></script>
+    <script type="text/javascript" src="/risky/js/angular-resource.min.js"></script>
+    <script type="text/javascript" src="/risky/js/risky.js"></script>
+    <script type="text/javascript" src="/risky/js/lobby.js"></script>
     <title>Risky Web App</title>
 </head>
 
-<body>
+<body ng-controller="LobbyController">
     <h1><%=lobby.name %></h1>
 
     <hr></hr>

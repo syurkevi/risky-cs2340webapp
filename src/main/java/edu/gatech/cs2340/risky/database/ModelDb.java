@@ -1,8 +1,9 @@
 package edu.gatech.cs2340.risky.database;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface ModelDb<T> {
+public interface ModelDb<T> extends Serializable  {
 
     public T get(Integer id);
 

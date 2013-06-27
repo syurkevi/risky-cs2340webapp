@@ -1,5 +1,5 @@
-var risky = angular.module('risky', []);
-risky.service('modelloader', function () {
+var risky = angular.module("risky", ["ngResource"]);
+risky.service("modelloader", function () {
     // loads properties of <script type="text/model-data">{this: "object"}</script> into the local data
     var data = {};
     
@@ -14,6 +14,15 @@ risky.service('modelloader', function () {
         data[key] = modelData;
         return data[key];
     };
+}).factory("Player", function ($resource) {
+    return $resource("/risky/api/player/:id", {
+        id: "@id"
+    }, {
+        getAll: {
+            method: "GET",
+            params: {id: ""}
+        }
+    });
 });
 
 risky.filter("iif", function () {// fake ternary operator in {{}}'d things

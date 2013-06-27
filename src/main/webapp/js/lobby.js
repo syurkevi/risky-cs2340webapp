@@ -1,7 +1,7 @@
-risky.controller('LobbyController', function ($scope) {
+risky.controller("LobbyController", function ($scope, Player) {
     $scope.players = [];
     $scope.lobby = {
-        'title': ''
+        "title": ""
     };
     
     $scope.addPlayer = function () {
@@ -11,19 +11,28 @@ risky.controller('LobbyController', function ($scope) {
             if ($scope.players[id] === name) return;// disallow players with the same name
         }
         $scope.players.push(name);
-        $scope.playerName = '';
+        $scope.playerName = "";
     };
+    
+    console.log(Player.get({id: 0}));
+    console.log(Player.getAll());
+    var p = new Player();
+    console.log(p);
+    p.name = "Joonho";
+    console.log(p);
+    p.$save();
+    console.log(p);
     
     $scope.removePlayer = function (index) {
         $scope.players.remove(index);
     };
     
     $scope.buildDefaultLobby = function () {
-        $scope.lobby.title = 'House of the Pizza Power';
-        $scope.players = ['Lenny', 'Ralph', 'Don', 'Mikey'];
+        $scope.lobby.title = "House of the Pizza Power";
+        $scope.players = ["Lenny", "Ralph", "Don", "Mikey"];
     };
     
     $scope.startMatch = function () {
-        document.getElementById('submitForm').submit();
+        document.getElementById("submitForm").submit();
     };
 });

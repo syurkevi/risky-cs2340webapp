@@ -12,12 +12,16 @@ import edu.gatech.cs2340.risky.database.HashMapDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.*;
 import java.io.PrintWriter;
+import com.google.gson.Gson;
+
+// POST / create
+// GET / read
+// PUT / update
+// DELETE / delete
 
 @WebServlet(urlPatterns = {
-    "/player/create", // POST
-    "/player/read/*", // GET
-    "/player/update/*", // PUT
-    "/player/delete/*" // DELETE
+    "/api/player",
+    "/api/player/*"
 })
 public class PlayerServlet extends ApiServlet {
     
@@ -30,10 +34,10 @@ public class PlayerServlet extends ApiServlet {
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String name = (String) request.getParameter("name");
-        Player player = new Player(name);
-        int playerId = playerDb.create(player);
-        dispatch(playerId);
+        Player player = (Player) getPayloadObject(Player.class);
+        System.out.println(new Gson().toJson(player));
+        //int playerId = playerDb.create(player);
+        //dispatch(playerId);
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -55,6 +59,8 @@ public class PlayerServlet extends ApiServlet {
         
         if (name != null) {
             player.name = name;
+        } else {
+            dispatch(new Exception("Player requires name"));
         }
         if (armies != null) {
             player.armies = armies;

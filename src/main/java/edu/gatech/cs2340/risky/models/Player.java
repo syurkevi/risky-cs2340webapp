@@ -7,10 +7,15 @@ public class Player extends Model {
     public String name;
     public int armies;
     public boolean playing = true;
-
+    
+    public Player() {
+        this(null);
+    }
+    
     public Player(String name, int armies) {
         this.name = name;
         this.armies = armies;
+        this.playing = true;
     }
     
     public Player(String name) {
