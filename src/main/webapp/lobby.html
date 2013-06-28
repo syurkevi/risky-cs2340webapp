@@ -38,9 +38,7 @@
         </div>
         <form action="/risky/game/create" method="post" id="submitForm">
             <input type="hidden" ng-repeat="name in players" name="player{{$index}}" value="{{name}}" />
-            <!-->Johnathan, fix your angular >_>
             <input type="hidden" ng-model="polys" name="polys" value="{{polys}}" required />
-            -->
         </form>
     </div>
 </body>

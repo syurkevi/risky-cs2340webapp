@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 risky.controller('LobbyController', function ($scope,$http,$q){
     $scope.playerCount = 0;
-=======
-risky.controller('LobbyController', function ($scope) {
->>>>>>> c86a785b3d620bead6e4dfb40b025d4293f804cb
     $scope.players = [];
     $scope.polys = 23; //Safety value
     var deferred=$q.defer();
@@ -38,9 +34,5 @@ risky.controller('LobbyController', function ($scope) {
         polyobj.setAttribute("name","polys");
         polyobj.setAttribute("value",$scope.polys);
         document.getElementById('submitForm').submit();
-<<<<<<< HEAD
-    }
-=======
     };
->>>>>>> c86a785b3d620bead6e4dfb40b025d4293f804cb
 });

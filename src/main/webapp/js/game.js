@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 risky.controller('GameController', function ($scope, $q, asynchttp) {
     $scope.turnOwner = 0;
     // Get necesarry http requests (player data and map json)
@@ -22,7 +21,6 @@ risky.controller('GameController', function ($scope, $q, asynchttp) {
             map.draw();
         });
     }
-=======
 risky.controller('GameController', function ($scope, modelloader) {
     
     $scope.setState = function (newState) {
@@ -217,5 +215,4 @@ risky.controller('GameController', function ($scope, modelloader) {
         map.draw();
         $scope.nextTurn();
     };
->>>>>>> c86a785b3d620bead6e4dfb40b025d4293f804cb
 });
