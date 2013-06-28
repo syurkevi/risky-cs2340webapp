@@ -21,12 +21,11 @@
         <div class="row-fluid">
         <hr>
             <div class="span2">
-                <div ng-repeat="player in players">
-                    <span class="color-swatch" style="background-color: {{player.color}}"></span>
-                    <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
+                <div ng-repeat="player in players" ng-class="$index == turnOwner | iif : 'hasTurn' : ''">
+                   <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
                 </div>
             </div>
-            <div class="span10 row-fluid no-left-gutter action-bar" ng-show="state == 'play'" ng-class="action{{currentAction}}">
+            <div class="span10 row-fluid no-left-gutter action-bar">
                 <div class="span3">
                     <h4>Place armies</h4>
                     <div>Click territories to place an army</div>
