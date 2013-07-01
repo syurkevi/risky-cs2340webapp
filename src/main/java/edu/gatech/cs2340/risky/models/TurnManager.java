@@ -1,8 +1,8 @@
 package edu.gatech.cs2340.risky.models;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * Class that will act as a reference

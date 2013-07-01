@@ -1,17 +1,17 @@
 package edu.gatech.cs2340.risky;
 
 import java.io.IOException;
-import javax.servlet.RequestDispatcher;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import edu.gatech.cs2340.risky.database.*;
-import java.io.PrintWriter;
-import java.util.Map;
-import java.util.HashMap;
+import javax.servlet.http.HttpSession;
+
+import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
+import edu.gatech.cs2340.risky.database.ModelDb;
 
 public abstract class RiskyServlet extends HttpServlet {
 
@@ -46,7 +46,7 @@ public abstract class RiskyServlet extends HttpServlet {
         return dbs;
     }
     
-    protected <T> ModelDb<T> getDb(HttpServletRequest request, Class c) {
+    protected <T extends Model> ModelDb<T> getDb(HttpServletRequest request, Class c) {
         Map<String, ModelDb> dbs = this.getDbs(request);
         ModelDb<T> db = dbs.get(c.getName());
         if (db == null) {

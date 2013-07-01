@@ -1,10 +1,11 @@
 package edu.gatech.cs2340.risky.database;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
 
-public class HashMapDbImpl<T> implements ModelDb<T> {
+import edu.gatech.cs2340.risky.Model;
+
+public class HashMapDbImpl<T extends Model> implements ModelDb<T> {
 
     private HashMap<Object, T> values = new HashMap<Object, T>();
 

@@ -5,7 +5,6 @@ import edu.gatech.cs2340.risky.Model;
 public class Player extends Model {
     
     private static int instanceCount = 0;
-    public int id;
     public String name;
     public int armies;
     public boolean playing = true;

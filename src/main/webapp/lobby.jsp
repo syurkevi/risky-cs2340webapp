@@ -19,7 +19,7 @@
         <div ng-repeat="player in players">
             <span>#<span>{{player.id}}</span></span>: <input type="text" ng-model="player.name" /><!-- JSPs can't have hashtag immediately followed by an opening curly brace -->
             <a class="btn" ng-click="player.$update()"><i class="icon-edit"></i></a>
-            <a class="btn btn-danger" ng-click="player.$delete()"><i class="icon-remove"></i></a>
+            <a class="btn btn-danger" ng-click="removePlayer({{player.id}})"><i class="icon-remove"></i></a>
         </div>
         <div class="input-append">
             <input type="text" ng-model="playerName" />

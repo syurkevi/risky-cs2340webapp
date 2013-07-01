@@ -1,19 +1,16 @@
 package edu.gatech.cs2340.risky.controllers.api;
 
 import java.io.IOException;
-import javax.servlet.RequestDispatcher;
+import java.util.Collection;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import edu.gatech.cs2340.risky.ApiServlet;
-import edu.gatech.cs2340.risky.database.*;
-import edu.gatech.cs2340.risky.models.*;
-import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.HashMap;
-import com.google.gson.Gson;
+import edu.gatech.cs2340.risky.database.ModelDb;
+import edu.gatech.cs2340.risky.models.Player;
 
 // POST / create
 // GET / read
@@ -40,10 +37,10 @@ public class PlayerServlet extends ApiServlet {
         System.out.print((player == null) ? "" : "not ");
         System.out.println("null");
         Collection<Player> players = playerDb.query();System.out.println("db.query finished");
-        if (players.size() > 6) {System.out.println("too many players, so calling error");
+        if (players.size() >= 6) {System.out.println("too many players, so calling error");
             error("Too many players");System.out.println("call to error() finished");
             return;
-        }System.out.println("not too many players");
+        }System.out.println("not too many players: " + players.size());
         
         System.out.println("got name " + player.name);
         
@@ -89,7 +86,7 @@ public class PlayerServlet extends ApiServlet {
         Player p = this.playerDb.delete(playerId);
         System.out.println("Player id: " + playerId);
         System.out.println((p == null) ? "null player" : ("playerName: " + p.name));
-        dispatch("good");
+        dispatch(p);
     }
     
 }

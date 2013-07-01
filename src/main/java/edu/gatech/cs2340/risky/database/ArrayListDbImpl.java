@@ -2,7 +2,9 @@ package edu.gatech.cs2340.risky.database;
 
 import java.util.ArrayList;
 
-public class ArrayListDbImpl<T> implements ModelDb<T> {
+import edu.gatech.cs2340.risky.Model;
+
+public class ArrayListDbImpl<T extends Model> implements ModelDb<T> {
 
     private ArrayList<T> values = new ArrayList<T>();
 
@@ -26,18 +28,24 @@ public class ArrayListDbImpl<T> implements ModelDb<T> {
     }
 
     public T update(Object id, T value) {
-        return values.set(id, value);
+        for (int i=0 ; i < values.size() ; i++) {
+            if (values.get(i).id.equals(id)) {
+                T temp = values.get(i);
+                values.set(i, value);
+                return temp;
+            }
+        }
+        return null;
     }
 
     public T delete(Object id) {
-        int i=0;
-        for ( ; i < values.size() ; i++) {
+        for (int i=0 ; i < values.size() ; i++) {
             if (values.get(i).id.equals(id)) {
-                break;
+                T item = values.get(i);
+                values.remove(i);
+                return item;
             }
         }
-        T item = values.get(i);
-        values.remove(i);
-        return item;
+        return null;
     }
 }
