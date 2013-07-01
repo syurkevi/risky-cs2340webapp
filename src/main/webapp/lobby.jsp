@@ -1,8 +1,3 @@
-<%@ page import="edu.gatech.cs2340.risky.models.*" %>
-<%@ page import="java.util.*" %>
-
-<% Lobby lobby = (Lobby) request.getAttribute("lobby"); %>
-
 <html ng-app="risky">
 <head>
     <link rel="stylesheet" type="text/css" href="/risky/css/bootstrap.css">
@@ -15,43 +10,33 @@
 </head>
 
 <body ng-controller="LobbyController">
-    <h1><%=lobby.name %></h1>
+    <h1>{{lobby.title}}</h1>
 
     <hr></hr>
 
     <h3>Players</h3>
-    <p><% for (int i=0 ; i < lobby.players.size() ; i++) { %><div>
-        <% Player player = lobby.players.get(i); %>
-        <form action="/risky/lobby/player/" method="post">
-            <input type="text" name="player_name" value="<%=player.name %>" />
-            <input type="hidden" name="operation" value="update">
-            <input type="hidden" name="player_id" value="<%=i %>">
-            <submit><i class="icon-edit"></i></submit>
-        </form>
-        <form action="/risky/lobby/player/" method="post">
-            <input type="hidden" name="operation" value="delete">
-            <input type="hidden" name="player_id" value="<%=i %>">
-            <submit><i class="icon-remove"></i></submit>
-        </form>
-    </div><% } %></p>
-    <div>
-        <form action="/risky/lobby/player/add" method="post">
-            <div class="input-append">
-                <input type="text" name="playerName" />
-                <input type="submit" class="btn btn-success" value="add player" />
-            </div>
-        </form>
-    </div>
+    <p>
+        <div ng-repeat="player in players">
+            <span>#<span>{{player.id}}</span></span>: <input type="text" ng-model="player.name" /><!-- JSPs can't have hashtag immediately followed by an opening curly brace -->
+            <a class="btn" ng-click="player.$update()"><i class="icon-edit"></i></a>
+            <a class="btn btn-danger" ng-click="player.$delete()"><i class="icon-remove"></i></a>
+        </div>
+        <div class="input-append">
+            <input type="text" ng-model="playerName" />
+            <a class="btn btn-success" ng-click="addPlayer()">add player</a>
+        </div>
+    </p>
+    
+    <div><a class="btn" ng-click="refreshPlayers()">Update players</a></div>
 
     <hr></hr>
 
     <h3>Get ready to rumble!</h3>
-    <div><% if (!lobby.hasEnoughPlayers()) { %>Not yet though, <span class="badge badge-important">3</span> player minimum<% }
-    else if (lobby.hasTooManyPlayers()) { %>Woah there, <span class="badge badge-important">6</span> player maximum<% }
-    else { %>
-        <a class="btn btn-primary" href="/risky/game/">Start Match</a>
-        <small><% if (lobby.players.size() == lobby.MAX_PLAYERS) { %>No more players<% }
-        else { %>Up to <span class="badge badge-info"><%=lobby.MAX_PLAYERS - lobby.players.size() %></span> more players</small><% } %>
-    </div><% } %>
+    <p>
+        <div ng-show="players.length < 3">Not yet though, <span class="badge badge-important">3</span> player minimum</div>
+        <div ng-show="players.length >= 3 && players.length <= 6">
+            <a class="btn btn-primary" href="/risky/lobby/start-match">Start Match</a> Up to <span class="badge badge-info">{{6 - players.length}}</span> more players</small>
+        </div>
+    </p>
 </body>
 </html>

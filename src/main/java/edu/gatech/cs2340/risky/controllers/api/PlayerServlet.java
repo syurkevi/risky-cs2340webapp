@@ -8,10 +8,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import edu.gatech.cs2340.risky.ApiServlet;
-import edu.gatech.cs2340.risky.database.HashMapDbImpl;
-import edu.gatech.cs2340.risky.database.ModelDb;
+import edu.gatech.cs2340.risky.database.*;
 import edu.gatech.cs2340.risky.models.*;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashMap;
 import com.google.gson.Gson;
 
 // POST / create
@@ -34,10 +35,31 @@ public class PlayerServlet extends ApiServlet {
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Player player = (Player) getPayloadObject(Player.class);
-        System.out.println(new Gson().toJson(player));
-        //int playerId = playerDb.create(player);
-        //dispatch(playerId);
+        Player player = (Player) getPayloadObject(Player.class);System.out.println("payload received and parsed");
+        System.out.print("player payload: ");
+        System.out.print((player == null) ? "" : "not ");
+        System.out.println("null");
+        Collection<Player> players = playerDb.query();System.out.println("db.query finished");
+        if (players.size() > 6) {System.out.println("too many players, so calling error");
+            error("Too many players");System.out.println("call to error() finished");
+            return;
+        }System.out.println("not too many players");
+        
+        System.out.println("got name " + player.name);
+        
+        for (Player opponent : players) {
+            System.out.print("checking against " + opponent.name);
+            if (player.name.equalsIgnoreCase(opponent.name)) {
+                System.out.println(": same");
+                error("Invalid player: Cannot have same name");
+                return;
+            } else {
+                System.out.println(": different");
+            }
+        }System.out.println("finished checking player names");
+        
+        playerDb.create(player);System.out.println("created player in db");
+        dispatch(player);
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -45,41 +67,29 @@ public class PlayerServlet extends ApiServlet {
             Integer playerId = getId(request);
             dispatch(playerDb.get(playerId));
         } catch (Exception e) {
-            dispatch(playerDb.getAll());
+            dispatch(playerDb.query());
         }
     }
     
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Integer playerId = getId(request);
+        Player givenPlayer = (Player) getPayloadObject(Player.class);
         Player player = playerDb.get(playerId);
         
-        String name = (String) request.getParameter("name");
-        Integer armies = Integer.parseInt(request.getParameter("armies"));
-        Boolean isAlive = new Boolean(request.getParameter("is_alive"));
-        
-        if (name != null) {
-            player.name = name;
-        } else {
-            dispatch(new Exception("Player requires name"));
+        try {
+            player.populateValidWith(givenPlayer);
+            dispatch(player);
+        } catch (Exception e) {
+            error("Failed to update player", e);
         }
-        if (armies != null) {
-            player.armies = armies;
-        }
-        if (isAlive != null) {
-            player.playing = isAlive;
-        }
-        
-        dispatch(player);
     }
     
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        try {
-            int playerId = getId(request);
-            Player p = this.playerDb.delete(playerId);
-            dispatch(p);
-        } catch (Exception e) {
-            dispatch(e);
-        }
+        int playerId = getId(request);
+        Player p = this.playerDb.delete(playerId);
+        System.out.println("Player id: " + playerId);
+        System.out.println((p == null) ? "null player" : ("playerName: " + p.name));
+        dispatch("good");
     }
     
 }

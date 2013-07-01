@@ -1,28 +1,34 @@
 var risky = angular.module("risky", ["ngResource"]);
-risky.service("modelloader", function () {
-    // loads properties of <script type="text/model-data">{this: "object"}</script> into the local data
-    var data = {};
-    
-    this.get = function (key) {
-        var modelData = document.querySelectorAll("script[type='text/model-data'][for='" + key + "']")[0];
-        try {
-            modelData = JSON.parse(modelData.innerText);
-        } catch (e) {
-            if (e instanceof SyntaxError) console.error('Could not parse model-data starting with \'' + modelData.innerText.replace(/\s+/, '').substring(0, 100) + '\'');
-            else throw e;
-        }
-        data[key] = modelData;
-        return data[key];
-    };
-}).factory("Player", function ($resource) {
+risky.factory("Player", function ($resource) {
     return $resource("/risky/api/player/:id", {
         id: "@id"
     }, {
-        getAll: {
-            method: "GET",
-            params: {id: ""}
-        }
+        "update": {method: "PUT"}
     });
+}).service("Toast", function ($rootScope) {
+    this.send = function (id, type, message) {
+        if (arguments.length < 2) {
+            return;
+        } else if (message === undefined) {
+            message = id;
+            id = undefined;
+        }
+        // inject a <div id="{{id}}" class="toast toast-{{type}}">{{message}}</div> into <div class="toasts"></div>
+        if (type === "error") {
+            console.error(message);
+        } else {
+            console.log(message);
+        }
+        
+        alert(message);
+    }
+    this.notify = function (id, message) {
+        this.send(id, "notice", message);
+    };
+    this.error = function (id, message) {
+        this.send(id, "error", message);
+    };
+    
 });
 
 risky.filter("iif", function () {// fake ternary operator in {{}}'d things

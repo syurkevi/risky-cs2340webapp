@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import edu.gatech.cs2340.risky.RiskyServlet;
+import edu.gatech.cs2340.risky.api.Error;
 import com.google.gson.Gson;
+import java.io.PrintWriter;
 
 public abstract class ApiServlet extends RiskyServlet {
     
@@ -24,7 +26,16 @@ public abstract class ApiServlet extends RiskyServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         this.request = request;
         this.response = response;
-        super.service(request, response);
+        
+        try {
+            super.service(request, response);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            StackTraceElement[] stackTraceElements = e.getStackTrace();
+            for (int i=0 ; i < 100 ; i++) {
+                System.out.println("\t" + stackTraceElements[i].toString());
+            }
+        }
     }
     
     public String getPayload() {
@@ -58,6 +69,7 @@ public abstract class ApiServlet extends RiskyServlet {
             
             this.payload = stringBuilder.toString();
         }
+        System.out.println(this.payload);
         return this.payload;
     }
     
@@ -65,14 +77,31 @@ public abstract class ApiServlet extends RiskyServlet {
         return new Gson().fromJson(this.getPayload(), objectClass);
     }
     
-    protected void dispatch(Object model) throws ServletException, IOException {
+    protected void warn(String warning) {
+        //this.warnings.add(warning);
+    }
+    
+    protected void error(String error, Object culprit) {
+        dispatch(new Error(error, culprit));
+    }
+    
+    protected void error(String error) {
+        dispatch(new Error(error, null));
+    }
+    
+    protected void dispatch(Object model) {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        if (false) {
-            response.getWriter().write(model.getClass().getName());
-        } else {
-            response.getWriter().write(new Gson().toJson(model));
+        
+        try {
+            response.getWriter().write((model != null) ? new Gson().toJson(model) : "{}");
+        } catch (IOException e) {
+            System.out.println("IOException");
         }
+        
+        this.request = null;
+        this.response = null;
+        this.payload = null;
     }
 
 }

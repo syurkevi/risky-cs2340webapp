@@ -1,17 +1,18 @@
 package edu.gatech.cs2340.risky.database;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.Collection;
+import edu.gatech.cs2340.risky.Model;
 
-public interface ModelDb<T> extends Serializable  {
+public interface ModelDb<T extends Model> extends Serializable  {
 
-    public T get(Integer id);
+    public T get(Object id);
 
-    public Map<Integer, T> getAll();
+    public Collection<T> query();
 
-    public Integer create(T model);
+    public Object create(T model);
 
-    public T update(Integer id, T model);
+    public T update(Object id, T model);
 
-    public T delete(Integer id);
+    public T delete(Object id);
 }

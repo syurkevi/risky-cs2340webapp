@@ -1,30 +1,34 @@
-risky.controller("LobbyController", function ($scope, Player) {
-    $scope.players = [];
+risky.controller("LobbyController", function ($scope, Toast, Player) {
+    $scope.players = Player.query();
     $scope.lobby = {
-        "title": ""
+        title: "Risky Lobby"
     };
     
     $scope.addPlayer = function () {
-        if ($scope.playerName.length <= 0) return;
-        var name = $scope.playerName;
-        for (var id in $scope.players) {
-            if ($scope.players[id] === name) return;// disallow players with the same name
-        }
-        $scope.players.push(name);
-        $scope.playerName = "";
+        var p = Player.save({name: $scope.playerName}, function () {
+            if (p.error) {
+                Toast.error(p.error);
+                return;
+            }
+            $scope.playerName = "";
+            $scope.players.push(p);
+        });
     };
     
-    console.log(Player.get({id: 0}));
-    console.log(Player.getAll());
-    var p = new Player();
-    console.log(p);
-    p.name = "Joonho";
-    console.log(p);
-    p.$save();
-    console.log(p);
+    $scope.removePlayer = function (playerId) {
+        var response = Player.delete({id: playerId}, function () {
+            if (response.error) {
+                Toast.notify(response.error);
+                return;
+            }
+            $scope.players.remove(playerId);
+        });
+    };
     
-    $scope.removePlayer = function (index) {
-        $scope.players.remove(index);
+    $scope.refreshPlayers = function () {
+        $scope.players = Player.query({}, function () {
+            console.log($scope.players);
+        });
     };
     
     $scope.buildDefaultLobby = function () {
