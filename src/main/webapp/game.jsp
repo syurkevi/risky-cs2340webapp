@@ -17,7 +17,7 @@
                 <li ng-repeat="player in lobby.players">
                     <swatch color="{{player.color}}"></swatch>
                     <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
-                    <small>{{player.armies}}</small>
+                    <small>{{player.availableThisTurn}}</small>
                 </li>
             </ul>
         </div>
