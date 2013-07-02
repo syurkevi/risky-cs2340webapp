@@ -19,6 +19,9 @@ body {
 .row-fluid .no-left-gutter {
     margin-left: 0;}
 
+.row-fluid [class*="span"] > *:first-child {
+    margin-top: 0;}
+
 .right-align {
     text-align: right;}
 

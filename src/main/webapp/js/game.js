@@ -144,7 +144,7 @@ risky.controller("GameController", function ($scope, Map, Lobby, Player) {
     
     var map;
     $scope.map = Map.get({}, function () {
-        map = new CanvasMap(document.getElementById("map"), $scope.map, {});
+        map = new CanvasMap(document.getElementById("map"), $scope.map, $scope.players, {});
         map.draw();
     });
     

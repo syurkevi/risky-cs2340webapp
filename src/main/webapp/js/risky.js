@@ -23,9 +23,9 @@ risky.service("Toast", function ($rootScope) {
         this.send(id, "error", message);
     };
     
-}).directive('swatch', function ($timeout) {
+}).directive("swatch", function ($timeout) {
     return {
-        restrict: 'E',
+        restrict: "E",
         replace: true,
         template: "<span class=\"color-swatch\"></span>",
         link: function ($scope, $element, $attrs) {
@@ -81,34 +81,31 @@ function pointInPoly(point, polygon) {
     return c;
 }
 
-function CanvasMap(canvas, map, config) {
+function CanvasMap(canvas, map, players, config) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
-    this.polygons = map.territories;
+    this.territories = map.territories;
+    this.players = players;
     this.config = {
         "scale": config.scale || 10
     };
 }
 
-CanvasMap.prototype.labelPolygon = function (polygon) {
-    var text = '';
-    if (polygon.armies) {
-        text = polygon.armies;
-    } else if (polygon.owner) {
-        text = polygon.owner.name;
-    } else {
-        return;
+CanvasMap.prototype.labelTerritory = function (territory, player) {
+    var text = "";
+    if (player) {
+        text = (player.territories[territory.id]) ? player.territories[territory.id].armies : player.name;
     }
     
     var x = 0;
     var y = 0;
     
-    for (var i=0 ; i < polygon.vertexes.length ; i++) {
-        x += polygon.vertexes[i][0];
-        y += polygon.vertexes[i][1];
+    for (var i=0 ; i < territory.vertexes.length ; i++) {
+        x += territory.vertexes[i][0];
+        y += territory.vertexes[i][1];
     }
-    x *= this.config.scale / polygon.vertexes.length;
-    y *= this.config.scale / polygon.vertexes.length;
+    x *= this.config.scale / territory.vertexes.length;
+    y *= this.config.scale / territory.vertexes.length;
     
     var textSize = this.context.measureText(text);
     
@@ -123,14 +120,14 @@ CanvasMap.prototype.labelPolygon = function (polygon) {
     this.context.fillText(text, x, y);
 };
 
-CanvasMap.prototype.drawPolygon = function (polygon) {
-    this.context.fillStyle = (polygon.owner) ? polygon.owner.color : polygon.color || '#ddd';
+CanvasMap.prototype.drawTerritory = function (territory, player) {
+    this.context.fillStyle = (player) ? player.color : "#ddd";
     this.context.beginPath();
     
-    this.context.moveTo(polygon.vertexes[0][0]*this.config.scale - 0.5, polygon.vertexes[0][1]*this.config.scale - 0.5);
+    this.context.moveTo(territory.vertexes[0][0]*this.config.scale - 0.5, territory.vertexes[0][1]*this.config.scale - 0.5);
     
-    for (var j=1 ; j < polygon.vertexes.length ; j++) {;
-        this.context.lineTo(polygon.vertexes[j][0]*this.config.scale - 0.5, polygon.vertexes[j][1]*this.config.scale - 0.5);
+    for (var j=1 ; j < territory.vertexes.length ; j++) {;
+        this.context.lineTo(territory.vertexes[j][0]*this.config.scale - 0.5, territory.vertexes[j][1]*this.config.scale - 0.5);
     }
     
     this.context.closePath();// pretends to "context.moveTo(first vertex)"
@@ -138,14 +135,26 @@ CanvasMap.prototype.drawPolygon = function (polygon) {
     
     this.context.stroke();// commit the strokes to the canvas
     
-    this.labelPolygon(polygon);
+    this.labelTerritory(territory, player);
 };
 
 CanvasMap.prototype.draw = function () {
     this.canvas.width = this.canvas.width;// clears the canvas
     this.context.strokeStyle = "#333";
-    for (var i=0 ; i < this.polygons.length ; i++) {
-        this.drawPolygon(this.polygons[i]);
+    
+    var territoryOwnershipMap = {};// territoryId -> player
+    
+    for (var i=0 ; i < this.players.length ; i++) {
+        var player = this.players[i];
+        for (var j=0 ; j < player.territories.length ; j++) {
+            var territory = player.territories[j];
+            territoryOwnershipMap[territory.id] = player;
+        }
+    }
+    
+    for (var i=0 ; i < this.territories.length ; i++) {
+        var territory = this.territories[i];
+        this.drawTerritory(territory, territoryOwnershipMap[territory.id]);
     }
 };
 

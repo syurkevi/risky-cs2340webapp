@@ -13,10 +13,13 @@
     <canvas id="map" width="800" height="500" ng-click="onMapClick($event)"></canvas>
     <div class="row-fluid">
         <div class="span2">
-            <div ng-repeat="player in lobby.players">
-                <swatch color="{{player.color}}"></swatch>
-                <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
-            </div>
+            <ul class="nav nav-pills nav-stacked">
+                <li ng-repeat="player in lobby.players">
+                    <swatch color="{{player.color}}"></swatch>
+                    <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
+                    <small>{{player.armies}}</small>
+                </li>
+            </ul>
         </div>
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="state == 'setup'" ng-class="action{{currentAction}}">
             <div class="span3">

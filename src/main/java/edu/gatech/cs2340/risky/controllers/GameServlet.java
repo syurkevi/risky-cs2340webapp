@@ -45,14 +45,14 @@ public class GameServlet extends RiskyServlet {
         map = this.<Map>getModel(request, Map.class);
         if (map == null) {
             map = MapFactory.get(0);
-            this.setModel(request, this.map);
+            this.setModel(request, map);
         }
         return true;
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String action = getAction(request);
-        
+        System.out.println("###### " + action);
         if (action.equalsIgnoreCase("start")) {
             startMatch(request, response);
         } else {
@@ -62,7 +62,9 @@ public class GameServlet extends RiskyServlet {
     }
     
     protected void startMatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        this.lobby = new Lobby();
+        if (this.lobby == null) {
+            this.lobby = new Lobby();
+        }
         
         ModelDb<Player> playerDb = this.<Player>getDb(request, Player.class);
         this.lobby.players.addAll(playerDb.query());// load the players

@@ -12,7 +12,6 @@ import javax.servlet.http.HttpSession;
 
 import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
-import edu.gatech.cs2340.risky.models.Player;
 
 public abstract class RiskyServlet extends HttpServlet {
 
@@ -105,7 +104,7 @@ public abstract class RiskyServlet extends HttpServlet {
     
     protected String getAction(HttpServletRequest request) {
         String uri = request.getServletPath();
-        return uri.substring(uri.lastIndexOf('/'), uri.length());
+        return uri.substring(uri.lastIndexOf('/') + 1, uri.length());
     }
     
 }
