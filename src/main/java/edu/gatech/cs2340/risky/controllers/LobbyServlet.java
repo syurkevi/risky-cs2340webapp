@@ -9,25 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import edu.gatech.cs2340.risky.RiskyServlet;
-import edu.gatech.cs2340.risky.models.Lobby;
 
 @WebServlet(urlPatterns = {
     "/lobby", // GET
     "/lobby/" // GET
 })
 public class LobbyServlet extends RiskyServlet {
-
-    Lobby lobby = null;
-
-    /**
-     * Called when HTTP method is GET (e.g., from an <a href="...">...</a>
-     * link).
-     */
+    
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        if (lobby == null) {
-            lobby = new Lobby("Risky Lobby");
-        }
-        request.setAttribute("lobby", lobby);
         RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/lobby.jsp");
         dispatcher.forward(request, response);
     }

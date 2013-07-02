@@ -1,4 +1,6 @@
-risky.controller('GameController', function ($scope, modelloader) {
+risky.controller("GameController", function ($scope, Map, Lobby, Player) {
+    
+    $scope.lobby = Lobby.get();
     
     $scope.setState = function (newState) {
         $scope.state = newState;
@@ -37,22 +39,22 @@ risky.controller('GameController', function ($scope, modelloader) {
     };
     
     $scope.states = {
-        /*'default': {
-            'init': function () {},
-            'actions': {
+        /*"default": {
+            "init": function () {},
+            "actions": {
                 0: {
-                    'init': function () {},
-                    'mapClick': function () {},
-                    'deinit': funciton () {}
+                    "init": function () {},
+                    "mapClick": function () {},
+                    "deinit": funciton () {}
                 }
             },
-            'deinit': function () {}
+            "deinit": function () {}
         },*/
-        'setup': {
-            'init': function () {},
-            'actions': {
+        "setup": {
+            "init": function () {},
+            "actions": {
                 0: {
-                    'mapClick': function (e) {
+                    "mapClick": function (e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (!territory) return; // alert user of invalid territory
                         if (territory.owner) return; // alert user of already taken territory
@@ -62,24 +64,24 @@ risky.controller('GameController', function ($scope, modelloader) {
                     }
                 }
             },
-            'deinit': function () {
+            "deinit": function () {
                 if (map.allTerritoriesOwned()) {
-                    $scope.setState('placearmies');
+                    $scope.setState("placearmies");
                 } else {
                     $scope.nextTurn(true);
                 }
             }
         },
-        'placearmies': {
-            'init': function () {},
-            'actions': {
+        "placearmies": {
+            "init": function () {},
+            "actions": {
                 0: {
-                    'init': function () {
+                    "init": function () {
                         var player = $scope.players[$scope.turnOwner];
                         player.armies.availableThisTurn += 1*player.armies.available;
                         player.armies.available = 0;
                     },
-                    'mapClick': function (e) {
+                    "mapClick": function (e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (!territory) return; // alert user of invalid territory
                         if (territory.owner != $scope.players[$scope.turnOwner]) return;
@@ -91,21 +93,21 @@ risky.controller('GameController', function ($scope, modelloader) {
                     }
                 }
             },
-            'deinit': function () {
-                $scope.setState('play');
+            "deinit": function () {
+                $scope.setState("play");
             }
         },
-        'play': {
-            'init': function () {},
-            'actions': {
+        "play": {
+            "init": function () {},
+            "actions": {
                 0: {
-                    'init': function () {
+                    "init": function () {
                         var player = $scope.players[$scope.turnOwner];
                         var allocation = Math.min(player.armies.available, 5);
                         player.armies.available -= allocation;
                         player.armies.availableThisTurn += allocation;
                     },
-                    'mapClick': function (e) {
+                    "mapClick": function (e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (!territory) return;
                         if (territory.owner != $scope.players[$scope.turnOwner]) return;
@@ -115,53 +117,36 @@ risky.controller('GameController', function ($scope, modelloader) {
                     }
                 }, 
                 1: {
-                    'mapClick': function (e) {
+                    "mapClick": function (e) {
                         
                     }
                 }, 
                 2: {
-                    'mapClick': function (e) {
+                    "mapClick": function (e) {
                         
                     }
                 }, 
                 3: {
-                    'mapClick': function (e) {
+                    "mapClick": function (e) {
                         
                     }
                 }
             },
-            'deinit': function () {
-                $scope.setState('play');
+            "deinit": function () {
+                $scope.setState("play");
             }
         }
     }
     
-    $scope.setState('setup');
+    $scope.setState("setup");
     
-    var playerColors = ['#0971B2', '#FFFC19', '#B21212', '#11C422', '#AC15B2', '#B26012'];
+    $scope.players = Player.query();
     
-    $scope.players = modelloader.get('players');
-    for (var i=0 ; i < $scope.players.length ; i++) {
-        $scope.players[i].color = (i < 5) ? playerColors[i] : generateRandomColor();
-        $scope.players[i].armies = {
-            'availableThisTurn': 0,
-            'available': $scope.players[i].armies,
-            'total': $scope.players[i].armies
-        };
-        $scope.players[i].getTerritories = function () {
-            var owned = [];
-            for (var j=0 ; j < map.polygons.length ; j++) {
-                if (map.polygons[j].owner.name == this.name) {
-                    owned.push(map.polygons[j]);
-                }
-            }
-            return owned;
-        };
-    }
-    
-    var polygons = modelloader.get('territories');
-    var map = new Map(document.getElementById('map'), polygons, {});
-    map.draw();
+    var map;
+    $scope.map = Map.get({}, function () {
+        map = new CanvasMap(document.getElementById("map"), $scope.map, {});
+        map.draw();
+    });
     
     $scope.onMapClick = function (e) {
         $scope.states[$scope.state].actions[$scope.currentAction].mapClick(e);
@@ -192,4 +177,13 @@ risky.controller('GameController', function ($scope, modelloader) {
         map.draw();
         $scope.nextTurn();
     };
+    
+    $scope.$watch("$scope.map", function () {
+        if (map) map.draw();
+    });
+    
+    $scope.$watch("$scope.lobby.players", function () {
+        if (map) map.draw();
+    }, true);
+    
 });

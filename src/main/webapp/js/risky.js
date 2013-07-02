@@ -1,11 +1,5 @@
 var risky = angular.module("risky", ["ngResource"]);
-risky.factory("Player", function ($resource) {
-    return $resource("/risky/api/player/:id", {
-        id: "@id"
-    }, {
-        "update": {method: "PUT"}
-    });
-}).service("Toast", function ($rootScope) {
+risky.service("Toast", function ($rootScope) {
     this.send = function (id, type, message) {
         if (arguments.length < 2) {
             return;
@@ -29,9 +23,38 @@ risky.factory("Player", function ($resource) {
         this.send(id, "error", message);
     };
     
+}).directive('swatch', function ($timeout) {
+    return {
+        restrict: 'E',
+        replace: true,
+        template: "<span class=\"color-swatch\"></span>",
+        link: function ($scope, $element, $attrs) {
+            $scope.$watch($attrs.color, function () {
+                $element.css("backgroundColor", $attrs.color);
+            });
+        }
+    };
+    
+}).factory("Map", function ($resource) {
+    return $resource("/risky/api/map");
+    
+}).factory("Player", function ($resource) {
+    return $resource("/risky/api/player/:id", {
+        id: "@id"
+    }, {
+        "update": {method: "PUT"},
+        "do": {method: "PUT", action: "nothing"}
+    });
+    
+}).factory("Lobby", function ($resource) {
+    return $resource("/risky/api/lobby/:id", {
+        id: "@id"
+    }, {
+        "update": {method: "PUT"}
+    });
 });
 
-risky.filter("iif", function () {// fake ternary operator in {{}}'d things
+risky.filter("iif", function () {// ternary operator for {{}}'d things
     return function(input, trueValue, falseValue) {
         return input ? trueValue : falseValue;
     };
@@ -58,16 +81,16 @@ function pointInPoly(point, polygon) {
     return c;
 }
 
-function Map(canvas, polygons, config) {
+function CanvasMap(canvas, map, config) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
-    this.polygons = polygons;
+    this.polygons = map.territories;
     this.config = {
         "scale": config.scale || 10
     };
 }
 
-Map.prototype.labelPolygon = function (polygon) {
+CanvasMap.prototype.labelPolygon = function (polygon) {
     var text = '';
     if (polygon.armies) {
         text = polygon.armies;
@@ -100,7 +123,7 @@ Map.prototype.labelPolygon = function (polygon) {
     this.context.fillText(text, x, y);
 };
 
-Map.prototype.drawPolygon = function (polygon) {
+CanvasMap.prototype.drawPolygon = function (polygon) {
     this.context.fillStyle = (polygon.owner) ? polygon.owner.color : polygon.color || '#ddd';
     this.context.beginPath();
     
@@ -118,7 +141,7 @@ Map.prototype.drawPolygon = function (polygon) {
     this.labelPolygon(polygon);
 };
 
-Map.prototype.draw = function () {
+CanvasMap.prototype.draw = function () {
     this.canvas.width = this.canvas.width;// clears the canvas
     this.context.strokeStyle = "#333";
     for (var i=0 ; i < this.polygons.length ; i++) {
@@ -126,11 +149,11 @@ Map.prototype.draw = function () {
     }
 };
 
-Map.prototype.toMapPoint = function (point) {
+CanvasMap.prototype.toMapPoint = function (point) {
     return [(point[0]-this.canvas.offsetLeft)/this.config.scale, (point[1]-this.canvas.offsetTop)/this.config.scale];
 };
 
-Map.prototype.getTerritoryAt = function (point) {
+CanvasMap.prototype.getTerritoryAt = function (point) {
     for (var i=0 ; i < this.polygons.length ; i++) {
         if (pointInPoly(point, this.polygons[i])) {
             return this.polygons[i];
@@ -138,7 +161,7 @@ Map.prototype.getTerritoryAt = function (point) {
     }
 };
 
-Map.prototype.allTerritoriesOwned = function () {
+CanvasMap.prototype.allTerritoriesOwned = function () {
     for (var i=0 ; i < this.polygons.length ; i++) {
         if (!this.polygons[i].owner) return false;
     }

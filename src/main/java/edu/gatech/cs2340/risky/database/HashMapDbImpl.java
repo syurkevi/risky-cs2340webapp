@@ -30,4 +30,8 @@ public class HashMapDbImpl<T extends Model> implements ModelDb<T> {
     public T delete(Object id) {
         return values.remove(id);
     }
+    
+    public void empty() {
+        this.values = new HashMap<Object, T>();
+    }
 }

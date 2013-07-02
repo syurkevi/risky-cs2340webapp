@@ -26,19 +26,19 @@ public class PlayerServlet extends ApiServlet {
     ModelDb<Player> playerDb;
     
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected boolean preDo(HttpServletRequest request, HttpServletResponse response) {
         playerDb = this.<Player>getDb(request, Player.class);
-        super.service(request, response);
+        return true;
     }
     
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Player player = (Player) getPayloadObject(Player.class);System.out.println("payload received and parsed");
+    protected synchronized void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {// R1
+        Player player = (Player) getPayloadObject(request, Player.class);System.out.println("payload received and parsed");
         System.out.print("player payload: ");
         System.out.print((player == null) ? "" : "not ");
         System.out.println("null");
         Collection<Player> players = playerDb.query();System.out.println("db.query finished");
         if (players.size() >= 6) {System.out.println("too many players, so calling error");
-            error("Too many players");System.out.println("call to error() finished");
+            error(response, "Too many players");System.out.println("call to error() finished");
             return;
         }System.out.println("not too many players: " + players.size());
         
@@ -48,7 +48,7 @@ public class PlayerServlet extends ApiServlet {
             System.out.print("checking against " + opponent.name);
             if (player.name.equalsIgnoreCase(opponent.name)) {
                 System.out.println(": same");
-                error("Invalid player: Cannot have same name");
+                error(response, "Invalid player: Cannot have same name");
                 return;
             } else {
                 System.out.println(": different");
@@ -56,37 +56,37 @@ public class PlayerServlet extends ApiServlet {
         }System.out.println("finished checking player names");
         
         playerDb.create(player);System.out.println("created player in db");
-        dispatch(player);
+        dispatch(response, player);
     }
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             Integer playerId = getId(request);
-            dispatch(playerDb.get(playerId));
+            dispatch(response, playerDb.get(playerId));
         } catch (Exception e) {
-            dispatch(playerDb.query());
+            dispatch(response, playerDb.query());
         }
     }
     
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected synchronized void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Integer playerId = getId(request);
-        Player givenPlayer = (Player) getPayloadObject(Player.class);
+        Player givenPlayer = (Player) getPayloadObject(request, Player.class);
         Player player = playerDb.get(playerId);
         
         try {
             player.populateValidWith(givenPlayer);
-            dispatch(player);
+            dispatch(response, player);
         } catch (Exception e) {
-            error("Failed to update player", e);
+            error(response, "Failed to update player", e);
         }
     }
     
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected synchronized void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int playerId = getId(request);
         Player p = this.playerDb.delete(playerId);
         System.out.println("Player id: " + playerId);
         System.out.println((p == null) ? "null player" : ("playerName: " + p.name));
-        dispatch(p);
+        dispatch(response, p);
     }
     
 }

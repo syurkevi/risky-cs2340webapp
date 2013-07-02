@@ -1,12 +1,16 @@
 package edu.gatech.cs2340.risky.models;
 
+import java.awt.Color;
+
 import edu.gatech.cs2340.risky.Model;
 
 public class Player extends Model {
     
+    private static int[] colors = {Color.blue.getRGB(), Color.red.getRGB(), Color.green.getRGB(), Color.yellow.getRGB(), Color.black.getRGB(), Color.lightGray.getRGB()};
     private static int instanceCount = 0;
     public String name;
     public int armies;
+    public String color;
     public boolean playing = true;
     
     public Player() {
@@ -18,6 +22,7 @@ public class Player extends Model {
         this.armies = armies;
         this.playing = true;
         this.id = instanceCount;
+        this.color = String.format("#%06X", (0xFFFFFF & this.colors[instanceCount%colors.length]));;
         instanceCount++;
     }
     

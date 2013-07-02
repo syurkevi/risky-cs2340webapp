@@ -15,16 +15,10 @@ import edu.gatech.cs2340.risky.api.Error;
 
 public abstract class ApiServlet extends RiskyServlet {
     
-    // store them, so we don't have to ask when dispatch()ing
-    HttpServletRequest request;
-    HttpServletResponse response;
     private String payload;
     
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        this.request = request;
-        this.response = response;
-        
         try {
             super.service(request, response);
         } catch (Exception e) {
@@ -36,58 +30,54 @@ public abstract class ApiServlet extends RiskyServlet {
         }
     }
     
-    public String getPayload() {
-        if (this.payload == null) {
-            StringBuilder stringBuilder = new StringBuilder();
-            BufferedReader bufferedReader = null;
-            
-            try {
-                InputStream inputStream = request.getInputStream();
-                if (inputStream != null) {
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    char[] charBuffer = new char[128];
-                    int bytesRead = -1;
-                    while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                        stringBuilder.append(charBuffer, 0, bytesRead);
-                    }
-                } else {
-                    stringBuilder.append("");
+    public String getPayload(HttpServletRequest request) {
+        StringBuilder stringBuilder = new StringBuilder();
+        BufferedReader bufferedReader = null;
+        
+        try {
+            InputStream inputStream = request.getInputStream();
+            if (inputStream != null) {
+                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                char[] charBuffer = new char[128];
+                int bytesRead = -1;
+                while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+                    stringBuilder.append(charBuffer, 0, bytesRead);
                 }
-            } catch (IOException ex) {
-                this.payload = "{}";
-            } finally {
-                if (bufferedReader != null) {
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException ex) {
-                        this.payload = "{}";
-                    }
+            } else {
+                stringBuilder.append("");
+            }
+        } catch (IOException ex) {
+            this.payload = "{}";
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException ex) {
+                    this.payload = "{}";
                 }
             }
-            
-            this.payload = stringBuilder.toString();
         }
-        System.out.println(this.payload);
-        return this.payload;
+            
+        return stringBuilder.toString();
     }
     
-    protected Object getPayloadObject(Class objectClass) {
-        return new Gson().fromJson(this.getPayload(), objectClass);
+    protected Object getPayloadObject(HttpServletRequest request, Class objectClass) {
+        return new Gson().fromJson(this.getPayload(request), objectClass);
     }
     
-    protected void warn(String warning) {
+    protected void warn(HttpServletResponse response, String warning) {
         //this.warnings.add(warning);
     }
     
-    protected void error(String error, Object culprit) {
-        dispatch(new Error(error, culprit));
+    protected void error(HttpServletResponse response, String error, Object culprit) {
+        dispatch(response, new Error(error, culprit));
     }
     
-    protected void error(String error) {
-        dispatch(new Error(error, null));
+    protected void error(HttpServletResponse response, String error) {
+        dispatch(response, new Error(error, null));
     }
     
-    protected void dispatch(Object model) {
+    protected void dispatch(HttpServletResponse response, Object model) {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         
@@ -96,10 +86,6 @@ public abstract class ApiServlet extends RiskyServlet {
         } catch (IOException e) {
             System.out.println("IOException");
         }
-        
-        this.request = null;
-        this.response = null;
-        this.payload = null;
     }
 
 }

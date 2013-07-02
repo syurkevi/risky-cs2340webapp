@@ -4,8 +4,8 @@ risky.controller("LobbyController", function ($scope, Toast, Player) {
         title: "Risky Lobby"
     };
     
-    $scope.addPlayer = function () {
-        var p = Player.save({name: $scope.playerName}, function () {
+    $scope.addPlayer = function (name) {
+        var p = Player.save({"name": name || $scope.playerName}, function () {
             if (p.error) {
                 Toast.error(p.error);
                 return;
@@ -15,28 +15,21 @@ risky.controller("LobbyController", function ($scope, Toast, Player) {
         });
     };
     
-    $scope.removePlayer = function (playerId) {
-        var response = Player.delete({id: playerId}, function () {
+    $scope.removePlayer = function (index) {
+        var response = Player.delete({id: $scope.players[index].id}, function () {
             if (response.error) {
                 Toast.notify(response.error);
                 return;
             }
-            $scope.players.remove(playerId);
+            $scope.players.remove(index);
         });
     };
     
-    $scope.refreshPlayers = function () {
-        $scope.players = Player.query({}, function () {
-            console.log($scope.players);
-        });
-    };
-    
-    $scope.buildDefaultLobby = function () {
+    $scope.loadDefaults = function () {
         $scope.lobby.title = "House of the Pizza Power";
-        $scope.players = ["Lenny", "Ralph", "Don", "Mikey"];
-    };
-    
-    $scope.startMatch = function () {
-        document.getElementById("submitForm").submit();
+        $scope.addPlayer("Lenny");
+        $scope.addPlayer("Ralph");
+        $scope.addPlayer("Don");
+        $scope.addPlayer("Mikey");
     };
 });

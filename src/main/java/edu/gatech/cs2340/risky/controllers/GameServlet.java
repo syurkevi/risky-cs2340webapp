@@ -1,99 +1,78 @@
 package edu.gatech.cs2340.risky.controllers;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import edu.gatech.cs2340.risky.models.Game;
+import edu.gatech.cs2340.risky.RiskyServlet;
+import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Lobby;
+import edu.gatech.cs2340.risky.models.Map;
 import edu.gatech.cs2340.risky.models.Player;
+import edu.gatech.cs2340.risky.models.factories.MapFactory;
 
 @WebServlet(urlPatterns = {
-        "/game", // GET
-        "/game/create", // POST
-        "/game/update/*", // PUT
-        "/game/delete/*" // DELETE
+    "/game", // GET
+    "/game/", // GET
+    "/game/start" // GET
 })
-public class GameServlet extends HttpServlet {
-
-    Game game = null;
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String operation = (String) request.getParameter("operation");
-        if (null == operation) {
-            operation = "POST";
-        }
-        
-        if (operation.equalsIgnoreCase("PUT")) {
-            doPut(request, response);
+public class GameServlet extends RiskyServlet {
+    
+    Lobby lobby;
+    Map map;
+    
+    protected boolean preDo(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        lobby = this.<Lobby>getModel(request, Lobby.class);
+        if (lobby == null) {
+            this.lobby = new Lobby();
             
-        } else if (operation.equalsIgnoreCase("DELETE")) {
-            doDelete(request, response);
-            
-        } else {
-            String title = request.getParameter("title");
-            
-            Lobby lobby = new Lobby(title);
-            
-            String name;
-            for (int i=0 ; true ; i++) {
-                name = request.getParameter("player" + i);
-                if (name == null) break;
-                lobby.players.add(new Player(name));
+            ModelDb<Player> playerDb = this.<Player>getDb(request, Player.class);
+            Collection<Player> players = playerDb.query();
+            if (players.size() < lobby.MIN_PLAYERS || players.size() > lobby.MAX_PLAYERS) {
+                response.sendRedirect("/risky/lobby/");
+                return false;
             }
+            this.lobby.players.addAll(playerDb.query());// load the players
+            playerDb.empty();
             
-            lobby.allocateArmies();
-            
-            this.game = new Game(lobby);
-            request.setAttribute("game", this.game);
-            
-            response.sendRedirect("/risky/game/");
+            this.setModel(request, this.lobby);
         }
+        map = this.<Map>getModel(request, Map.class);
+        if (map == null) {
+            map = MapFactory.get(0);
+            this.setModel(request, this.map);
+        }
+        return true;
     }
-
-    /**
-     * Called when HTTP method is GET (e.g., from an <a href="...">...</a>
-     * link).
-     */
+    
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        if (this.game == null) {
-            response.sendRedirect("/risky/lobby/");
-            return;
+        String action = getAction(request);
+        
+        if (action.equalsIgnoreCase("start")) {
+            startMatch(request, response);
+        } else {
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
+            dispatcher.forward(request, response);
         }
-        request.setAttribute("game", this.game);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
-        dispatcher.forward(request, response);
     }
-
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String name = (String) request.getParameter("name");
-        int id = getId(request);
-        //game.players.get(id).name = name;
+    
+    protected void startMatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        this.lobby = new Lobby();
         
-        request.setAttribute("game", game);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
-        dispatcher.forward(request, response);
-    }
-
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        int id = getId(request);
-        this.game = null;
+        ModelDb<Player> playerDb = this.<Player>getDb(request, Player.class);
+        this.lobby.players.addAll(playerDb.query());// load the players
+        playerDb.empty();
         
-        request.setAttribute("game", game);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/game.jsp");
-        dispatcher.forward(request, response);
-    }
-
-    private int getId(HttpServletRequest request) {
-        String uri = request.getPathInfo();
-        String idStr = uri.substring(1, uri.length());// Strip off the leading slash, e.g. "/2" becomes "2"
-        return Integer.parseInt(idStr);
+        this.setModel(request, this.lobby);
+        
+        lobby.randomizeTurnOrder();// R2
+        lobby.allocateArmies();// R3
+        response.sendRedirect("/risky/game");
     }
 
 }

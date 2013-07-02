@@ -16,4 +16,6 @@ public interface ModelDb<T extends Model> extends Serializable  {
     public T update(Object id, T model);
 
     public T delete(Object id);
+    
+    public void empty();
 }
