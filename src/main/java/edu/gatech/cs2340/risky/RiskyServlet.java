@@ -15,6 +15,10 @@ public abstract class RiskyServlet extends HttpServlet {
             return;
         }
         
+        if ("do".equals(getAction(request, 0))) {
+            
+        }
+        
         // delegate on operation parameter for plain ol' html forms
         String operation = (String) request.getParameter("operation");
         
@@ -57,7 +61,28 @@ public abstract class RiskyServlet extends HttpServlet {
         return request.getSession().getId();
     }
     
+    protected String getDoMethodName(HttpServletRequest request) {
+        // from /do/stuff-is-cool to stuffIsCool
+        return "";
+    }
+    
     protected String getAction(HttpServletRequest request) {
+        return getAction(request, 0);
+    }
+    
+    protected String getAction(HttpServletRequest request, int index) {
+        String[] actions = getActions(request);
+        if (index >= actions.length) {
+            return null;
+        }
+        return actions[index];
+    }
+    
+    protected String[] getActions(HttpServletRequest request) {
+        return request.getPathInfo().substring(1).split("/");
+    }
+    
+    protected String getFinalAction(HttpServletRequest request) {
         String uri = request.getServletPath();
         return uri.substring(uri.lastIndexOf("/") + 1, uri.length());
     }

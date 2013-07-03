@@ -15,7 +15,8 @@ import edu.gatech.cs2340.risky.models.Lobby;
 
 @WebServlet(urlPatterns = {
     "/lobby", // GET
-    "/lobby/" // GET
+    "/lobby/", // GET
+    "/lobby/*" // GET
 })
 public class LobbyServlet extends RiskyServlet {
     

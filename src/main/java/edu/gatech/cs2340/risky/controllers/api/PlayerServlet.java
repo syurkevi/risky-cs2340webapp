@@ -11,6 +11,9 @@ import edu.gatech.cs2340.risky.ApiServlet;
 import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
+import edu.gatech.cs2340.risky.models.Battle;
+import edu.gatech.cs2340.risky.models.BattleRecord;
+import edu.gatech.cs2340.risky.models.Lobby;
 import edu.gatech.cs2340.risky.models.Player;
 
 @WebServlet(urlPatterns = {
@@ -49,12 +52,12 @@ public class PlayerServlet extends ApiServlet {
             dispatch(response, playerDb.read(playerId));
         } catch (Exception e) {
             Collection<Player> results = playerDb.query();
-            results = this.filterResults(results, (String) request.getParameter("filter"));
+            results = this.filterResults(results, (String) request.getParameter("filter"), (String) request.getParameter("arg"));
             dispatch(response, results);
         }
     }
     
-    protected synchronized Collection<Player> filterResults(Collection<Player> players, String filter) {
+    protected synchronized Collection<Player> filterResults(Collection<Player> players, String filter, String arg) {
         if (filter == null) {
             return players;
         }
@@ -64,6 +67,11 @@ public class PlayerServlet extends ApiServlet {
                 if (player.playing == false) {
                     filteredResult.add(player);
                 }
+            }
+        } else if ("inLobby".equals(filter)) {
+            Lobby lobby = Database.getModel(Lobby.class, arg);
+            if (lobby != null) {
+               filteredResult = lobby.getPlayers();
             }
         }
         
@@ -92,6 +100,12 @@ public class PlayerServlet extends ApiServlet {
         int playerId = getId(request);
         Player p = playerDb.delete(playerId);
         dispatch(response, p);
+    }
+    
+    protected void attack(HttpServletRequest request, HttpServletResponse response, Object defendingPlayer, int attackingDie, int defendingDie) {
+        Battle worldWarJava = new Battle();
+        BattleRecord results = worldWarJava.wage();
+        dispatch(response, results);
     }
     
 }

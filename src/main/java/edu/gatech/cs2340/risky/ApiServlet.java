@@ -83,8 +83,8 @@ public abstract class ApiServlet extends RiskyServlet {
             gson.registerTypeAdapter(Lobby.class, new LobbyAdapter());
             
             String responseText = (model != null) ? gson.create().toJson(model) : "{}";
-            
             response.getWriter().write(responseText);
+            
         } catch (Exception e) {
             this.logException(e);
             return;

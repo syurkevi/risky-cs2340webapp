@@ -24,13 +24,13 @@ public class TurnOrder {
         return round;
     }
     
-    private Player getPlayer() {
+    public Player getPlayer() {
         Lobby lobby = Database.getModel(Lobby.class, this.lobbyId);
         if (lobby == null) return null;
         return Database.getModel(Player.class, lobby.players.get(this.playerIndex));
     }
     
-    private int nextTurn() {
+    public int nextTurn() {
         Lobby lobby = Database.getModel(Lobby.class, this.lobbyId);
         if (lobby == null) return -1;
         this.playerIndex++;

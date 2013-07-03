@@ -66,7 +66,7 @@ public class Lobby extends Model {
     
     public void allocateArmies() {
         for (Player player : this.getPlayers()) {
-            player.armies = this.calculateArmies(this.players.size());
+            player.allocateArmies(this.calculateArmies(this.players.size()));
         }
     }
     
