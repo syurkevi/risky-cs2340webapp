@@ -28,10 +28,7 @@
 
     <hr></hr>
 
-    <h3>Get ready to rumble!</h3>
-    <p>
-        <a class="btn" ng-click="loadDefaults()">Load Default Lobby <small>(for testing purposes)</small></a>
-    </p>
+    <h3>Get ready to rumble! <a class="btn btn-mini" ng-click="loadDefaults()">Load Default Lobby (for testing purposes)</a></h3>
     <p>
         <div ng-show="players.length < 3">Not yet though, <span class="badge badge-important">3</span> player minimum</div>
         <div ng-show="players.length >= 3 && players.length <= 6">

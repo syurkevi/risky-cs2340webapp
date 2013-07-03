@@ -55,6 +55,7 @@
                 <h4>End turn</h4>
                 <div>Call it quits already</div>
                 <a class="btn btn-primary btn-mini" ng-click="nextTurn()">End</a>
+                <a class="btn btn-primary btn-mini" ng-click="quitGame()">Quit Game</a>
             </div>
         </div>
     </div>

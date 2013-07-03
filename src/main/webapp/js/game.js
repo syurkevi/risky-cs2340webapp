@@ -31,6 +31,12 @@ risky.controller("GameController", function ($scope, Map, Lobby, Player) {
         }
     };
     
+    $scope.quitGame = function () {
+        // send a call to remove the user from the lobby and set their playing = false;
+        // get a new list of players
+        // allocate their territories?
+    };
+    
     $scope.nextAction = function () {
         if ($scope.states[$scope.state].actions[$scope.currentAction].deinit) {
             $scope.states[$scope.state].actions[$scope.currentAction].deinit();// deinitialize the previous action
