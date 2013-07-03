@@ -9,30 +9,32 @@ public class Player extends Model {
     
     private static int[] colors = {Color.blue.getRGB(), Color.red.getRGB(), Color.green.getRGB(), Color.yellow.getRGB(), Color.black.getRGB(), Color.lightGray.getRGB()};
     private static int instanceCount = 0;
+    
     public String name;
     public int armies;
     public int armiesAvailableThisTurn;
     public String color;// e.g. #00FF00
-    public boolean playing = true;
+    public boolean playing;
     public HashMap<Object, TerritoryDeed> territories;
+    public Object lobby;
     
     public Player() {
         this(null);
+    }
+    
+    public Player(String name) {
+        this(name, 0);
     }
     
     public Player(String name, int armies) {
         this.name = name;
         this.armies = armies;
         this.armiesAvailableThisTurn = this.armies;
-        this.playing = true;
+        this.playing = false;
         this.id = instanceCount;
-        this.color = String.format("#%06X", (0xFFFFFF & this.colors[instanceCount%colors.length]));
+        this.color = String.format("#%06X", (0xFFFFFF & Player.colors[instanceCount%colors.length]));
         this.territories = new HashMap<Object, TerritoryDeed>();
         instanceCount++;
-    }
-    
-    public Player(String name) {
-        this(name, 0);
     }
     
     public void allocateArmies(int number) {

@@ -10,23 +10,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import edu.gatech.cs2340.risky.api.Error;
+import edu.gatech.cs2340.risky.api.LobbyAdapter;
+import edu.gatech.cs2340.risky.models.Lobby;
 
 public abstract class ApiServlet extends RiskyServlet {
-    
-    private String payload;
     
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             super.service(request, response);
         } catch (Exception e) {
-            System.out.println(e.toString());
-            StackTraceElement[] stackTraceElements = e.getStackTrace();
-            for (int i=0 ; i < 100 && i < stackTraceElements.length ; i++) {
-                System.out.println("\t" + stackTraceElements[i].toString());
-            }
+            log("Exception in calling RiskyServlet.service()", e);
         }
     }
     
@@ -47,17 +44,17 @@ public abstract class ApiServlet extends RiskyServlet {
                 stringBuilder.append("");
             }
         } catch (IOException ex) {
-            this.payload = "{}";
+            return "{}";
         } finally {
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
                 } catch (IOException ex) {
-                    this.payload = "{}";
+                    return "{}";
                 }
             }
         }
-            
+        
         return stringBuilder.toString();
     }
     
@@ -82,10 +79,51 @@ public abstract class ApiServlet extends RiskyServlet {
         response.setCharacterEncoding("UTF-8");
         
         try {
-            response.getWriter().write((model != null) ? new Gson().toJson(model) : "{}");
-        } catch (IOException e) {
-            System.out.println("IOException");
+            GsonBuilder gson = new GsonBuilder();
+            gson.registerTypeAdapter(Lobby.class, new LobbyAdapter());
+            
+            String responseText = (model != null) ? gson.create().toJson(model) : "{}";
+            
+            response.getWriter().write(responseText);
+        } catch (Exception e) {
+            this.logException(e);
+            return;
         }
+    }
+    
+    /*
+     * Boilerplate method mapping, so the API is more CRUD-y
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        this.read(request, response);
+    }
+    
+    protected void read(HttpServletRequest request, HttpServletResponse response) {
+        
+    }
+    
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        this.create(request, response);
+    }
+    
+    protected void create(HttpServletRequest request, HttpServletResponse response) {
+        
+    }
+    
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
+        this.update(request, response);
+    }
+    
+    protected void update(HttpServletRequest request, HttpServletResponse response) {
+        
+    }
+    
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
+        this.delete(request, response);
+    }
+    
+    protected void delete(HttpServletRequest request, HttpServletResponse response) {
+        
     }
 
 }

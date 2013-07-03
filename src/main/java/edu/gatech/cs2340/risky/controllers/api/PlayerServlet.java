@@ -1,21 +1,17 @@
 package edu.gatech.cs2340.risky.controllers.api;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import edu.gatech.cs2340.risky.ApiServlet;
+import edu.gatech.cs2340.risky.Database;
+import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Player;
-
-// POST / create
-// GET / read
-// PUT / update
-// DELETE / delete
 
 @WebServlet(urlPatterns = {
     "/api/player",
@@ -23,69 +19,78 @@ import edu.gatech.cs2340.risky.models.Player;
 })
 public class PlayerServlet extends ApiServlet {
     
-    ModelDb<Player> playerDb;
-    
     @Override
-    protected boolean preDo(HttpServletRequest request, HttpServletResponse response) {
-        playerDb = this.<Player>getDb(request, Player.class);
-        return true;
-    }
-    
-    protected synchronized void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {// R1
-        Player player = (Player) getPayloadObject(request, Player.class);System.out.println("payload received and parsed");
-        System.out.print("player payload: ");
-        System.out.print((player == null) ? "" : "not ");
-        System.out.println("null");
-        Collection<Player> players = playerDb.query();System.out.println("db.query finished");
-        if (players.size() >= 6) {System.out.println("too many players, so calling error");
-            error(response, "Too many players");System.out.println("call to error() finished");
+    protected synchronized void create(HttpServletRequest request, HttpServletResponse response) {// R1
+        ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
+        Player player = (Player) getPayloadObject(request, Player.class);
+        
+        Collection<Player> players = playerDb.query();
+        if (players.size() >= 6) {
+            error(response, "Too many players");
             return;
-        }System.out.println("not too many players: " + players.size());
-        
-        System.out.println("got name " + player.name);
-        
+        }
         for (Player opponent : players) {
-            System.out.print("checking against " + opponent.name);
             if (player.name.equalsIgnoreCase(opponent.name)) {
-                System.out.println(": same");
                 error(response, "Invalid player: Cannot have same name");
                 return;
-            } else {
-                System.out.println(": different");
             }
-        }System.out.println("finished checking player names");
+        }
         
-        playerDb.create(player);System.out.println("created player in db");
+        players.add(player);
         dispatch(response, player);
     }
     
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    @Override
+    protected void read(HttpServletRequest request, HttpServletResponse response) {
+        ModelDb<Player> playerDb = Database.getDb(Player.class);
+        
         try {
             Integer playerId = getId(request);
-            dispatch(response, playerDb.get(playerId));
+            dispatch(response, playerDb.read(playerId));
         } catch (Exception e) {
-            dispatch(response, playerDb.query());
+            Collection<Player> results = playerDb.query();
+            results = this.filterResults(results, (String) request.getParameter("filter"));
+            dispatch(response, results);
         }
     }
     
-    protected synchronized void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected synchronized Collection<Player> filterResults(Collection<Player> players, String filter) {
+        if (filter == null) {
+            return players;
+        }
+        ArrayList<Player> filteredResult = new ArrayList<Player>();
+        if ("isNotPlaying".equals(filter)) {
+            for (Player player : players) {
+                if (player.playing == false) {
+                    filteredResult.add(player);
+                }
+            }
+        }
+        
+        return filteredResult;
+    }
+    
+    protected synchronized void update(HttpServletRequest request, HttpServletResponse response) {
+        ModelDb<Player> playerDb = Database.getDb(Player.class);
+        
         Integer playerId = getId(request);
         Player givenPlayer = (Player) getPayloadObject(request, Player.class);
-        Player player = playerDb.get(playerId);
+        Player player = playerDb.read(playerId);
         
         try {
             player.populateValidWith(givenPlayer);
             dispatch(response, player);
+            return;
         } catch (Exception e) {
             error(response, "Failed to update player", e);
+            return;
         }
     }
     
-    protected synchronized void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected synchronized void delete(HttpServletRequest request, HttpServletResponse response) {
+        ModelDb<Player> playerDb = Database.getDb(Player.class);
         int playerId = getId(request);
-        Player p = this.playerDb.delete(playerId);
-        System.out.println("Player id: " + playerId);
-        System.out.println((p == null) ? "null player" : ("playerName: " + p.name));
+        Player p = playerDb.delete(playerId);
         dispatch(response, p);
     }
     

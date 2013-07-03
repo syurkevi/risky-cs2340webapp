@@ -5,17 +5,23 @@ import java.util.Collection;
 
 import edu.gatech.cs2340.risky.Model;
 
-public interface ModelDb<T extends Model> extends Serializable  {
+public abstract class ModelDb<T extends Model> implements Serializable  {
 
-    public T get(Object id);
+    public abstract T read(Object id);
 
-    public Collection<T> query();
+    public abstract Collection<T> query();
 
-    public Object create(T model);
+    public abstract Object create(T model);
 
-    public T update(Object id, T model);
+    public abstract T update(T model);
 
-    public T delete(Object id);
+    public abstract T delete(Object id);
+
+    public T delete(T model) {
+        return delete(model.id);
+    }
     
-    public void empty();
+    public abstract void empty();
+    
+    public abstract <T extends Model> ModelDb<T> getInstance();
 }

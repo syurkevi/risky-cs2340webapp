@@ -152,6 +152,7 @@ CanvasMap.prototype.draw = function () {
         }
     }
     
+    if (!this.territories) return;
     for (var i=0 ; i < this.territories.length ; i++) {
         var territory = this.territories[i];
         this.drawTerritory(territory, territoryOwnershipMap[territory.id]);

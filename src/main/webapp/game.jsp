@@ -6,7 +6,7 @@
     <script type="text/javascript" src="/risky/js/angular-resource.min.js"></script>
     <script type="text/javascript" src="/risky/js/risky.js"></script>
     <script type="text/javascript" src="/risky/js/game.js"></script>
-    <title>Risky Web App</title>
+    <title>Game | Risky</title>
 </head>
 <body ng-controller="GameController">
     <h1>{{lobby.title}}</h1>

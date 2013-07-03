@@ -1,6 +1,10 @@
 risky.controller("GameController", function ($scope, Map, Lobby, Player) {
     
-    $scope.lobby = Lobby.get();
+    $scope.lobby = Lobby.get({});
+    
+    $scope.$watch("$scope.lobby.players", function () {
+        console.log($scope.lobby["players"]);
+    }, true);
     
     $scope.setState = function (newState) {
         $scope.state = newState;

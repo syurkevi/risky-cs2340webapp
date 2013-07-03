@@ -1,12 +1,16 @@
 package edu.gatech.cs2340.risky.models.factories;
 
+import edu.gatech.cs2340.risky.Database;
+import edu.gatech.cs2340.risky.database.HashMapDbImpl;
+import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Map;
 import edu.gatech.cs2340.risky.models.Territory;
 
 public class MapFactory {
     
-    public static Map get(int i) {// we only have one map for now, but multiple could be cool
+    public static Object get(int i) {// we only have one map for now, but multiple could be cool
         Map m = new Map();
+        m.id = i;
         int[][][] vertexeses = {
             {{4, 4}, {16, 4}, {12, 20}, {6, 18}},
             {{16, 4}, {14, 12}, {20, 18}, {24, 10}},
@@ -36,7 +40,11 @@ public class MapFactory {
         for (int[][] vertexes : vertexeses) {
             m.addTerritory(new Territory(vertexes));
         }
-        return m;
+        
+        ModelDb<Map> mapDb = Database.getDb(Map.class, new HashMapDbImpl<Map>());
+        mapDb.create(m);
+        
+        return m.id;
     }
     
 }

@@ -1,15 +1,11 @@
 package edu.gatech.cs2340.risky.controllers.api;
 
-import java.io.IOException;
-import java.util.Collection;
-
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import edu.gatech.cs2340.risky.ApiServlet;
-import edu.gatech.cs2340.risky.database.ModelDb;
+import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.models.Lobby;
 import edu.gatech.cs2340.risky.models.Player;
 
@@ -19,32 +15,27 @@ import edu.gatech.cs2340.risky.models.Player;
 })
 public class LobbyServlet extends ApiServlet {
     
-    Lobby lobby;
-    
     @Override
     protected boolean preDo(HttpServletRequest request, HttpServletResponse response) {
-        lobby = this.<Lobby>getModel(request, Lobby.class);
+        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         if (lobby == null) {
-            this.lobby = new Lobby();
-            
-            ModelDb<Player> playerDb = this.<Player>getDb(request, Player.class);
-            this.lobby.players.addAll(playerDb.query());// load the players
-            playerDb.empty();
-            
-            this.setModel(request, this.lobby);
+            error(response, "Made new lobby");
+            return false;
         }
         return true;
     }
     
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void create(HttpServletRequest request, HttpServletResponse response) {
         error(response, "Lobby must be created through /risky/lobby");
     }
     
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void read(HttpServletRequest request, HttpServletResponse response) {
+        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         dispatch(response, lobby);
     }
     
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void update(HttpServletRequest request, HttpServletResponse response) {
+        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         Lobby givenLobby = (Lobby) getPayloadObject(request, Player.class);
         
         try {
@@ -52,12 +43,13 @@ public class LobbyServlet extends ApiServlet {
             dispatch(response, lobby);
         } catch (Exception e) {
             error(response, "Failed to update lobby", e);
+            return;
         }
     }
     
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        this.deleteModel(request, lobby);
-        dispatch(response, new Object());
+    protected void delete(HttpServletRequest request, HttpServletResponse response) {
+        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
+        dispatch(response, Database.delete(lobby));
     }
     
 }

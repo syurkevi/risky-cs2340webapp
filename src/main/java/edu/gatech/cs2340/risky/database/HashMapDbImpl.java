@@ -5,11 +5,11 @@ import java.util.HashMap;
 
 import edu.gatech.cs2340.risky.Model;
 
-public class HashMapDbImpl<T extends Model> implements ModelDb<T> {
+public class HashMapDbImpl<T extends Model> extends ModelDb<T> {
 
     private HashMap<Object, T> values = new HashMap<Object, T>();
 
-    public T get(Object id) {
+    public T read(Object id) {
         return values.get(id);
     }
     
@@ -17,14 +17,14 @@ public class HashMapDbImpl<T extends Model> implements ModelDb<T> {
         return values.values();
     }
 
-    public Object create(T value) {
+    public Object create(T model) {
         Integer newId = values.size();
-        values.put(newId, value);
+        values.put(newId, model);
         return newId;
     }
 
-    public T update(Object id, T value) {
-        return values.put(id, value);
+    public T update(T model) {
+        return values.put(model.id, model);
     }
 
     public T delete(Object id) {
@@ -33,5 +33,9 @@ public class HashMapDbImpl<T extends Model> implements ModelDb<T> {
     
     public void empty() {
         this.values = new HashMap<Object, T>();
+    }
+    
+    public <T extends Model> HashMapDbImpl<T> getInstance() {
+        return new HashMapDbImpl<T>();
     }
 }

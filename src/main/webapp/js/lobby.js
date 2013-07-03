@@ -1,5 +1,5 @@
 risky.controller("LobbyController", function ($scope, Toast, Player) {
-    $scope.players = Player.query();
+    $scope.players = Player.query({filter: "isNotPlaying"});
     $scope.lobby = {
         title: "Risky Lobby"
     };

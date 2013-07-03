@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import edu.gatech.cs2340.risky.Model;
 
-public class ArrayListDbImpl<T extends Model> implements ModelDb<T> {
+public class ArrayListDbImpl<T extends Model> extends ModelDb<T> {
 
     private ArrayList<T> values = new ArrayList<T>();
 
-    public T get(Object id) {
+    public T read(Object id) {
         for (T item : values) {
             if (item.id.equals(id)) {
                 return item;
@@ -21,17 +21,17 @@ public class ArrayListDbImpl<T extends Model> implements ModelDb<T> {
         return values;
     }
 
-    public Object create(T value) {
+    public Object create(T model) {
         Integer newId = values.size();
-        values.add(value);
+        values.add(model);
         return newId;
     }
 
-    public T update(Object id, T value) {
+    public T update(T model) {
         for (int i=0 ; i < values.size() ; i++) {
-            if (values.get(i).id.equals(id)) {
+            if (values.get(i).id.equals(model.id)) {
                 T temp = values.get(i);
-                values.set(i, value);
+                values.set(i, model);
                 return temp;
             }
         }
@@ -48,8 +48,16 @@ public class ArrayListDbImpl<T extends Model> implements ModelDb<T> {
         }
         return null;
     }
+
+    public T delete(T model) {
+        return delete(model.id);
+    }
     
     public void empty() {
         this.values = new ArrayList<T>();
+    }
+    
+    public <T extends Model> ArrayListDbImpl<T> getInstance() {
+        return new ArrayListDbImpl<T>();
     }
 }
