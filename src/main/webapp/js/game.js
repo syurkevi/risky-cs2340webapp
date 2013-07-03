@@ -20,7 +20,7 @@ risky.controller("GameController", function ($scope, Map, Lobby, Player) {
         $scope.turnOwner = 0;
         $scope.currentAction = 0;
         
-        var initState = $scope.stats[$scope.state].init, initAction = $scope.stats[$scope.state].action[0].init;
+        var initState = $scope.states[$scope.state].init, initAction = $scope.states[$scope.state].actions[0].init;
         
         if (initState) initState();
         if (initAction) initAction();
