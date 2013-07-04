@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import edu.gatech.cs2340.risky.ApiServlet;
 import edu.gatech.cs2340.risky.Database;
+import edu.gatech.cs2340.risky.api.annotations.ApiParams;
 import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Battle;
@@ -102,10 +103,21 @@ public class PlayerServlet extends ApiServlet {
         dispatch(response, p);
     }
     
-    protected void attack(HttpServletRequest request, HttpServletResponse response, Object defendingPlayer, int attackingDie, int defendingDie) {
+    // example of what the /api/{model}/do/ calls will work like
+    @ApiParams({"defendingPlayer", "attackingDie", "defendingDie"})
+    public Object attack(Object defendingPlayer, int attackingDie, int defendingDie) {
         Battle worldWarJava = new Battle();
         BattleRecord results = worldWarJava.wage();
-        dispatch(response, results);
+        return results;
+    }
+
+    @ApiParams({"one"})
+    public Object nothing(Object one) {
+        Object[] proof = new Object[3];
+        proof[0] = 2;
+        proof[1] = one;
+        proof[2] = 0;
+        return proof;
     }
     
 }

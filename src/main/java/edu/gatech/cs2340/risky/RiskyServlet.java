@@ -15,10 +15,6 @@ public abstract class RiskyServlet extends HttpServlet {
             return;
         }
         
-        if ("do".equals(getAction(request, 0))) {
-            
-        }
-        
         // delegate on operation parameter for plain ol' html forms
         String operation = (String) request.getParameter("operation");
         
@@ -59,11 +55,6 @@ public abstract class RiskyServlet extends HttpServlet {
         // seem innocuous when the following line could just be used everywhere this method is used
         // but if/when it comes time to move to many-session-to-one-lobby, migration *should* be easy
         return request.getSession().getId();
-    }
-    
-    protected String getDoMethodName(HttpServletRequest request) {
-        // from /do/stuff-is-cool to stuffIsCool
-        return "";
     }
     
     protected String getAction(HttpServletRequest request) {
