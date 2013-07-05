@@ -9,23 +9,18 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import edu.gatech.cs2340.risky.Util.Methods;
 import edu.gatech.cs2340.risky.Util.Objects;
 import edu.gatech.cs2340.risky.Util.Strings;
 import edu.gatech.cs2340.risky.api.Error;
-import edu.gatech.cs2340.risky.api.LobbyAdapter;
 import edu.gatech.cs2340.risky.api.annotations.ApiParams;
-import edu.gatech.cs2340.risky.models.Lobby;
 
 public abstract class ApiServlet extends RiskyServlet {
     
@@ -33,7 +28,7 @@ public abstract class ApiServlet extends RiskyServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             if ("do".equals(getAction(request, 0))) {
-                Object model = doAction(request, response);
+                Object model = doAction(request);
                 dispatch(response, model);
             } else {
                 super.service(request, response);
@@ -43,9 +38,10 @@ public abstract class ApiServlet extends RiskyServlet {
         }
     }
     
-    protected Object doAction(HttpServletRequest request, HttpServletResponse response) {
+    protected Object doAction(HttpServletRequest request) {
         Map<String, Object> givens = this.getParameterFieldMap(request);
         givens.putAll(this.getPayloadFieldMap(request));
+        
         String method = getDoMethodName(request);
         
         try {
@@ -71,42 +67,39 @@ public abstract class ApiServlet extends RiskyServlet {
                 throw new NoSuchMethodException("No method " + method + " with similar enough arguments");
             }
             
-            return call(best, givens);
+            return call(request, best, givens);
             
         } catch (NoSuchMethodException e) {
-            error(response, "404 " + ((e.getMessage() == null || e.getMessage().equals("") ? "Method Not Found" : e.getMessage())));
-            return null;
+            boolean hasMessage = e.getMessage() == null || e.getMessage().equals("");
+            String message = (!hasMessage) ? "Method Not Found" : e.getMessage();
+            return new Error("404 " + message, e, HttpServletResponse.SC_NOT_FOUND);
             
         } catch (IllegalAccessException e) {
-            error(response, "500 Illegal Access to method " + method + " on " + this.getClass().getSimpleName());
-            return null;
+            return new Error("500 Illegal Access to method " + method + " on " + this.getClass().getSimpleName(), e);
             
         } catch (InvocationTargetException e) {
-            error(response, "500 " + this.getClass().getSimpleName() + "." + method + " threw "
-                    + e.getTargetException().getClass().getName() + " with message " + e.getTargetException().getMessage());
-            return null;
+            Throwable thrown = e.getTargetException();
+            return new Error("500 " + this.getClass().getSimpleName() + "." + method + " threw " + thrown.getClass().getName() + ": " + thrown.getMessage(), e);
             
         } catch (Exception e) {
-            error(response, e.getMessage());
             logException(e);
-            return null;
+            return new Error(e.getMessage(), e);
         }
     }
     
-    protected Object call(Method method, Map<String, Object> params) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    protected Object call(HttpServletRequest request, Method method, Map<String, Object> params) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Object[] args = new Object[method.getParameterTypes().length];
+        args[0] = request;
         
-        Set<Map.Entry<String, Object>> entries = (Set<Map.Entry<String, Object>>) params.entrySet();
-            
-        System.out.println(entries.size() + " given parameters");
+        String[] names = method.getAnnotation(ApiParams.class).value();
+        Class[] types = method.getParameterTypes();
         
-        for (Map.Entry<String, Object> entry : entries) {
-            System.out.println(entry.getKey());
-        }
-        
-        String[] arguments = method.getAnnotation(ApiParams.class).value();
-        for (int i=0 ; i < args.length ; i++) {
-            args[i] = (i < arguments.length) ? params.get(arguments[i]) : null;
+        for (int i=1 ; i < args.length ; i++) {
+            if (i > names.length) {
+                args[i] = null;
+                continue;
+            }
+            args[i] = params.get(names[i - 1]);
         }
         
         return method.invoke(this, args);
@@ -144,7 +137,11 @@ public abstract class ApiServlet extends RiskyServlet {
     }
     
     protected Object getPayloadObject(HttpServletRequest request, Class objectClass) {
-        return new Gson().fromJson(this.getPayload(request), objectClass);
+        try {
+            return new ObjectMapper().readValue(this.getPayload(request), objectClass);
+        } catch (Exception e) {
+            return new Object();
+        }
     }
     
     protected Map<String, Object> getParameterFieldMap(HttpServletRequest request) {
@@ -183,11 +180,16 @@ public abstract class ApiServlet extends RiskyServlet {
     }
     
     protected void error(HttpServletResponse response, String error, Object culprit) {
-        dispatch(response, new Error(error, culprit));
+        error(response, new Error(error, culprit), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
     
     protected void error(HttpServletResponse response, String error) {
-        dispatch(response, new Error(error, null));
+        error(response, new Error(error, null), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+    
+    protected void error(HttpServletResponse response, Error error, int code) {
+        response.setStatus(code);
+        dispatch(response, error);
     }
     
     protected void dispatch(HttpServletResponse response, Object model) {
@@ -195,10 +197,10 @@ public abstract class ApiServlet extends RiskyServlet {
         response.setCharacterEncoding("UTF-8");
         
         try {
-            GsonBuilder gson = new GsonBuilder();
-            gson.registerTypeAdapter(Lobby.class, new LobbyAdapter());
+            ObjectMapper mapper = new ObjectMapper();
+            //gson.registerTypeAdapter(Lobby.class, new LobbyAdapter());
             
-            String responseText = (model != null) ? gson.create().toJson(model) : "{}";
+            String responseText = (model != null) ? mapper.writeValueAsString(model) : "null";
             response.getWriter().write(responseText);
             
         } catch (Exception e) {
@@ -220,35 +222,63 @@ public abstract class ApiServlet extends RiskyServlet {
      * Boilerplate method mapping, so the API is more CRUD-y
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        this.read(request, response);
+        Object output = null;
+        try {
+            output = this.getClass().getDeclaredMethod("read", HttpServletRequest.class).invoke(this, request);
+            dispatch(response, output);
+        } catch (Exception e) {
+            error(response, e.getMessage());
+            e.printStackTrace();
+        }
     }
     
-    protected void read(HttpServletRequest request, HttpServletResponse response) {
-        
+    public Object read(HttpServletRequest request) throws Exception {
+        return null;
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        this.create(request, response);
+        Object output = null;
+        try {
+            output = this.getClass().getDeclaredMethod("create", HttpServletRequest.class).invoke(this, request);
+            dispatch(response, output);
+        } catch (Exception e) {
+            error(response, e.getMessage());
+            e.printStackTrace();
+        }
     }
     
-    protected void create(HttpServletRequest request, HttpServletResponse response) {
-        
+    public Object create(HttpServletRequest request) throws Exception {
+        return null;
     }
     
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
-        this.update(request, response);
+        Object output = null;
+        try {
+            output = this.getClass().getDeclaredMethod("update", HttpServletRequest.class).invoke(this, request);
+            dispatch(response, output);
+        } catch (Exception e) {
+            error(response, e.getMessage());
+            e.printStackTrace();
+        }
     }
     
-    protected void update(HttpServletRequest request, HttpServletResponse response) {
-        
+    public Object update(HttpServletRequest request) throws Exception {
+        return null;
     }
     
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
-        this.delete(request, response);
+        Object output = null;
+        try {
+            output = this.getClass().getDeclaredMethod("delete", HttpServletRequest.class).invoke(this, request);
+            dispatch(response, output);
+        } catch (Exception e) {
+            error(response, e.getMessage(), e);
+            e.printStackTrace();
+        }
     }
     
-    protected void delete(HttpServletRequest request, HttpServletResponse response) {
-        
+    public Object delete(HttpServletRequest request) throws Exception {
+        return null;
     }
     
 

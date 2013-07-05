@@ -21,17 +21,16 @@ import edu.gatech.cs2340.risky.models.Player;
 public class TurnOrderServlet extends ApiServlet {
     
     @Override
-    protected void read(HttpServletRequest request, HttpServletResponse response) {
+    public Object read(HttpServletRequest request) throws Exception {
         Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         if (lobby == null) {
-            error(response, "No lobby to use");
-            return;
+            throw new Exception("No lobby to use");
         }
         
-        dispatch(response, lobby.turnOrder);
+        return lobby.turnOrder;
     }
     
-    protected synchronized void update(HttpServletRequest request, HttpServletResponse response) {
+    public synchronized Object update(HttpServletRequest request) throws Exception {
         ModelDb<Player> playerDb = Database.getDb(Player.class);
         
         Integer playerId = getId(request);
@@ -40,11 +39,9 @@ public class TurnOrderServlet extends ApiServlet {
         
         try {
             player.populateValidWith(givenPlayer);
-            dispatch(response, player);
-            return;
+            return player;
         } catch (Exception e) {
-            error(response, "Failed to update player", e);
-            return;
+            throw new Exception("Failed to update player");
         }
     }
     

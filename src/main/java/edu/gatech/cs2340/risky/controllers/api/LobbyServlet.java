@@ -15,7 +15,6 @@ import edu.gatech.cs2340.risky.models.Player;
 })
 public class LobbyServlet extends ApiServlet {
     
-    @Override
     protected boolean preDo(HttpServletRequest request, HttpServletResponse response) {
         Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         if (lobby == null) {
@@ -25,31 +24,30 @@ public class LobbyServlet extends ApiServlet {
         return true;
     }
     
-    protected void create(HttpServletRequest request, HttpServletResponse response) {
-        error(response, "Lobby must be created through /risky/lobby");
+    public Object create(HttpServletRequest request) throws Exception {
+        throw new Exception("Lobby must be created through /risky/lobby");
     }
     
-    protected void read(HttpServletRequest request, HttpServletResponse response) {
+    public Object read(HttpServletRequest request) {
         Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
-        dispatch(response, lobby);
+        return lobby;
     }
     
-    protected void update(HttpServletRequest request, HttpServletResponse response) {
+    public Object update(HttpServletRequest request) throws Exception {
         Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         Lobby givenLobby = (Lobby) getPayloadObject(request, Player.class);
         
         try {
             lobby.populateValidWith(givenLobby);
-            dispatch(response, lobby);
+            return lobby;
         } catch (Exception e) {
-            error(response, "Failed to update lobby", e);
-            return;
+            throw new Exception("Failed to update lobby");
         }
     }
     
-    protected void delete(HttpServletRequest request, HttpServletResponse response) {
+    public Object delete(HttpServletRequest request) {
         Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
-        dispatch(response, Database.delete(lobby));
+        return Database.delete(lobby);
     }
     
 }

@@ -23,38 +23,35 @@ import edu.gatech.cs2340.risky.models.Player;
 })
 public class PlayerServlet extends ApiServlet {
     
-    @Override
-    protected synchronized void create(HttpServletRequest request, HttpServletResponse response) {// R1
+    public synchronized Object create(HttpServletRequest request) throws Exception {// R1
         ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
         Player player = (Player) getPayloadObject(request, Player.class);
         
         Collection<Player> players = playerDb.query();
         if (players.size() >= 6) {
-            error(response, "Too many players");
-            return;
+            throw new Exception("Too many players");
         }
         for (Player opponent : players) {
             if (player.name.equalsIgnoreCase(opponent.name)) {
-                error(response, "Invalid player: Cannot have same name");
-                return;
+                throw new Exception("Invalid player: Cannot have same name");
             }
         }
         
         players.add(player);
-        dispatch(response, player);
+        return player;
     }
     
-    @Override
-    protected void read(HttpServletRequest request, HttpServletResponse response) {
-        ModelDb<Player> playerDb = Database.getDb(Player.class);
+    public Object read(HttpServletRequest request) {
+        ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
         
         try {
             Integer playerId = getId(request);
-            dispatch(response, playerDb.read(playerId));
+            return playerDb.read(playerId);
+            
         } catch (Exception e) {
             Collection<Player> results = playerDb.query();
             results = this.filterResults(results, (String) request.getParameter("filter"), (String) request.getParameter("arg"));
-            dispatch(response, results);
+            return results;
         }
     }
     
@@ -79,8 +76,8 @@ public class PlayerServlet extends ApiServlet {
         return filteredResult;
     }
     
-    protected synchronized void update(HttpServletRequest request, HttpServletResponse response) {
-        ModelDb<Player> playerDb = Database.getDb(Player.class);
+    public synchronized Object update(HttpServletRequest request) throws Exception {
+        ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
         
         Integer playerId = getId(request);
         Player givenPlayer = (Player) getPayloadObject(request, Player.class);
@@ -88,19 +85,18 @@ public class PlayerServlet extends ApiServlet {
         
         try {
             player.populateValidWith(givenPlayer);
-            dispatch(response, player);
-            return;
+            return player;
+            
         } catch (Exception e) {
-            error(response, "Failed to update player", e);
-            return;
+            throw new Exception("Failed to update player");
         }
     }
     
-    protected synchronized void delete(HttpServletRequest request, HttpServletResponse response) {
+    public synchronized Object delete(HttpServletRequest request) {
         ModelDb<Player> playerDb = Database.getDb(Player.class);
         int playerId = getId(request);
         Player p = playerDb.delete(playerId);
-        dispatch(response, p);
+        return p;
     }
     
     // example of what the /api/{model}/do/ calls will work like
@@ -111,12 +107,12 @@ public class PlayerServlet extends ApiServlet {
         return results;
     }
 
-    @ApiParams({"one"})
-    public Object nothing(Object one) {
+    @ApiParams({"one", "two"})
+    public Object[] nothing(HttpServletRequest request, Object one, Object two) throws Exception {
         Object[] proof = new Object[3];
-        proof[0] = 2;
+        proof[0] = 0;
         proof[1] = one;
-        proof[2] = 0;
+        proof[2] = two;
         return proof;
     }
     

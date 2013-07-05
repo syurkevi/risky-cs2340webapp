@@ -5,7 +5,6 @@ import java.util.UUID;
 public class Model {
     
     public Object id;
-    public Database db;
     
     public void populateValidWith(Model m) {
         
