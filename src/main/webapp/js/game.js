@@ -1,37 +1,45 @@
 risky.controller("GameController", function ($scope, Map, Lobby, Player) {
     
-    $scope.lobby = Lobby.get({});
+    $scope.lobby = Lobby.get();
+    //$scope.turnOrder = TurnOrder.get();
     
-    $scope.$watch("$scope.lobby.players", function () {
-        console.log($scope.lobby["players"]);
+    $scope.$watch("$scope.lobby", function () {
+        console.log($scope.lobby.players);
     }, true);
+    
+    function getCurrentPlayer() {
+        return Player.get({id: $scope.lobby.turnOrder.playerIndex});
+    }
+    
+    $scope.attack = function () {
+        getCurrentPlayer().attack(stephen, 3, 3);
+    };
     
     $scope.setState = function (newState) {
         $scope.state = newState;
         $scope.turnOwner = 0;
         $scope.currentAction = 0;
-        if ($scope.states[$scope.state].init) {
-            $scope.states[$scope.state].init();
-        }
-        if ($scope.states[$scope.state].actions[0].init) {
-            $scope.states[$scope.state].actions[0].init();
-        }
+        
+        var initState = $scope.states[$scope.state].init, initAction = $scope.states[$scope.state].actions[0].init;
+        
+        if (initState) initState();
+        if (initAction) initAction();
     };
     
-    $scope.nextTurn = function (forceful) {
+    $scope.nextTurn = function () {
+        
         if ($scope.turnOwner == $scope.players.length-1 && !forceful) {// if last player
-            if ($scope.states[$scope.state].deinit) {
-                $scope.states[$scope.state].deinit();// deinitialize the state
-            }
+            var deinitState = $scope.states[$scope.state].deinit;
+            if (deinitState) deinitState();// deinitialize the state
         } else {// otherwise
             $scope.turnOwner = ++$scope.turnOwner % $scope.players.length;// move to the next player
-            if ($scope.states[$scope.state].actions[$scope.currentAction].init) {
-                $scope.states[$scope.state].actions[$scope.currentAction = 0].init();// reset action and initialize
-            }
+            var initFirstAction = $scope.states[$scope.state].actions[$scope.currentAction = 0].init;
+            if (initFirstAction) initFirstAction();// reset action and initialize
         }
     };
     
     $scope.quitGame = function () {
+        $scope.players[$scope.lobby.turnOrder.playerIndex].playing = false;
         // send a call to remove the user from the lobby and set their playing = false;
         // get a new list of players
         // allocate their territories?

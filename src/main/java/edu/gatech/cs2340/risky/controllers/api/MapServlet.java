@@ -14,13 +14,13 @@ import edu.gatech.cs2340.risky.models.Map;
 })
 public class MapServlet extends ApiServlet {
     
-    protected void read(HttpServletRequest request, HttpServletResponse response) {
+    public Object read(HttpServletRequest request) {
         Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         Object map = null;
         if (lobby != null) {
             map = Database.getModel(Map.class, lobby.mapId);
         }
-        dispatch(response, map);
+        return map;
     }
     
 }

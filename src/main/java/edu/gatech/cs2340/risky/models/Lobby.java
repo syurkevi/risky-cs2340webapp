@@ -1,12 +1,6 @@
 package edu.gatech.cs2340.risky.models;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-
-import com.google.gson.JsonSerializer;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonElement;
 
 import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.Model;
@@ -57,16 +51,16 @@ public class Lobby extends Model {
     }
     
     public boolean hasEnoughPlayers() {
-        return this.players.size() > MIN_PLAYERS;
+        return this.players.size() >= MIN_PLAYERS;
     }
     
     public boolean hasTooManyPlayers() {
-        return this.players.size() > MAX_PLAYERS;
+        return this.players.size() >= MAX_PLAYERS;
     }
     
     public void allocateArmies() {
         for (Player player : this.getPlayers()) {
-            player.armies = this.calculateArmies(this.players.size());
+            player.allocateArmies(this.calculateArmies(this.players.size()));
         }
     }
     

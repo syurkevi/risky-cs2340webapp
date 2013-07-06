@@ -25,7 +25,7 @@ import edu.gatech.cs2340.risky.models.factories.MapFactory;
 public class GameServlet extends RiskyServlet {
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String action = getAction(request);
+        String action = getFinalAction(request);
         if (action.equalsIgnoreCase("start")) {
             startMatch(request, response);
         } else {

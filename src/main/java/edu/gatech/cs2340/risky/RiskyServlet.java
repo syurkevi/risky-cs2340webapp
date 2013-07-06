@@ -58,6 +58,26 @@ public abstract class RiskyServlet extends HttpServlet {
     }
     
     protected String getAction(HttpServletRequest request) {
+        return getAction(request, 0);
+    }
+    
+    protected String getAction(HttpServletRequest request, int index) {
+        String[] actions = getActions(request);
+        if (index >= actions.length) {
+            return null;
+        }
+        return actions[index];
+    }
+    
+    protected String[] getActions(HttpServletRequest request) {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo == null) {
+            return new String[0];
+        }
+        return pathInfo.substring(1).split("/");
+    }
+    
+    protected String getFinalAction(HttpServletRequest request) {
         String uri = request.getServletPath();
         return uri.substring(uri.lastIndexOf("/") + 1, uri.length());
     }
