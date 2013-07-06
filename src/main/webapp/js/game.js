@@ -3,7 +3,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.lobby = Lobby.get();
     $scope.turnOrder = TurnOrder.get();
     $scope.players = Player.query();
-    
     function getCurrentPlayer() {
         return $scope.players[$scope.turnOrder.playerIndex];
     }

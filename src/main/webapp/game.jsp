@@ -18,6 +18,7 @@
 </head>
 <body ng-controller="GameController">
     <h1>{{lobby.title}}</h1>
+    <div class="toasts" style="position: fixed; left: 32px; top: 32px; width: 196px; height: 256px; background-color: #FFF0EE; border-radius: 4px; border: 3px solid #CCC0BB; overflow: scroll;"><h2 style="text-align: center; text-decoration: underline; font-style: italics;">Toast!!!</h2><div id={{toast.id}} ng-repeat="toast in toasts" class="toast toast-{{toast.type}}">{{toast.message}}</div></div>
     <canvas id="map" width="800" height="500" ng-click="onMapClick($event)"></canvas>
     <div class="row-fluid">
         <div class="span2">
@@ -34,13 +35,6 @@
                 <h4>Select a territory</h4>
                 <div>We're picking out the land you want initially</div>
                 <div><a class="btn btn-primary btn-mini" ng-click="automateTerritorySelection()">Automate</a></div>
-            </div>
-        </div>
-        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'placearmies'" ng-class="action{{currentAction}}">
-            <div class="span3">
-                <h4>Place armies</h4>
-                <div>{{players[turnOrder.playerIndex].armiesAvailableThisTurn}} armies left</div>
-                <div><a class="btn btn-primary btn-mini" ng-click="automateArmySelection()">Automate</a></div>
             </div>
         </div>
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'play'" ng-class="action{{currentAction}}">

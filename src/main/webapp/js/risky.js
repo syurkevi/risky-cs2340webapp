@@ -9,13 +9,17 @@ risky.service("Toast", function ($rootScope) {
             id = undefined;
         }
         
-        // TODO: inject a <div id="{{id}}" class="toast toast-{{type}}">{{message}}</div> into <div class="toasts"></div>
-        
         var type = (type === "error") ? "error" : "log";
         console[type](message);
         
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
-        alert(message);// remove once that TODO is TODONE
+        var toasts={};
+        toasts.id=id;
+        toasts.type=type;
+        toasts.message=message;
+        if(!$rootScope.toasts)
+            $rootScope.toasts=[];
+        $rootScope.toasts.push(toasts);
     }
     this.notify = function (id, message) {
         this.send(id, "notice", message);
