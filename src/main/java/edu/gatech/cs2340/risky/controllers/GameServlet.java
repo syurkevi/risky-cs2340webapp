@@ -29,7 +29,9 @@ public class GameServlet extends RiskyServlet {
         if (action.equalsIgnoreCase("start")) {
             startMatch(request, response);
         } else {
-            if (!this.requireLobby(request, response)) {
+            Lobby lobby = Lobby.get(request);
+            if (!lobby.isReadyToPlay()) {
+                response.sendRedirect("/risky/lobby");
                 return;
             }
             
@@ -39,11 +41,9 @@ public class GameServlet extends RiskyServlet {
     }
     
     protected void startMatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
+        Lobby lobby = Lobby.get(request);
         
-        this.requireLobby(request, response);
-        
-        ModelDb<Player> playerDb = Database.getDb(Player.class);
+        ModelDb<Player> playerDb = Player.getDb();
         for (Player candidate : playerDb.query()) {
             if (candidate.playing == false) {
                 candidate.playing = true;
@@ -52,24 +52,19 @@ public class GameServlet extends RiskyServlet {
         }
         
         if (!lobby.isReadyToPlay()) {
-            response.sendRedirect("/risky/lobby/");
+            response.sendRedirect("/risky/lobby");
             return;
         }
         
         lobby.turnOrder.shuffleOrder();// R2
         lobby.allocateArmies();// R3
-        response.sendRedirect("/risky/game");
-    }
-    
-    protected boolean requireLobby(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
         
-        if (lobby == null) {
+        if (!lobby.isReadyToPlay()) {
             response.sendRedirect("/risky/lobby");
-            return false;
+            return;
         }
         
-        return true;
+        response.sendRedirect("/risky/game");
     }
 
 }

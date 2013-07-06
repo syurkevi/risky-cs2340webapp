@@ -13,28 +13,19 @@ import edu.gatech.cs2340.risky.models.Player;
     "/api/lobby",
     "/api/lobby/*"
 })
-public class LobbyServlet extends ApiServlet {
-    
-    protected boolean preDo(HttpServletRequest request, HttpServletResponse response) {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
-        if (lobby == null) {
-            error(response, "Made new lobby");
-            return false;
-        }
-        return true;
-    }
+public class LobbyController extends ApiServlet {
     
     public Object create(HttpServletRequest request) throws Exception {
         throw new Exception("Lobby must be created through /risky/lobby");
     }
     
     public Object read(HttpServletRequest request) {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
+        Lobby lobby = Lobby.get(request);
         return lobby;
     }
     
     public Object update(HttpServletRequest request) throws Exception {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
+        Lobby lobby = Lobby.get(request);
         Lobby givenLobby = (Lobby) getPayloadObject(request, Player.class);
         
         try {
@@ -46,7 +37,10 @@ public class LobbyServlet extends ApiServlet {
     }
     
     public Object delete(HttpServletRequest request) {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
+        Lobby lobby = Lobby.get(request);
+        for (Player player : lobby.getPlayers()) {
+            player.playing = false;// release players from lobby
+        }
         return Database.delete(lobby);
     }
     

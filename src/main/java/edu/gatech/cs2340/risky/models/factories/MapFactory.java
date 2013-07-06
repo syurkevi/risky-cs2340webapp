@@ -8,10 +8,15 @@ import edu.gatech.cs2340.risky.models.Territory;
 
 public class MapFactory {
     
-    public static Object get(int i) {// we only have one map for now, but multiple could be cool
-        Map m = new Map();
-        m.id = i;
-        int[][][] vertexeses = {
+    public static Object get(Object id) {// we only have one map for now, but multiple could be cool
+        Map m = Database.getModel(Map.class, id, new HashMapDbImpl<Map>());
+        if (m != null) {
+            return m;
+        }
+        
+        m = new Map();
+        m.id = id;
+        Integer[][][] vertexeses = {
             {{4, 4}, {16, 4}, {12, 20}, {6, 18}},
             {{16, 4}, {14, 12}, {20, 18}, {24, 10}},
             {{20, 7}, {28, 6}, {26, 18}, {20, 18}, {24, 10}},
@@ -37,14 +42,13 @@ public class MapFactory {
             {{16, 42}, {4, 40}, {2, 30}, {11, 32}},
             {{32, 26}, {36, 24}, {38, 22}, {40, 24}, {37, 27}, {33, 27}}
         };
-        for (int[][] vertexes : vertexeses) {
+        for (Integer[][] vertexes : vertexeses) {
             m.addTerritory(new Territory(vertexes));
         }
         
-        ModelDb<Map> mapDb = Database.getDb(Map.class, new HashMapDbImpl<Map>());
-        mapDb.create(m);
+        Database.setModel(m);
         
-        return m.id;
+        return m;
     }
     
 }

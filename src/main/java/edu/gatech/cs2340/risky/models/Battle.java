@@ -4,16 +4,16 @@ import edu.gatech.cs2340.risky.Model;
 
 public class Battle extends Model {
     
-    private Object attackingTerritory;
+    private String attackingTerritory;
     private int attackingDie;
-    private Object defendingTerritory;
+    private String defendingTerritory;
     private int defendingDie;
     
     public Battle() {
         
     }
     
-    public Battle(Object fromTerritory, Object toTerritory, int attackingDie, int defendingDie) {
+    public Battle(String fromTerritory, String toTerritory, int attackingDie, int defendingDie) {
         this.attackingTerritory = fromTerritory;
         this.defendingTerritory = toTerritory;
         this.attackingDie = attackingDie;
