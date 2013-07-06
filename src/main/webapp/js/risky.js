@@ -1,36 +1,60 @@
-var risky = angular.module('risky', []);
-risky.service('asynchttp', function ($q,$http) {
-    this.get = function(key) { //TODO: Error handling
-        if(key==null){
-            console.error("No key for http request to get");
-            return null;
+var risky = angular.module("risky", ["ngResource"]);
+risky.service("Toast", function ($rootScope) {
+    this.send = function (id, type, message) {
+        if (arguments.length < 2) {
+            return;
+        } else if (message === undefined) {
+            message = id;
+            id = undefined;
         }
-        var deferred = $q.defer();
-        if(key=="players"){
-            $http({"method":'GET',"url":"../game","params":{"info":"name"}}).then(function(r){
-                deferred.resolve(angular.fromJson(r.data).players);
-            });
+        // inject a <div id="{{id}}" class="toast toast-{{type}}">{{message}}</div> into <div class="toasts"></div>
+        if (type === "error") {
+            console.error(message);
+        } else {
+            console.log(message);
         }
-        if(key=="map") {
-            $http({"method":'GET',"url":"../js/map.json"}).then(function(r){
-                polygons=angular.fromJson(r.data).map;
-                deferred.resolve(polygons);
-            });
-        }
-        if(key=="turn") {
-            $http({"method":'GET',"url":"../js/map.json"}).then(function(r){
-                polygons=angular.fromJson(r.data).map;
-                deferred.resolve(polygons);
-            });
-        }
-        return deferred.promise;
+        
+        alert(message);
     }
-    this.set = function(data){
-        //TODO: will be sending data to servlet after every turn
-    }
+    this.notify = function (id, message) {
+        this.send(id, "notice", message);
+    };
+    this.error = function (id, message) {
+        this.send(id, "error", message);
+    };
+    
+}).directive("swatch", function ($timeout) {
+    return {
+        restrict: "E",
+        replace: true,
+        template: "<span class=\"color-swatch\"></span>",
+        link: function ($scope, $element, $attrs) {
+            $scope.$watch($attrs.color, function () {
+                $element.css("backgroundColor", $attrs.color);
+            });
+        }
+    };
+    
+}).factory("Map", function ($resource) {
+    return $resource("/risky/api/map");
+    
+}).factory("Player", function ($resource) {
+    return $resource("/risky/api/player/:id", {
+        id: "@id"
+    }, {
+        "update": {method: "PUT"},
+        "do": {method: "PUT", action: "nothing"}
+    });
+    
+}).factory("Lobby", function ($resource) {
+    return $resource("/risky/api/lobby/:id", {
+        id: "@id"
+    }, {
+        "update": {method: "PUT"}
+    });
 });
 
-risky.filter("iif", function () {// fake ternary operator in {{}}'d things
+risky.filter("iif", function () {// ternary operator for {{}}'d things
     return function(input, trueValue, falseValue) {
         return input ? trueValue : falseValue;
     };
@@ -43,41 +67,67 @@ Array.prototype.remove = function(from, to) {
     return this.push.apply(this, rest);
 };
 
-function Map(canvas, polygons_promise, config) {
+function generateRandomColor() {
+    return "#"+Math.floor(Math.random()*16777215).toString(16);
+}
+
+function pointInPoly(point, polygon) {
+    var i, j, c = false, vertexes = polygon.vertexes;
+    for (i = 0, j = vertexes.length - 1; i < vertexes.length; j = i++) {
+        if (((vertexes[i][1] > point[1]) != (vertexes[j][1] > point[1])) && (point[0] < (vertexes[j][0] - vertexes[i][0]) * (point[1] - vertexes[i][1]) / (vertexes[j][1] - vertexes[i][1]) + vertexes[i][0])) {
+            c = !c;
+        }
+    }
+    return c;
+}
+
+function CanvasMap(canvas, map, players, config) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
-    this.polygons = polygons_promise; // Only a promise, not the actual polygons object
+    this.territories = map.territories;
+    this.players = players;
     this.config = {
         "scale": config.scale || 10
     };
 }
 
-Map.prototype.labelPolygon = function (polygon, label) { // Do not call this without knowing you have the actual polygon, not just a promise
-    //hackish?
-    var xa=[],ya=[],x=0,y=0;
-    for(var i=0; i<polygon.vertexes.length; i++){
-        xa.push(polygon.vertexes[i][0]);
-        ya.push(polygon.vertexes[i][1]);
+CanvasMap.prototype.labelTerritory = function (territory, player) {
+    var text = "";
+    if (player) {
+        text = (player.territories[territory.id]) ? player.territories[territory.id].armies : player.name;
     }
-    xa.sort(function(a,b){return a-b});
-    ya.sort(function(a,b){return a-b});
-    x=(xa[xa.length-1]*this.config.scale+xa[0]*this.config.scale)/2;
-    y=(ya[ya.length-1]*this.config.scale+ya[0]*this.config.scale)/2;
-    this.context.fillStyle = "#000"
-    this.context.fillText(label,x,y);
+    
+    var x = 0;
+    var y = 0;
+    
+    for (var i=0 ; i < territory.vertexes.length ; i++) {
+        x += territory.vertexes[i][0];
+        y += territory.vertexes[i][1];
+    }
+    x *= this.config.scale / territory.vertexes.length;
+    y *= this.config.scale / territory.vertexes.length;
+    
+    var textSize = this.context.measureText(text);
+    
+    x -= textSize.width/2;// center horizontally
+    x = Math.min(this.canvas.width-5, Math.max(x, 0));// keep it within the canvas bounds
+    y = Math.min(this.canvas.height-5, Math.max(y, 10));
+    
+    this.context.fillStyle = "#333";// dark grey drop-shadow
+    this.context.fillText(text, x+0.5, y+0.5);
+    
+    this.context.fillStyle = "#fff";// white text
+    this.context.fillText(text, x, y);
 };
 
-/*Map.prototype.inPolygon = function (polygon,x,y) { //TODO: Merge with Johnathan's functions
-};*/
-
-Map.prototype.drawPolygon = function (polygon,fillcolor,label) { // Make sure this is a polygon, not a promise
-    this.context.fillStyle = fillcolor; //(polygon.owner) ? polygon.owner.color : "#ddd"; //TODO: Owner now defined in player object
+CanvasMap.prototype.drawTerritory = function (territory, player) {
+    this.context.fillStyle = (player) ? player.color : "#ddd";
     this.context.beginPath();
     
-    this.context.moveTo(polygon.vertexes[0][0]*this.config.scale - 0.5, polygon.vertexes[0][1]*this.config.scale - 0.5);
+    this.context.moveTo(territory.vertexes[0][0]*this.config.scale - 0.5, territory.vertexes[0][1]*this.config.scale - 0.5);
     
-    for (var j=1 ; j < polygon.vertexes.length ; j++) {
-        this.context.lineTo(polygon.vertexes[j][0]*this.config.scale - 0.5, polygon.vertexes[j][1]*this.config.scale - 0.5);
+    for (var j=1 ; j < territory.vertexes.length ; j++) {;
+        this.context.lineTo(territory.vertexes[j][0]*this.config.scale - 0.5, territory.vertexes[j][1]*this.config.scale - 0.5);
     }
     
     this.context.closePath();// pretends to "context.moveTo(first vertex)"
@@ -85,34 +135,45 @@ Map.prototype.drawPolygon = function (polygon,fillcolor,label) { // Make sure th
     
     this.context.stroke();// commit the strokes to the canvas
     
-    this.labelPolygon(polygon,label);
+    this.labelTerritory(territory, player);
 };
 
-Map.prototype.draw = function (turn) { // Perhaps add territory data (player[x].territories) and map data as an argument?
-    this.canvas.width = this.canvas.width; // Clears the canvas
+CanvasMap.prototype.draw = function () {
+    this.canvas.width = this.canvas.width;// clears the canvas
     this.context.strokeStyle = "#333";
-    var that=this,pcolor=[["#23C","#E4DDFF"],["#2C3","#E4FFDD"],["#C23","#FFDDE4"],["#C2C","#FFDDFF"],["#CC3","#FFFFDD"],["#777","#DDD"]]; //0=selected;1=unselected
-    //TODO: pcolor to $scope?
-
-    this.polygons.then(function(ret_polygons) { // Might want to change from promise(s) to something more concrete
-        players_promise.then(function(ret_players) {
-            for(var i=0; i<ret_polygons.length; i++) {
-                for(var j=0; j<ret_players.length; j++) {
-                    for(var k=0; k<ret_players[j].territories.length; k++) {
-                        if(i===ret_players[j].territories[k].id) {
-                            that.drawPolygon(ret_polygons[i],((turn===j)?pcolor[j][0]:pcolor[j][1]),ret_players[j].territories[k].armies);
-                          // Map.drawPolygon(polygon        ,color                                 ,label                               );
-                        }
-                    }
-                }
-            }
-            return;
-        });
-        for(var i=0; i<ret_polygons.length; i++) { // Draw blank map if map object exists but no territory data
-            that.drawPolygon(ret_polygons[i],"#d2e0d2","");
+    
+    var territoryOwnershipMap = {};// territoryId -> player
+    
+    for (var i=0 ; i < this.players.length ; i++) {
+        var player = this.players[i];
+        for (var j=0 ; j < player.territories.length ; j++) {
+            var territory = player.territories[j];
+            territoryOwnershipMap[territory.id] = player;
         }
-        //console.info("No player data received. Drawing raw map.");
-        return;
-    });
-    //console.warn("No map data received. Not drawing.");
+    }
+    
+    if (!this.territories) return;
+    for (var i=0 ; i < this.territories.length ; i++) {
+        var territory = this.territories[i];
+        this.drawTerritory(territory, territoryOwnershipMap[territory.id]);
+    }
+};
+
+CanvasMap.prototype.toMapPoint = function (point) {
+    return [(point[0]-this.canvas.offsetLeft)/this.config.scale, (point[1]-this.canvas.offsetTop)/this.config.scale];
+};
+
+CanvasMap.prototype.getTerritoryAt = function (point) {
+    for (var i=0 ; i < this.polygons.length ; i++) {
+        if (pointInPoly(point, this.polygons[i])) {
+            return this.polygons[i];
+        }
+    }
+};
+
+CanvasMap.prototype.allTerritoriesOwned = function () {
+    for (var i=0 ; i < this.polygons.length ; i++) {
+        if (!this.polygons[i].owner) return false;
+    }
+    return true;
 };

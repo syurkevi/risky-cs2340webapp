@@ -19,6 +19,9 @@ body {
 .row-fluid .no-left-gutter {
     margin-left: 0;}
 
+.row-fluid [class*="span"] > *:first-child {
+    margin-top: 0;}
+
 .right-align {
     text-align: right;}
 
@@ -26,4 +29,4 @@ body {
     text-align: left;}
 
 .action-bar {
-	font-size: 85%;}
+    font-size: 85%;}
