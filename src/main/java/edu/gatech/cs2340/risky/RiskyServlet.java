@@ -38,20 +38,16 @@ public abstract class RiskyServlet extends HttpServlet {
         return true;
     }
 
-    protected int getId(HttpServletRequest request) {
+    public static int getId(HttpServletRequest request) throws Exception {
         String uri = request.getPathInfo();
-        if (uri.equals("")) {
-            return -1;
+        if (uri == null || "".equals(uri)) {
+            throw new Exception("Invalid getId");
         }
         String idStr = uri.substring(1, uri.length());// Strip off the leading slash, e.g. "/2" becomes "2"
-        try {
-            return Integer.parseInt(idStr);
-        } catch (Exception e) {
-            return -1;
-        }
+        return Integer.parseInt(idStr);
     }
     
-    protected String getSessionId(HttpServletRequest request) {
+    public static String getSessionId(HttpServletRequest request) {
         // seem innocuous when the following line could just be used everywhere this method is used
         // but if/when it comes time to move to many-session-to-one-lobby, migration *should* be easy
         return request.getSession().getId();

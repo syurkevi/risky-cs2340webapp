@@ -14,28 +14,28 @@
     <div class="row-fluid">
         <div class="span2">
             <ul class="nav nav-pills nav-stacked">
-                <li ng-repeat="player in lobby.players">
+                <li ng-repeat="player in players">
                     <swatch color="{{player.color}}"></swatch>
-                    <span ng-class="$index == turnOwner | iif : 'label' : ''">{{player.name}}</span>
+                    <span ng-class="$index == turnOrder.playerIndex | iif : 'label' : ''">{{player.name}}</span>
                     <small>{{player.armiesAvailableThisTurn}}</small>
                 </li>
             </ul>
         </div>
-        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="state == 'setup'" ng-class="action{{currentAction}}">
+        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'setup'" ng-class="action{{currentAction}}">
             <div class="span3">
                 <h4>Select a territory</h4>
                 <div>We're picking out the land you want initially</div>
                 <div><a class="btn btn-primary btn-mini" ng-click="automateTerritorySelection()">Automate</a></div>
             </div>
         </div>
-        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="state == 'placearmies'" ng-class="action{{currentAction}}">
+        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'placearmies'" ng-class="action{{currentAction}}">
             <div class="span3">
                 <h4>Place armies</h4>
-                <div>{{players[turnOwner].armies.availableThisTurn}} armies left</div>
+                <div>{{players[turnOrder.playerIndex].armiesAvailableThisTurn}} armies left</div>
                 <div><a class="btn btn-primary btn-mini" ng-click="automateArmySelection()">Automate</a></div>
             </div>
         </div>
-        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="state == 'play'" ng-class="action{{currentAction}}">
+        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'play'" ng-class="action{{currentAction}}">
             <div class="span3">
                 <h4>Place armies</h4>
                 <div>Click territories to place an army</div>
@@ -55,7 +55,12 @@
                 <h4>End turn</h4>
                 <div>Call it quits already</div>
                 <a class="btn btn-primary btn-mini" ng-click="nextTurn()">End</a>
-                <a class="btn btn-primary btn-mini" ng-click="quitGame()">Quit Game</a>
+                <a class="btn btn-primary btn-mini" ng-click="player[turnOrder.playerIndex].$quit()">Quit Game</a>
+            </div>
+        </div>
+        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'gameover'" ng-class="action{{currentAction}}">
+            <div class="span12">
+                <h4>A WinRAR is you!</h4>
             </div>
         </div>
     </div>

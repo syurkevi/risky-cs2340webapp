@@ -4,9 +4,11 @@ import edu.gatech.cs2340.risky.Model;
 
 public class TerritoryDeed extends Model {
     public int armies;
-    public Player player;
+    public Object playerId;
+    private static int instanceCount = 0;
     
-    public TerritoryDeed(Player player) {
-        this.player = player;
+    public TerritoryDeed(Object playerId) {
+        this.id = this.instanceCount++;
+        this.playerId = playerId;
     }
 }

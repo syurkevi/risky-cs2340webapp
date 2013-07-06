@@ -2,25 +2,24 @@ package edu.gatech.cs2340.risky.controllers.api;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import edu.gatech.cs2340.risky.ApiServlet;
 import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.models.Lobby;
 import edu.gatech.cs2340.risky.models.Map;
+import edu.gatech.cs2340.risky.models.factories.MapFactory;
 
 @WebServlet(urlPatterns = {
     "/api/map"
 })
-public class MapServlet extends ApiServlet {
+public class MapController extends ApiServlet {
     
-    public Object read(HttpServletRequest request) {
-        Lobby lobby = Database.getModel(Lobby.class, this.getSessionId(request));
-        Object map = null;
+    public Object read(HttpServletRequest request) throws Exception {
+        Lobby lobby = Lobby.get(request);
         if (lobby != null) {
-            map = Database.getModel(Map.class, lobby.mapId);
+            return MapFactory.get(lobby.mapId);
         }
-        return map;
+        throw new Exception("No lobby");
     }
     
 }

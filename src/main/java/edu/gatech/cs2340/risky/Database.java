@@ -1,19 +1,36 @@
 package edu.gatech.cs2340.risky;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+
 import edu.gatech.cs2340.risky.database.ModelDb;
 
-public class Database {
+@WebListener("Load database before servlet request come in")
+public class Database implements ServletContextListener {
     
-    protected static HashMap<String, ModelDb> databases = new HashMap<String, ModelDb>();
+    protected static ServletContext context;
+    public static HashMap<String, ModelDb> databases = init();
+    
+    private static HashMap<String, ModelDb> init() {
+        if (context == null) {
+            return null;
+        }
+        
+        if (Database.databases == null) {
+            context.setAttribute("databases", new HashMap<String, ModelDb>());
+        }
+        
+        return (HashMap<String, ModelDb>) context.getAttribute("databases");
+    }
     
     public static <T extends Model> ModelDb<T> getDb(Class c) {
         return Database.getDb(c, null);
     }
-    
+
     public static <T extends Model> ModelDb<T> getDb(Class c, ModelDb<T> defaultDatabase) {
         ModelDb database = Database.databases.get(c.getName());
         if (database == null && defaultDatabase != null) {
@@ -56,6 +73,17 @@ public class Database {
         }
         database.delete(model);
         return true;
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        
+    }
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        Database.context = sce.getServletContext();
+        Database.databases = init();
     }
     
 }

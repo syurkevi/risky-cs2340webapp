@@ -27,22 +27,26 @@ public abstract class ApiServlet extends RiskyServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
-            if ("do".equals(getAction(request, 0))) {
-                Object model = doAction(request);
-                dispatch(response, model);
+            if (request.getParameter("action") != null) {
+                doAction(request, response);
             } else {
                 super.service(request, response);
             }
         } catch (Exception e) {
+            handleException(response, e);
             log("Exception in calling RiskyServlet.service()", e);
         }
     }
     
-    protected Object doAction(HttpServletRequest request) {
+    protected void doAction(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> givens = this.getParameterFieldMap(request);
-        givens.putAll(this.getPayloadFieldMap(request));
+        String method = givens.remove("action").toString();
+        //givens.remove("action");
+        //givens.putAll(this.getPayloadFieldMap(request));
         
-        String method = getDoMethodName(request);
+        //String method = getDoMethodName(request);
+        
+        Object model;
         
         try {
             Method[] options = Objects.getMethodsByName(this.getClass(), method);
@@ -67,24 +71,31 @@ public abstract class ApiServlet extends RiskyServlet {
                 throw new NoSuchMethodException("No method " + method + " with similar enough arguments");
             }
             
-            return call(request, best, givens);
+            model = call(request, best, givens);
             
         } catch (NoSuchMethodException e) {
             boolean hasMessage = e.getMessage() == null || e.getMessage().equals("");
             String message = (!hasMessage) ? "Method Not Found" : e.getMessage();
-            return new Error("404 " + message, e, HttpServletResponse.SC_NOT_FOUND);
+            model = new Error("404 " + message, e, HttpServletResponse.SC_NOT_FOUND);
             
         } catch (IllegalAccessException e) {
-            return new Error("500 Illegal Access to method " + method + " on " + this.getClass().getSimpleName(), e);
+            model = new Error("500 Illegal Access to method " + method + " on " + this.getClass().getSimpleName(), e);
             
         } catch (InvocationTargetException e) {
             Throwable thrown = e.getTargetException();
-            return new Error("500 " + this.getClass().getSimpleName() + "." + method + " threw " + thrown.getClass().getName() + ": " + thrown.getMessage(), e);
-            
+            //model = new Error("500 " +
+            //this.getClass().getSimpleName() +
+            //"." + method + " threw " +
+            //thrown.getClass().getName() + 
+            //": ",// + thrown.getMessage(),
+            //e);
+            model = e;
         } catch (Exception e) {
             logException(e);
-            return new Error(e.getMessage(), e);
+            model = new Error(e.getMessage(), e);
         }
+        
+        dispatch(response, model);
     }
     
     protected Object call(HttpServletRequest request, Method method, Map<String, Object> params) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -175,26 +186,17 @@ public abstract class ApiServlet extends RiskyServlet {
         return fieldMap;
     }
     
-    protected void warn(HttpServletResponse response, String warning) {
-        //this.warnings.add(warning);
-    }
-    
-    protected void error(HttpServletResponse response, String error, Object culprit) {
-        error(response, new Error(error, culprit), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-    
-    protected void error(HttpServletResponse response, String error) {
-        error(response, new Error(error, null), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-    
-    protected void error(HttpServletResponse response, Error error, int code) {
-        response.setStatus(code);
-        dispatch(response, error);
-    }
-    
     protected void dispatch(HttpServletResponse response, Object model) {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        
+        if (model == null) {
+            // ensure model is not null in else ifs below
+        } else if (model.getClass().equals(Error.class)) {
+            response.setStatus(((Error) model).code);
+        } else if (model.getClass().getName().contains("Exception")) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
         
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -210,11 +212,10 @@ public abstract class ApiServlet extends RiskyServlet {
     }
     
     protected String getDoMethodName(HttpServletRequest request) {
-        // from /do/stuff-is-cool to stuffIsCool
         String action = getAction(request, 1);
         if (action == null) {
             return null;
-        }
+        }// from /do/stuff-is-cool to stuffIsCool
         return Strings.dashedToCamel(action);
     }
     
@@ -227,8 +228,7 @@ public abstract class ApiServlet extends RiskyServlet {
             output = this.getClass().getDeclaredMethod("read", HttpServletRequest.class).invoke(this, request);
             dispatch(response, output);
         } catch (Exception e) {
-            error(response, e.getMessage());
-            e.printStackTrace();
+            handleException(response, e);
         }
     }
     
@@ -242,8 +242,7 @@ public abstract class ApiServlet extends RiskyServlet {
             output = this.getClass().getDeclaredMethod("create", HttpServletRequest.class).invoke(this, request);
             dispatch(response, output);
         } catch (Exception e) {
-            error(response, e.getMessage());
-            e.printStackTrace();
+            handleException(response, e);
         }
     }
     
@@ -257,8 +256,7 @@ public abstract class ApiServlet extends RiskyServlet {
             output = this.getClass().getDeclaredMethod("update", HttpServletRequest.class).invoke(this, request);
             dispatch(response, output);
         } catch (Exception e) {
-            error(response, e.getMessage());
-            e.printStackTrace();
+            handleException(response, e);
         }
     }
     
@@ -272,13 +270,18 @@ public abstract class ApiServlet extends RiskyServlet {
             output = this.getClass().getDeclaredMethod("delete", HttpServletRequest.class).invoke(this, request);
             dispatch(response, output);
         } catch (Exception e) {
-            error(response, e.getMessage(), e);
-            e.printStackTrace();
+            handleException(response, e);
         }
     }
     
     public Object delete(HttpServletRequest request) throws Exception {
         return null;
+    }
+    
+    protected void handleException(HttpServletResponse response, Throwable e) {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        dispatch(response, e);
+        e.printStackTrace();
     }
     
 
