@@ -3,6 +3,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.lobby = Lobby.get();
     $scope.turnOrder = TurnOrder.get();
     $scope.players = Player.query();
+    $scope.map = Map.get();
     
     function getCurrentPlayer() {
         return $scope.players[$scope.turnOrder.playerIndex];
@@ -31,12 +32,10 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     
-                    var d = $q.defer();
                     getCurrentPlayer().$fortify({
                         to: territory.id,
                         armies: 4
-                    }, d.resolve, d.reject);
-                    return d.promise;
+                    }, resolve, reject);
                 }
             }
         },
@@ -55,8 +54,8 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             }, 
             1: {// attack
                 "data": {},
-                "mapClick": function (e) {
-                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageU]));
+                "mapClick": function (resolve, reject, e) {
+                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     if (!data.attacking) {
                         data.attacking = territory.id;
                         
@@ -71,12 +70,10 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         
                     } else {
                         // send attack
-                        var d = $q.defer();
                         getCurrentPlayer().$attack({
                             to: territory.id,
                             armies: 4
-                        }, d.resolve, d.reject);
-                        return d.promise;
+                        }, resolve, reject);
                     }
                 }
             }, 
@@ -109,41 +106,47 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
         });
     };
     
+    $scope.onMapClick = function (e) {
+        var d = $q.defer();
+        try {
+            d.resolve($scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick(e));
+        } catch (e) {
+            d.reject(e);
+        }
+        
+        var a;
+        
+        d.promise.then(function () {
+            var p = $q.defer();
+            a = new Date().getTime();
+            $scope.players = Player.query({}, p.resolve, p.reject);
+            return p.promise;
+            
+        }).then(function (data) {
+            console.log(new Date().getTime() - a);
+            console.log($scope.players[0].territories);
+            map.draw($scope.players);
+            nextAction();
+            
+        }, function (error) {
+            console.log(3);
+            Toast.error(error);
+        });
+    }
+    
     
     var map;
     $scope.map = Map.get({}, function () {
         $scope.players = Player.query({}, function () {
             map = new CanvasMap(document.getElementById("map"), $scope.map, $scope.players, {});
-            map.draw();
         });
     });
     
-    $scope.onMapClick = function (e) {
-        handleAction($scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick, [e]);
-    };
-    
-    function handleAction(func, params) {
-        var d = $q.defer();
-        try {
-            d.resolve(func.apply(null, params));
-        } catch (e) {
-            d.reject(e);
-        }
-        
-        d.promise.then(function () {
-            $scope.players = Player.query();
-            
-        }).then(function (data) {
-            map.draw();console.log("hey");// TODO update map after automation actions
-            nextAction();console.log("hey2");
-            
-        }, function (error) {
-            Toast.error(error);
-        });
-    }
-    
     $scope.$watch("players", function () {
-        if (map) map.draw();
+        if (map) {
+            console.log("redraw");
+            map.draw($scope.players);
+        }
     }, true);
     
 });
