@@ -8,25 +8,20 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     }
     
     function nextAction() {
-        $scope.turnOrder.$nextAction();
+        $scope.turnOrder.$nextAction({}, function () {}, Toast.error);
     }
     
     $scope.states = {
         "setup": {
             0: {// seize territory
                 "mapClick": function (e) {
-                    var deferred = $q.defer();
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                    if (!territory) deferred.reject("Invalid territory"); // TODO alert user of invalid territory
                     
+                    var d = $q.defer();
                     getCurrentPlayer().$seize({
                         "territory": territory.id
-                    }, function (data) {
-                        deferred.resolve(data);
-                    }, function (error) {
-                        deferred.reject(error);
-                    });
-                    return deferred.promise;
+                    }, d.resolve, d.reject);
+                    return d.promise;
                 }
             }
         },
@@ -34,12 +29,13 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             0: {// place army
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                    if (!territory) return; // alert user of invalid territory
                     
+                    var d = $q.defer();
                     getCurrentPlayer().$fortify({
                         to: territory.id,
-                        armies: 5
-                    });
+                        armies: 4
+                    }, d.resolve, d.reject);
+                    return d.promise;
                 }
             }
         },
@@ -47,17 +43,40 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             0: {// place armies
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                    if (!territory) return;
                     
+                    var d = $q.defer();
                     getCurrentPlayer().$fortify({
                         to: territory.id,
-                        armies: 5
-                    });
+                        armies: 4
+                    }, d.resolve, d.reject);
+                    return d.promise;
                 }
             }, 
             1: {// attack
+                "data": {},
                 "mapClick": function (e) {
-                    
+                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageU]));
+                    if (!data.attacking) {
+                        data.attacking = territory.id;
+                        
+                    } else if (!data.defending) {
+                        data.defending = territory.id;
+                        
+                    } else if (!data.attackingDie) {
+                        data.attackingDie = 0;// get number from alert?
+                        
+                    } else if (!data.defendingDie) {
+                        data.defendingDie = 0;
+                        
+                    } else {
+                        // send attack
+                        var d = $q.defer();
+                        getCurrentPlayer().$attack({
+                            to: territory.id,
+                            armies: 4
+                        }, d.resolve, d.reject);
+                        return d.promise;
+                    }
                 }
             }, 
             2: {// fortify
@@ -82,12 +101,38 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
         });
     });
     
-    $scope.automateTerritorySelection = function () {
-        for (var i=0 ; i < map.polygons.length ; i++) {
-            map.polygons[i].owner = $scope.players[i % $scope.players.length];
+    $scope.onMapClick = function (e) {
+        var d = $q.defer();
+        try {
+            d.resolve($scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick(e));
+        } catch (e) {
+            d.reject(e);
         }
-        map.draw();
-        $scope.states.setup.deinit();
+        
+        d.promise.then(function () {
+            Player.query();
+            
+        }).then(function (data) {
+            nextAction();
+            
+        }, function (error) {
+            Toast.error(error);
+        });
+    };
+    
+    $scope.$watch("players", function () {
+        if (map) map.draw();
+    }, true);
+    
+    
+    
+    
+    
+    
+    $scope.automateTerritorySelection = function () {
+        Lobby.automateTerritorySelection({}, function () {
+            Player.query();
+        });
     };
     
     $scope.automateArmySelection = function (playerIndex) {
@@ -107,35 +152,5 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
         map.draw();
         $scope.nextTurn();
     };
-    
-    $scope.onMapClick = function (e) {
-        var clickCall = $scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick(e);
-        var q = clickCall;
-        if (!q || !q["then"]) {
-            var deferred = $q.defer();
-            Player.query({}, function (success) {
-                deferred.resolve(success);
-            }, function (error) {
-                deferred.reject(error);
-            });
-            q = deferred.promise;
-        }
-        
-        q.then(function (data) {
-            nextAction();
-            map.draw();
-            
-        }, function (error) {
-            Toast.error(error);
-        });
-    };
-    
-    $scope.$watch("$scope.map", function () {
-        if (map) map.draw();
-    });
-    
-    $scope.$watch("$scope.lobby.players", function () {
-        if (map) map.draw();
-    }, true);
     
 });

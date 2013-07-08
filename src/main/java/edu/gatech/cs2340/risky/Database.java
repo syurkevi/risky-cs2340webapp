@@ -15,6 +15,7 @@ public class Database implements ServletContextListener {
     protected static ServletContext context;
     public static HashMap<String, ModelDb> databases = init();
     
+    @SuppressWarnings("unchecked")
     private static HashMap<String, ModelDb> init() {
         if (context == null) {
             return null;
@@ -32,7 +33,7 @@ public class Database implements ServletContextListener {
     }
 
     public static <T extends Model> ModelDb<T> getDb(Class c, ModelDb<T> defaultDatabase) {
-        ModelDb database = Database.databases.get(c.getName());
+        ModelDb<T> database = Database.databases.get(c.getName());
         if (database == null && defaultDatabase != null) {
             database = defaultDatabase.getInstance();
             Database.setDb(c, database);

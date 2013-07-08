@@ -6,11 +6,16 @@ import edu.gatech.cs2340.risky.Model;
 
 public class Territory extends Model {
     public Integer[][] vertexes;
-    private static int instanceCount = 0;
+    public Integer[] center;
     
-    public Territory(Integer[][] vertexes) {
-        this.id = instanceCount++;
+    public Territory(int id, Integer[][] vertexes) {
+        this(id, vertexes, null);
+    }
+    
+    public Territory(int id, Integer[][] vertexes, Integer[] center) {
+        this.id = id;
         this.vertexes = vertexes;
+        this.center = center;
     }
     
     public static TerritoryDeed get(HttpServletRequest request, Object territoryId) {

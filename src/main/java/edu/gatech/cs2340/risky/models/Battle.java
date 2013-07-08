@@ -24,9 +24,9 @@ public class Battle extends Model {
         return this.attackingTerritory != null && this.attackingDie > 0 && this.defendingTerritory != null && this.defendingDie > 0;
     }
     
-    public BattleRecord wage() {
+    public void wage() throws Exception {
         if (!this.isReadyToWage()) {
-            return null;// maybe throw an exception instead?
+            throw new Exception("Yowzers, battle not ready to wage");
         }
         
         // TODO: implement logic of an attack as defined in R15
@@ -42,7 +42,6 @@ public class Battle extends Model {
         record.winnerCasualties = 1;
         record.loserCasualties = 2;
         
-        return record;
     }
     
 }

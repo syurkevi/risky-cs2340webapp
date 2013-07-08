@@ -1,6 +1,7 @@
 package edu.gatech.cs2340.risky.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -52,6 +53,10 @@ public class Lobby extends Model {
     }
     
     public boolean isReadyToPlay() {
+        System.out.println("Player count: " + this.players.size());
+        System.out.println(this.hasEnoughPlayers() ? "true" : "false");
+        System.out.println(!this.hasTooManyPlayers() ? "true" : "false");
+        System.out.println((this.mapId != null) ? "true" : "false");
         return this.hasEnoughPlayers() && !this.hasTooManyPlayers() && this.mapId != null;
     }
     
@@ -66,6 +71,46 @@ public class Lobby extends Model {
     public void allocateArmies() {
         for (Player player : this.getPlayers()) {
             player.allocateArmies(this.calculateArmies(this.players.size()));
+        }
+    }
+    
+    public void assignTerritories(){
+        Map map = Map.get(this.mapId);
+        int numofTerritories = map.territories.size();
+        int territoriesPerPlayer = numofTerritories/players.size();
+        int territoriesExtra = numofTerritories%players.size();
+       
+        //make sure ids will be assigned randomly
+        ArrayList<Integer> terrIds=new ArrayList<Integer>();
+        for(int i=0;i<numofTerritories;++i) {
+            terrIds.add(i);
+        }
+        Collections.shuffle(terrIds);
+        
+        int t_index=0;
+        ModelDb<Player> playerDb = Database.getDb(Player.class);
+        //distribute main bulk of territories
+        for(Object p : players) {
+            Player player=playerDb.read(p);
+            for(int i=0;i<territoriesPerPlayer;++i) {
+                TerritoryDeed deed = new TerritoryDeed(player.id);
+                deed.playerId = player.id;
+                int territory = terrIds.get(t_index++);
+
+                map.deeds.put(territory, deed);
+                player.territories.put(territory, deed);
+            }
+        }
+        //distribute left over territories
+        for(int i=0; i<territoriesExtra; ++i){
+            Object p = players.get(i);
+            Player player=playerDb.read(p);
+            TerritoryDeed deed = new TerritoryDeed(player.id);
+            deed.playerId = player.id;
+            int territory = terrIds.get(t_index++);
+
+            map.deeds.put(territory, deed);
+            player.territories.put(territory, deed);
         }
     }
     

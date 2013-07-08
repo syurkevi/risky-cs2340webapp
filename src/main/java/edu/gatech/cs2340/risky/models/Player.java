@@ -1,6 +1,5 @@
 package edu.gatech.cs2340.risky.models;
 
-import java.awt.Color;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,9 +53,9 @@ public class Player extends Model {
         return number;// number of armies actually attacked with
     }
     
-    public BattleRecord attack(String attackingTerritory, String defendingTerritory, int attackingDie, int defendingDie) {
+    public void attack(String attackingTerritory, String defendingTerritory, int attackingDie, int defendingDie) throws Exception {
         Battle worldWarJava = new Battle(attackingTerritory, defendingTerritory, attackingDie, defendingDie);
-        return worldWarJava.wage();
+        worldWarJava.wage();
     }
     
     public void gainTerritory(Object territoryId, TerritoryDeed deed) {
@@ -110,15 +109,14 @@ public class Player extends Model {
     
     public static Player get(HttpServletRequest request, Integer id) {
         ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
-        Integer playerId = id;
-        if (playerId == null) {
+        if (id == null) {
             try {
-                playerId = RiskyServlet.getId(request);
+                id = RiskyServlet.getId(request);
             } catch (Exception e) {
                 
             }
         }
-        return playerDb.read(playerId);
+        return playerDb.read(id);
     }
     
     public static ModelDb<Player> getDb() {
