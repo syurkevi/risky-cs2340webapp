@@ -2,26 +2,23 @@ package edu.gatech.cs2340.risky.Util;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Objects {
     
     public static Method[] getMethodsByName(Class c, String name) {
-        Method[] candidates = c.getMethods();
+        System.out.println("getMethodsByName");
+        System.out.println(c.getName());
+        System.out.println(name);
+        Method[] candidates = c.getDeclaredMethods();
         ArrayList<Method> methods = new ArrayList<Method>();
         for (Method candidate : candidates) {
+            System.out.println("\t" + candidate.getName());
             if (candidate.getName().equals(name)) {
                 methods.add(candidate);
             }
         }
         
-        candidates = new Method[methods.size()];
-        for (int i=0 ; i < candidates.length ; i++) {
-            candidates[i] = methods.get(i);
-        }
-        
-        return candidates;
+        return methods.toArray(new Method[0]);
     }
     
 }

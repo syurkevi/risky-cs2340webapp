@@ -1,6 +1,5 @@
 package edu.gatech.cs2340.risky.models;
 
-import java.awt.Color;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -110,15 +109,14 @@ public class Player extends Model {
     
     public static Player get(HttpServletRequest request, Integer id) {
         ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
-        Integer playerId = id;
-        if (playerId == null) {
+        if (id == null) {
             try {
-                playerId = RiskyServlet.getId(request);
+                id = RiskyServlet.getId(request);
             } catch (Exception e) {
                 
             }
         }
-        return playerDb.read(playerId);
+        return playerDb.read(id);
     }
     
     public static ModelDb<Player> getDb() {

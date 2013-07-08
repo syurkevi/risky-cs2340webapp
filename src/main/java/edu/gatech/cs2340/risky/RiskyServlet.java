@@ -40,50 +40,69 @@ public abstract class RiskyServlet extends HttpServlet {
 
     public static int getId(HttpServletRequest request) throws Exception {
         String uri = request.getPathInfo();
+        System.out.println(uri);
         if (uri == null || "".equals(uri)) {
             throw new Exception("Invalid getId");
         }
-        String idStr = uri.substring(1, uri.length());// Strip off the leading slash, e.g. "/2" becomes "2"
+        String idStr = uri.substring(1).split("/")[0];// Strip off the leading slash, e.g. "/2/what" becomes "2"
         return Integer.parseInt(idStr);
     }
     
     public static String getSessionId(HttpServletRequest request) {
-        // seem innocuous when the following line could just be used everywhere this method is used
+        // seem silly when the following line could just be used everywhere this method is used
         // but if/when it comes time to move to many-session-to-one-lobby, migration *should* be easy
         return request.getSession().getId();
     }
     
-    protected String getAction(HttpServletRequest request) {
-        return getAction(request, 0);
-    }
-    
-    protected String getAction(HttpServletRequest request, int index) {
-        String[] actions = getActions(request);
-        if (index >= actions.length) {
+    protected String getLastPathSegment(HttpServletRequest request) {
+        String[] segments = this.getPathSegments(request);
+        if (segments.length == 0) {
             return null;
         }
-        return actions[index];
+        return segments[segments.length-1];
     }
     
-    protected String[] getActions(HttpServletRequest request) {
+    protected String getPathSegment(HttpServletRequest request, int index) {
+        String[] actions = getPathSegments(request);
+        if (index < actions.length) {
+            return actions[index];
+        }
+        return null;// watch out! null if outside range
+    }
+    
+    protected String[] getPathSegments(HttpServletRequest request) {
+        // pathInfo does not include the app context (risky), or servlet context (maybe /api/player)
+        // so this.game.is.gre.at/risky/api/player/0/attack
+        // would have this method return {"0", "attack"}
         String pathInfo = request.getPathInfo();
-        if (pathInfo == null) {
+        System.out.println(pathInfo + " <- path info");
+        System.out.println(request.getServletPath() + " <- path");
+        System.out.println(request.getQueryString() + " <- query string");
+        System.out.println(request.getRequestURI() + " <- uri");
+        if (pathInfo == null) {            
             return new String[0];
         }
-        return pathInfo.substring(1).split("/");
+        String[] segments = pathInfo.substring(1).split("\\/");
+        for (String s : segments) { System.out.print(s + " "); } System.out.println(" <- segments");
+        return segments;
     }
     
-    protected String getFinalAction(HttpServletRequest request) {
-        String uri = request.getServletPath();
-        return uri.substring(uri.lastIndexOf("/") + 1, uri.length());
-    }
-    
-    protected void logException(Exception e) {
-        System.out.println(e.toString());
-        StackTraceElement[] stackTraceElements = e.getStackTrace();
-        for (int i=0 ; i < 100 && i < stackTraceElements.length ; i++) {
-            System.out.println("\t" + stackTraceElements[i].toString());
+    protected String getLastUrlSegment(HttpServletRequest request) {
+        String[] segments = this.getUrlSegments(request);
+        if (segments.length == 0) {
+            return null;
         }
+        return segments[segments.length-1];
     }
+    
+    protected String[] getUrlSegments(HttpServletRequest request) {
+        String path = request.getServletPath();
+        if (path == null) {
+            return new String[0];
+        }
+        return path.substring(1).split("/");
+    }
+    
+    
     
 }

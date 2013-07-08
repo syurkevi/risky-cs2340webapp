@@ -2,7 +2,6 @@ package edu.gatech.cs2340.risky.models.factories;
 
 import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.database.HashMapDbImpl;
-import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Map;
 import edu.gatech.cs2340.risky.models.Territory;
 
@@ -42,6 +41,7 @@ public class MapFactory {
             {{16, 42}, {4, 40}, {2, 30}, {11, 32}},
             {{32, 26}, {36, 24}, {38, 22}, {40, 24}, {37, 27}, {33, 27}}
         };
+        
         for (Integer[][] vertexes : vertexeses) {
             m.addTerritory(new Territory(vertexes));
         }

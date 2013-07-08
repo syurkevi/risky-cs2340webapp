@@ -27,12 +27,6 @@ public class TurnOrder {
         Collections.shuffle(lobby.players);
     }
     
-    public Player getPlayer() {
-        Lobby lobby = Lobby.get(this.lobbyId);
-        if (lobby == null) return null;
-        return Database.getModel(Player.class, lobby.players.get(this.playerIndex));
-    }
-    
     public void nextState() {
         int i=0;
         for ( ; i < this.states.length ; i++) {// find current state

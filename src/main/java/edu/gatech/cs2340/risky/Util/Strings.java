@@ -18,6 +18,7 @@ public class Strings {
     }
     
     public static String dashedToCamel(String s) {
+        // from /do/stuff-is-cool to stuffIsCool
         String[] parts = s.split("-");
         for (int i=1 ; i < parts.length ; i++) {
             parts[i] = Strings.capitalize(parts[i]);

@@ -52,6 +52,10 @@ public class Lobby extends Model {
     }
     
     public boolean isReadyToPlay() {
+        System.out.println("Player count: " + this.players.size());
+        System.out.println(this.hasEnoughPlayers() ? "true" : "false");
+        System.out.println(!this.hasTooManyPlayers() ? "true" : "false");
+        System.out.println((this.mapId != null) ? "true" : "false");
         return this.hasEnoughPlayers() && !this.hasTooManyPlayers() && this.mapId != null;
     }
     

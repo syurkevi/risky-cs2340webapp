@@ -8,10 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.RiskyServlet;
-import edu.gatech.cs2340.risky.database.HashMapDbImpl;
-import edu.gatech.cs2340.risky.models.Lobby;
 
 @WebServlet(urlPatterns = {
     "/lobby", // GET

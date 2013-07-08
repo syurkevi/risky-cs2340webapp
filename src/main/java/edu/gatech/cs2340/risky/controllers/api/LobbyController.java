@@ -2,10 +2,9 @@ package edu.gatech.cs2340.risky.controllers.api;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import edu.gatech.cs2340.risky.ApiServlet;
 import edu.gatech.cs2340.risky.Database;
+import edu.gatech.cs2340.risky.api.annotations.ApiParams;
 import edu.gatech.cs2340.risky.models.Lobby;
 import edu.gatech.cs2340.risky.models.Player;
 
@@ -14,16 +13,22 @@ import edu.gatech.cs2340.risky.models.Player;
     "/api/lobby/*"
 })
 public class LobbyController extends ApiServlet {
-    
+
+    @Override
+    @ApiParams({"request"})
     public Object create(HttpServletRequest request) throws Exception {
         throw new Exception("Lobby must be created through /risky/lobby");
     }
-    
+
+    @Override
+    @ApiParams({"request"})
     public Object read(HttpServletRequest request) {
         Lobby lobby = Lobby.get(request);
         return lobby;
     }
-    
+
+    @Override
+    @ApiParams({"request"})
     public Object update(HttpServletRequest request) throws Exception {
         Lobby lobby = Lobby.get(request);
         Lobby givenLobby = (Lobby) getPayloadObject(request, Player.class);
@@ -35,7 +40,9 @@ public class LobbyController extends ApiServlet {
             throw new Exception("Failed to update lobby");
         }
     }
-    
+
+    @Override
+    @ApiParams({"request"})
     public Object delete(HttpServletRequest request) {
         Lobby lobby = Lobby.get(request);
         for (Player player : lobby.getPlayers()) {

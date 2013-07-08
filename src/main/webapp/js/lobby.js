@@ -6,13 +6,9 @@ risky.controller("LobbyController", function ($scope, Toast, Player) {
     
     $scope.addPlayer = function (name) {
         var p = Player.save({"name": name || $scope.playerName}, function () {
-            if (p.error) {
-                Toast.error(p.error);
-                return;
-            }
             $scope.playerName = "";
             $scope.players.push(p);
-        });
+        }, Toast.error);
     };
     
     $scope.removePlayer = function (index) {

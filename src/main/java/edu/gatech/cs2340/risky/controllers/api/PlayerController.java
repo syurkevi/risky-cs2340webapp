@@ -7,9 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 import edu.gatech.cs2340.risky.ApiServlet;
-import edu.gatech.cs2340.risky.Database;
 import edu.gatech.cs2340.risky.api.annotations.ApiParams;
-import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Lobby;
 import edu.gatech.cs2340.risky.models.Map;
@@ -22,7 +20,9 @@ import edu.gatech.cs2340.risky.models.TerritoryDeed;
     "/api/player/*"
 })
 public class PlayerController extends ApiServlet {
-    
+
+    @Override
+    @ApiParams({"request"})
     public synchronized Object create(HttpServletRequest request) throws Exception {// R1
         ModelDb<Player> playerDb = Player.getDb();
         Player player = (Player) getPayloadObject(request, Player.class);
@@ -41,7 +41,9 @@ public class PlayerController extends ApiServlet {
         players.add(player);
         return player;
     }
-    
+
+    @Override
+    @ApiParams({"request"})
     public Object read(HttpServletRequest request) {
         ModelDb<Player> playerDb = Player.getDb();
         
@@ -55,7 +57,9 @@ public class PlayerController extends ApiServlet {
             return results;
         }
     }
-    
+
+    @Override
+    @ApiParams({"request"})
     public synchronized Object update(HttpServletRequest request) throws Exception {
         Player givenPlayer = (Player) getPayloadObject(request, Player.class);
         Player player = Player.get(request);
@@ -68,7 +72,9 @@ public class PlayerController extends ApiServlet {
             throw new Exception("Failed to update player");
         }
     }
-    
+
+    @Override
+    @ApiParams({"request"})
     public synchronized Object delete(HttpServletRequest request) throws Exception {
         ModelDb<Player> playerDb = Player.getDb();
         int playerId = getId(request);
@@ -76,14 +82,14 @@ public class PlayerController extends ApiServlet {
         return player;
     }
     
-    @ApiParams({"attacking", "defending", "attackingDie", "defendingDie"})
+    @ApiParams({"request", "attacking", "defending", "attackingDie", "defendingDie"})
     public Object attack(HttpServletRequest request, String attacking, String defending, String attackingDie, String defendingDie) throws Exception {
         Player player = Player.get(request);
         player.attack(attacking, defending, Integer.parseInt(attackingDie), Integer.parseInt(defendingDie));
         return player;
     }
     
-    @ApiParams({"territory"})
+    @ApiParams({"request", "territory"})
     public Object seizeTerritory(HttpServletRequest request, String territory) throws Exception {
         Lobby lobby = Lobby.get(request);
         Map map = Map.get(lobby.mapId);
@@ -137,16 +143,21 @@ public class PlayerController extends ApiServlet {
         throw new Exception("Could not seize territory");
     }
     
-    @ApiParams({"to", "armies"})
-    public Object fortifyTerritory(HttpServletRequest request, String to, String armies) {
+    @ApiParams({"request", "to", "armies"})
+    public Object fortifyTerritory(HttpServletRequest request, String to, String armies) throws Exception {
         Player player = Player.get(request);
         TerritoryDeed toDeed = Territory.get(request, to);
+        
+        if (!toDeed.playerId.equals(player.id)) {
+            throw new Exception("You do not own this territory");
+        }
+        
         int number = Integer.parseInt(armies);
         player.fortifyTerritory(null, toDeed, number);
         return player;
     }
     
-    @ApiParams({"from", "to", "armies"})
+    @ApiParams({"request", "from", "to", "armies"})
     public Object fortifyTerritory(HttpServletRequest request, String from, String to, String armies) throws Exception {
         Player player = Player.get(request);
         TerritoryDeed fromDeed = Territory.get(request, from);
@@ -161,11 +172,20 @@ public class PlayerController extends ApiServlet {
         return player;
     }
     
-    @ApiParams({})
+    @ApiParams({"request"})
     public Object quit(HttpServletRequest request) {
         Player player = Player.get(request);
         player.playing = false;
         return player;
+    }
+    
+    @ApiParams({"request", "one", "two", "three"})
+    public Object[] nothing(HttpServletRequest request, String one, String two, String three) {
+        Object[] a = new Object[3];
+        a[0] = one;
+        a[1] = two;
+        a[2] = three;
+        return a;
     }
     
     protected synchronized Collection<Player> filterResults(Collection<Player> players, String filter, String arg) {
