@@ -172,22 +172,6 @@ public class PlayerController extends ApiServlet {
         return player;
     }
     
-    @ApiParams({"request"})
-    public Object quit(HttpServletRequest request) {
-        Player player = Player.get(request);
-        player.playing = false;
-        return player;
-    }
-    
-    @ApiParams({"request", "one", "two", "three"})
-    public Object[] nothing(HttpServletRequest request, String one, String two, String three) {
-        Object[] a = new Object[3];
-        a[0] = one;
-        a[1] = two;
-        a[2] = three;
-        return a;
-    }
-    
     protected synchronized Collection<Player> filterResults(Collection<Player> players, String filter, String arg) {
         if (filter == null) {
             return players;

@@ -54,8 +54,30 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 }
             }, 
             1: {// attack
+                "data": {},
                 "mapClick": function (e) {
-                    
+                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageU]));
+                    if (!data.attacking) {
+                        data.attacking = territory.id;
+                        
+                    } else if (!data.defending) {
+                        data.defending = territory.id;
+                        
+                    } else if (!data.attackingDie) {
+                        data.attackingDie = 0;// get number from alert?
+                        
+                    } else if (!data.defendingDie) {
+                        data.defendingDie = 0;
+                        
+                    } else {
+                        // send attack
+                        var d = $q.defer();
+                        getCurrentPlayer().$attack({
+                            to: territory.id,
+                            armies: 4
+                        }, d.resolve, d.reject);
+                        return d.promise;
+                    }
                 }
             }, 
             2: {// fortify

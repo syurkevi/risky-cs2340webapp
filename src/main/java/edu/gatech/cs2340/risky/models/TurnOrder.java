@@ -83,9 +83,28 @@ public class TurnOrder {
             
         }
         
+        this.handleActionTransition();
+        
         return this.action;
     }
     
+    protected void handleActionTransition() {
+        Lobby lobby = Lobby.get(this.lobbyId);
+        Player player = lobby.getPlayers().get(this.playerIndex);
+        if ("setup".equals(this.state)) {
+            
+        } else if ("placearmies".equals(this.state)) {
+            
+        } else if ("play".equals(this.state)) {
+            switch (this.action) {
+            case 0:
+                player.armiesAvailableThisTurn += (int) Math.max(3.0, Math.ceil(player.territories.size()/3.0));
+                break;
+            }
+            
+        }
+    }
+
     public int nextTurn() throws Exception {
         Lobby lobby = Lobby.get(this.lobbyId);
         if (lobby == null) throw new Exception("No lobby");

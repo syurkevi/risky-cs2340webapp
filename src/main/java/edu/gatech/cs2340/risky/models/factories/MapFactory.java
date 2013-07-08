@@ -42,8 +42,10 @@ public class MapFactory {
             {{32, 26}, {36, 24}, {38, 22}, {40, 24}, {37, 27}, {33, 27}}
         };
         
-        for (Integer[][] vertexes : vertexeses) {
-            m.addTerritory(new Territory(vertexes));
+        for (int i=0 ; i < vertexeses.length ; i++) {
+            Territory t = new Territory(i, vertexeses[i]);
+            
+            m.addTerritory(t);
         }
         
         Database.setModel(m);

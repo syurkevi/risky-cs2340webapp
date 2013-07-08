@@ -53,9 +53,9 @@ public class Player extends Model {
         return number;// number of armies actually attacked with
     }
     
-    public BattleRecord attack(String attackingTerritory, String defendingTerritory, int attackingDie, int defendingDie) {
+    public void attack(String attackingTerritory, String defendingTerritory, int attackingDie, int defendingDie) throws Exception {
         Battle worldWarJava = new Battle(attackingTerritory, defendingTerritory, attackingDie, defendingDie);
-        return worldWarJava.wage();
+        worldWarJava.wage();
     }
     
     public void gainTerritory(Object territoryId, TerritoryDeed deed) {
