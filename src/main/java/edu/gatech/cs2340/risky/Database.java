@@ -28,6 +28,11 @@ public class Database implements ServletContextListener {
         return (HashMap<String, ModelDb>) context.getAttribute("databases");
     }
     
+    public static void clear() {
+        context.setAttribute("databases", new HashMap<String, ModelDb>());
+        Database.databases = (HashMap<String, ModelDb>) context.getAttribute("databases");
+    }
+    
     public static <T extends Model> ModelDb<T> getDb(Class c) {
         return Database.getDb(c, null);
     }

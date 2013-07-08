@@ -12,7 +12,7 @@
 <body ng-controller="GameController">
     <div>
         <h1 class="pull-left">{{lobby.title}}</h1>
-        <a class="btn btn-danger btn-mini pull-right">Close game</a>
+        <a href="/risky/game/quit" class="btn btn-danger btn-mini pull-right">Close game</a>
     </div>
     <canvas id="map" width="800" height="500" ng-click="onMapClick($event)"></canvas>
     <div class="row-fluid">
@@ -29,14 +29,14 @@
             <div class="span4">
                 <h4>Select a territory</h4>
                 <div>We're picking out the land you want initially</div>
-                <div><a class="btn btn-primary btn-mini" ng-click="automateTerritorySelection()">Automate</a></div>
+                <div><a class="btn btn-primary btn-mini" ng-click="automateSetup()">Automate</a></div>
             </div>
         </div>
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'placearmies'" ng-class="action{{currentAction}}">
             <div class="span4">
                 <h4>Place armies</h4>
                 <div>{{players[turnOrder.playerIndex].armiesAvailableThisTurn}} armies left</div>
-                <div><a class="btn btn-primary btn-mini" ng-click="automateArmySelection()">Automate</a></div>
+                <div><a class="btn btn-primary btn-mini" ng-click="automatePlacearmies()">Automate</a></div>
             </div>
         </div>
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'play'" ng-class="action{{currentAction}}">

@@ -1,5 +1,3 @@
-
-
 function CanvasMap(canvas, map, players, config) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
@@ -26,7 +24,11 @@ CanvasMap.prototype.getOwnershipMap = function () {
 CanvasMap.prototype.labelTerritory = function (territory, player) {
     var text = "";
     if (player) {
-        text = (player.territories[territory.id]) ? player.territories[territory.id].armies : player.name;
+        if (player.territories[territory.id]) {
+            text = player.territories[territory.id].armies;
+        } else {
+            text = player.name;
+        }
     }
     
     var center = this.calculateCenter(territory);
@@ -36,7 +38,7 @@ CanvasMap.prototype.labelTerritory = function (territory, player) {
     var textSize = this.context.measureText(text);
     
     x -= textSize.width/2;// center horizontally
-    x = Math.min(this.canvas.width-5, Math.max(x, 0));// keep within the canvas bounds
+    x = Math.min(this.canvas.width-5, Math.max(x, 0));// keep within the bounds
     y = Math.min(this.canvas.height-5, Math.max(y, 10));
     
     this.context.font = "12px Sans-serif";
@@ -57,9 +59,10 @@ CanvasMap.prototype.drawTerritory = function (territory, player) {
     
     // half-pixel offsets to avoid heavy-looking lines
     if (!territory.vertexes) return;
+    
     this.context.moveTo(territory.vertexes[0][0]*this.config.scale - 0.5, territory.vertexes[0][1]*this.config.scale - 0.5);
     
-    for (var j=1 ; j < territory.vertexes.length ; j++) {;
+    for (var j=1 ; j < territory.vertexes.length ; j++) {
         this.context.lineTo(territory.vertexes[j][0]*this.config.scale - 0.5, territory.vertexes[j][1]*this.config.scale - 0.5);
     }
     
@@ -85,7 +88,10 @@ CanvasMap.prototype.draw = function () {
 };
 
 CanvasMap.prototype.toMapPoint = function (point) {
-    return [(point[0]-this.canvas.offsetLeft)/this.config.scale, (point[1]-this.canvas.offsetTop)/this.config.scale];
+    var mapPoint = [0, 0];
+    mapPoint[0] = (point[0]-this.canvas.offsetLeft)/this.config.scale;
+    mapPoint[1] = (point[1]-this.canvas.offsetTop)/this.config.scale;
+    return mapPoint;
 };
 
 CanvasMap.prototype.calculateCenter = function (territory) {
