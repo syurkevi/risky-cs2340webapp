@@ -44,13 +44,13 @@
                 <h4>Place armies</h4>
                 <div>Click a territory to place an army</div>
             </div>
-            <div class="span4">
+            <div class="span4" ng-class="turnOrder.action == 1 | iif : 'highlighted' : ''">
                 <h4>Attack</h4>
                 <div>Attack who?</div>
                 <div>Where from?</div>
                 <div>Repeat as necessary</div>
             </div>
-            <div class="span4">
+            <div class="span4" ng-class="turnOrder.action == 2 | iif : 'highlighted' : ''">
                 <h4>Fortify</h4>
                 <div>You have one shot to seize everything you ever wanted. Capture it; don't let it slip!</div>
             </div>
