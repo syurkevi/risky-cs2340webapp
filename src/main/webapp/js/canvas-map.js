@@ -91,7 +91,7 @@ CanvasMap.prototype.drawTerritory = function (territory, player) {
 CanvasMap.prototype.draw = function (players) {
     this.canvas.width = this.canvas.width;// clear canvas
     this.context.strokeStyle = "#333";
-    console.log(players[0].territories);
+    //console.log(players[0].territories);
     var ownershipMap = this.getOwnershipMap(players);
     
     if (!this.territories) return;

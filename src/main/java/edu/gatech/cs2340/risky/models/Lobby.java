@@ -98,7 +98,7 @@ public class Lobby extends Model {
                 deed.playerId = player.id;
                 int territory = terrIds.get(t_index++);
 
-                map.deeds.put(territory, deed);
+                map.deeds.put(Integer.toString(territory), deed);
                 player.territories.put(territory, deed);
             }
         }
@@ -110,7 +110,7 @@ public class Lobby extends Model {
             deed.playerId = player.id;
             int territory = terrIds.get(t_index++);
 
-            map.deeds.put(territory, deed);
+            map.deeds.put(Integer.toString(territory), deed);
             player.territories.put(territory, deed);
         }
     }

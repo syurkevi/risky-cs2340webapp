@@ -26,12 +26,11 @@ risky.service("Toast", function ($rootScope) {
     toast.error = function (id, message) {
         toast.send(id, "error", message);
     };
-    /*
     toast.request = function (message, requestinfo) {
         // requestinfo = [{"name":name,"value":value},{...},...]
         if (!$rootScope.toasts) $rootScope.toasts=[]$scope.players.;
         $rootScope.toasts.push({"id": $rootScope.toasts.length, "type":"success", "message":message, "buttons":requestinfo});
-    };*/
+    };
     return toast;
     
 }).directive("swatch", function ($timeout) {
