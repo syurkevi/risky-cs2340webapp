@@ -22,6 +22,17 @@ CanvasMap.prototype.getOwnershipMap = function (players) {
     return map;
 };
 
+CanvasMap.prototype.getDeedForTerritory = function (players, territory) {
+    return this.getOwnerOfTerritory(players).territories[territory];
+};
+
+CanvasMap.prototype.getOwnerOfTerritory = function (players, territory) {
+    var ownership = this.getOwnershipMap(players);
+    console.log(ownership);
+    console.log(territory);
+    return ownership[territory];
+};
+
 CanvasMap.prototype.labelTerritory = function (territory, player) {
     var text = "";
     if (player) {
@@ -32,7 +43,7 @@ CanvasMap.prototype.labelTerritory = function (territory, player) {
         }
     }
     
-    text = text + " (" + territory.id + ")";
+    text = text + " (#" + territory.id + ")";
     
     var center = this.calculateCenter(territory);
     var x = center[0];

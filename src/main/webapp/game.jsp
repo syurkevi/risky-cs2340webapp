@@ -42,6 +42,7 @@
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'play'" ng-class="action{{currentAction}}">
             <div class="span4" ng-class="turnOrder.action == 0 | iif : 'highlighted' : ''">
                 <h4>Place armies</h4>
+                <div>{{players[turnOrder.playerIndex].armiesAvailableThisTurn}} armies to place</div>
                 <div>Click a territory to place an army</div>
             </div>
             <div class="span4" ng-class="turnOrder.action == 1 | iif : 'highlighted' : ''">

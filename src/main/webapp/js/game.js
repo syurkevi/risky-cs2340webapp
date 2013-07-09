@@ -57,18 +57,40 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             1: {// attack
                 "data": {},
                 "mapClick": function (e) {
-                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                    var data = $scope.states.play[1].data;
                     if (!data.attacking) {
-                        data.attacking = territory.id;
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (map.getOwnerOfTerritory($scope.players, territory.id).name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
+                        data['attacking'] = territory;
+                        
+                        console.log("set attacking to " + territory.id);
                         
                     } else if (!data.defending) {
-                        data.defending = territory.id;
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
+                        data['defending'] = territory;
                         
-                    } else if (!data.attackingDie) {
-                        data.attackingDie = 0;// get number from alert?
+                        console.log(data);
+                        console.log(data.attacking);
+                        console.log(data.attacking.id);
+                        console.log("set defending to " + territory.id);
+                        console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
                         
-                    } else if (!data.defendingDie) {
-                        data.defendingDie = 0;
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?")*1;// eventually Toast.prompt
+                        if (isNaN(die)) throw new Exception("Not a number");
+                        var armies = map.getDeedForTerritory(territory);
+                        if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
+                        data.attackingDie = die;
+                        
+                        console.log("set attacking die to " + die);
+                        
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?")*1;// eventually Toast.prompt
+                        if (isNaN(die)) throw new Exception("Not a number");
+                        var armies = map.getDeedForTerritory(territory);
+                        if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive");
+                        data.defendingDie = die;
+                        
+                        console.log("set defending die to " + die);
                         
                     } else {
                         // send attack
@@ -114,7 +136,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     function handleAction(func, args) {
         var d = $q.defer();
         try {
-            d.resolve(func.apply(null, args));
+            var value = func.apply(null, args);
+            if (value === undefined || !value.hasOwnProperty("then")) return;
+            d.resolve(value);
         } catch (e) {
             d.reject(e);
         }
@@ -134,7 +158,8 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             nextAction();
             
         }, function (error) {
-            console.log(3);
+            console.error("yikes!");
+            console.log(error);
             Toast.error(error);
         });
     }
