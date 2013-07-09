@@ -1,5 +1,3 @@
-
-
 function CanvasMap(canvas, map, players, config) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
@@ -10,11 +8,12 @@ function CanvasMap(canvas, map, players, config) {
     };
 }
 
-CanvasMap.prototype.getOwnershipMap = function () {
+CanvasMap.prototype.getOwnershipMap = function (players) {
     var map = {};// territoryId -> player
     
-    for (var i=0 ; i < this.players.length ; i++) {
-        var player = this.players[i];
+    if (!players) return map;
+    for (var i=0 ; i < players.length ; i++) {
+        var player = players[i];
         for (var territoryId in player.territories) {
             map[territoryId] = player;
         }
@@ -23,11 +22,28 @@ CanvasMap.prototype.getOwnershipMap = function () {
     return map;
 };
 
+CanvasMap.prototype.getDeedForTerritory = function (players, territory) {
+    return this.getOwnerOfTerritory(players).territories[territory];
+};
+
+CanvasMap.prototype.getOwnerOfTerritory = function (players, territory) {
+    var ownership = this.getOwnershipMap(players);
+    console.log(ownership);
+    console.log(territory);
+    return ownership[territory];
+};
+
 CanvasMap.prototype.labelTerritory = function (territory, player) {
     var text = "";
     if (player) {
-        text = (player.territories[territory.id]) ? player.territories[territory.id].armies : player.name;
+        if (player.territories[territory.id]) {
+            text = player.territories[territory.id].armies;
+        } else {
+            text = player.name;
+        }
     }
+    
+    text = text + " (#" + territory.id + ")";
     
     var center = this.calculateCenter(territory);
     var x = center[0];
@@ -36,7 +52,7 @@ CanvasMap.prototype.labelTerritory = function (territory, player) {
     var textSize = this.context.measureText(text);
     
     x -= textSize.width/2;// center horizontally
-    x = Math.min(this.canvas.width-5, Math.max(x, 0));// keep within the canvas bounds
+    x = Math.min(this.canvas.width-5, Math.max(x, 0));// keep within the bounds
     y = Math.min(this.canvas.height-5, Math.max(y, 10));
     
     this.context.font = "12px Sans-serif";
@@ -57,9 +73,10 @@ CanvasMap.prototype.drawTerritory = function (territory, player) {
     
     // half-pixel offsets to avoid heavy-looking lines
     if (!territory.vertexes) return;
+    
     this.context.moveTo(territory.vertexes[0][0]*this.config.scale - 0.5, territory.vertexes[0][1]*this.config.scale - 0.5);
     
-    for (var j=1 ; j < territory.vertexes.length ; j++) {;
+    for (var j=1 ; j < territory.vertexes.length ; j++) {
         this.context.lineTo(territory.vertexes[j][0]*this.config.scale - 0.5, territory.vertexes[j][1]*this.config.scale - 0.5);
     }
     
@@ -71,11 +88,11 @@ CanvasMap.prototype.drawTerritory = function (territory, player) {
     this.labelTerritory(territory, player);
 };
 
-CanvasMap.prototype.draw = function () {
+CanvasMap.prototype.draw = function (players) {
     this.canvas.width = this.canvas.width;// clear canvas
     this.context.strokeStyle = "#333";
-    
-    var ownershipMap = this.getOwnershipMap();
+    console.log(players[0].territories);
+    var ownershipMap = this.getOwnershipMap(players);
     
     if (!this.territories) return;
     for (var i=0 ; i < this.territories.length ; i++) {
@@ -85,7 +102,10 @@ CanvasMap.prototype.draw = function () {
 };
 
 CanvasMap.prototype.toMapPoint = function (point) {
-    return [(point[0]-this.canvas.offsetLeft)/this.config.scale, (point[1]-this.canvas.offsetTop)/this.config.scale];
+    var mapPoint = [0, 0];
+    mapPoint[0] = (point[0]-this.canvas.offsetLeft)/this.config.scale;
+    mapPoint[1] = (point[1]-this.canvas.offsetTop)/this.config.scale;
+    return mapPoint;
 };
 
 CanvasMap.prototype.calculateCenter = function (territory) {

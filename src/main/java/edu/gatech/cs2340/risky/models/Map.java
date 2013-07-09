@@ -12,22 +12,24 @@ import edu.gatech.cs2340.risky.database.HashMapDbImpl;
 
 public class Map extends Model {
     public ArrayList<Territory> territories;
-    public HashMap<Object, TerritoryDeed> deeds;
-    private ArrayList<Pair> adjacencies;
+    public HashMap<String, TerritoryDeed> deeds;
     
     public Map() {
         this.territories = new ArrayList<Territory>();
-        this.deeds = new HashMap<Object, TerritoryDeed>();
+        this.deeds = new HashMap<String, TerritoryDeed>();
     }
     
-    public void addTerritory(Territory t, Object[] adjacencies) {
+    public void addTerritory(Territory t) {
         territories.add(t);
-        for (Object adjacent : adjacencies) {
-            Pair p = new Pair(t.id, adjacent);
-            if (!this.adjacencies.contains(p)) {
-                this.adjacencies.add(p);
-            }
-        }
+    }
+    
+    public boolean allTerritoriesOccupied() {
+        return this.deeds.keySet().size() == this.territories.size();
+    }
+    
+    public boolean territoriesAreAdjacent(Object t1, Object t2) {
+        // find both territories and ask them both whether they're adjacent, return the OR of their answers
+        return false;
     }
     
     public static Map get(HttpServletRequest request) {

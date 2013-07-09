@@ -1,10 +1,10 @@
 package edu.gatech.cs2340.risky.models;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
-
-import edu.gatech.cs2340.risky.Database;
 
 public class TurnOrder {
     
@@ -51,7 +51,7 @@ public class TurnOrder {
         
         if (this.state.equals("setup")) {
             this.action = 0;
-            if (map.deeds.keySet().size() == map.territories.size()) {// all territories occupied
+            if (map.allTerritoriesOccupied()) {
                 this.nextState();
             } else {
                 this.nextTurn();
@@ -91,6 +91,7 @@ public class TurnOrder {
     protected void handleActionTransition() {
         Lobby lobby = Lobby.get(this.lobbyId);
         Player player = lobby.getPlayers().get(this.playerIndex);
+        
         if ("setup".equals(this.state)) {
             
         } else if ("placearmies".equals(this.state)) {
@@ -98,6 +99,7 @@ public class TurnOrder {
         } else if ("play".equals(this.state)) {
             switch (this.action) {
             case 0:
+                System.out.println("dsl;klajsfllksajdflkasdfj;lksajf;lkjsd;lfkjsaf;lkj " + this.playerIndex + " " + player.name + " " + player.id);
                 player.armiesAvailableThisTurn += (int) Math.max(3.0, Math.ceil(player.territories.size()/3.0));
                 break;
             }
@@ -114,6 +116,55 @@ public class TurnOrder {
             this.playerIndex %= lobby.players.size(); 
         }
         return this.playerIndex;
+    }
+    
+    public void automateSetup() throws Exception {
+        Lobby lobby = Lobby.get(this.lobbyId);
+        if (lobby == null) throw new Exception("No lobby");
+        Map map = Map.get(lobby.mapId);
+        ArrayList<Player> players = lobby.getPlayers();
+        
+        for (int i=0 ; i < map.territories.size() ; i++) {
+            Player player = players.get(i % players.size());
+            Object territoryId = map.territories.get(i).id;
+            TerritoryDeed deed = new TerritoryDeed(player.id);
+            deed.playerId = player.id;
+            map.deeds.put(territoryId.toString(), deed);
+            player.territories.put(territoryId, deed);
+            player.placeArmiesOnTerritory(1, territoryId);
+        }
+        
+        this.state = this.states[1];
+        this.playerIndex = 0;
+        this.action = 0;
+        handleActionTransition();
+    }
+    
+    public void automatePlacearmies() throws Exception {
+        Lobby lobby = Lobby.get(this.lobbyId);
+        if (lobby == null) throw new Exception("No lobby");
+        Map map = Map.get(lobby.mapId);
+        ArrayList<Player> players = lobby.getPlayers();
+        
+        for (Player player : players) {
+            int available = player.armiesAvailableThisTurn;
+            int each = available / player.territories.size();
+            int i=0;
+            for (Entry<Object, TerritoryDeed> entry : player.territories.entrySet()) {
+                Object territoryId = entry.getKey();
+                int amount = each;
+                if (i == 0) {// account for armies lost due to integer division
+                    amount = available - each * (player.territories.size() - 1);
+                }
+                player.placeArmiesOnTerritory(amount, territoryId);
+                i++;
+            }
+        }
+        
+        this.state = this.states[2];
+        this.playerIndex = 0;
+        this.action = 0;
+        handleActionTransition();
     }
     
     public static TurnOrder get(HttpServletRequest request) {

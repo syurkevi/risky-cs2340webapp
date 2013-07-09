@@ -41,6 +41,7 @@ public class Lobby extends Model {
         for (Object playerId : this.players) {
             players.add(playerDb.read(playerId));
         }
+        Collections.sort(players);
         return players;
     }
     
