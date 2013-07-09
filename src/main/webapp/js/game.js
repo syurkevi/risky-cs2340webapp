@@ -1,195 +1,181 @@
-risky.controller('GameController', function ($scope, modelloader) {
+risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder, Map, Player) {
     
-    $scope.setState = function (newState) {
-        $scope.state = newState;
-        $scope.turnOwner = 0;
-        $scope.currentAction = 0;
-        if ($scope.states[$scope.state].init) {
-            $scope.states[$scope.state].init();
-        }
-        if ($scope.states[$scope.state].actions[0].init) {
-            $scope.states[$scope.state].actions[0].init();
-        }
-    };
+    $scope.lobby = Lobby.get();
+    $scope.turnOrder = TurnOrder.get();
+    $scope.players = Player.query();
+    $scope.map = Map.get();
     
-    $scope.nextTurn = function (forceful) {
-        if ($scope.turnOwner == $scope.players.length-1 && !forceful) {// if last player
-            if ($scope.states[$scope.state].deinit) {
-                $scope.states[$scope.state].deinit();// deinitialize the state
-            }
-        } else {// otherwise
-            $scope.turnOwner = ++$scope.turnOwner % $scope.players.length;// move to the next player
-            if ($scope.states[$scope.state].actions[$scope.currentAction].init) {
-                $scope.states[$scope.state].actions[$scope.currentAction = 0].init();// reset action and initialize
-            }
-        }
-    };
+    function getCurrentPlayer() {
+        return $scope.players[$scope.turnOrder.playerIndex];
+    }
     
-    $scope.nextAction = function () {
-        if ($scope.states[$scope.state].actions[$scope.currentAction].deinit) {
-            $scope.states[$scope.state].actions[$scope.currentAction].deinit();// deinitialize the previous action
-        }
-        if ($scope.currentAction == $scope.states[$scope.state].actions.length-1) {// if last action
-            $scope.nextTurn();// move to the next player
-        } else if ($scope.states[$scope.state].actions[++$scope.currentAction].init) {
-            $scope.states[$scope.state].actions[++$scope.currentAction].init();// otherwise move to next state
-        }
-    };
+    function nextAction() {
+        $scope.turnOrder.$nextAction({}, function () {}, Toast.error);
+    }
     
     $scope.states = {
-        /*'default': {
-            'init': function () {},
-            'actions': {
-                0: {
-                    'init': function () {},
-                    'mapClick': function () {},
-                    'deinit': funciton () {}
-                }
-            },
-            'deinit': function () {}
-        },*/
-        'setup': {
-            'init': function () {},
-            'actions': {
-                0: {
-                    'mapClick': function (e) {
-                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                        if (!territory) return; // alert user of invalid territory
-                        if (territory.owner) return; // alert user of already taken territory
-                        territory.owner = $scope.players[$scope.turnOwner];
-                        map.draw();
-                        $scope.nextTurn();
-                    }
-                }
-            },
-            'deinit': function () {
-                if (map.allTerritoriesOwned()) {
-                    $scope.setState('placearmies');
-                } else {
-                    $scope.nextTurn(true);
+        "setup": {
+            0: {// seize territory
+                "mapClick": function (e) {
+                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                    
+                    var d = $q.defer();
+                    getCurrentPlayer().$seize({
+                        "territory": territory.id
+                    }, d.resolve, d.reject);
+                    return d.promise;
                 }
             }
         },
-        'placearmies': {
-            'init': function () {},
-            'actions': {
-                0: {
-                    'init': function () {
-                        var player = $scope.players[$scope.turnOwner];
-                        player.armies.availableThisTurn += 1*player.armies.available;
-                        player.armies.available = 0;
-                    },
-                    'mapClick': function (e) {
-                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                        if (!territory) return; // alert user of invalid territory
-                        if (territory.owner != $scope.players[$scope.turnOwner]) return;
-                        
-                        if (!territory.armies) territory.armies = 0;
-                        territory.armies++;
-                        if (--territory.owner.armies.availableThisTurn <= 0) $scope.nextTurn();
-                        map.draw();
-                    }
+        "placearmies": {
+            0: {// place army
+                "mapClick": function (e) {
+                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                    
+                    var d = $q.defer();
+                    getCurrentPlayer().$fortify({
+                        to: territory.id,
+                        armies: 4
+                    }, d.resolve, d.reject);
+                    return d.promise;
                 }
-            },
-            'deinit': function () {
-                $scope.setState('play');
             }
         },
-        'play': {
-            'init': function () {},
-            'actions': {
-                0: {
-                    'init': function () {
-                        var player = $scope.players[$scope.turnOwner];
-                        var allocation = Math.min(player.armies.available, 5);
-                        player.armies.available -= allocation;
-                        player.armies.availableThisTurn += allocation;
-                    },
-                    'mapClick': function (e) {
+        "play": {
+            0: {// place armies
+                "mapClick": function (e) {
+                    var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                    
+                    var d = $q.defer();
+                    getCurrentPlayer().$fortify({
+                        to: territory.id,
+                        armies: 4
+                    }, d.resolve, d.reject);
+                    return d.promise;
+                }
+            }, 
+            1: {// attack
+                "data": {},
+                "mapClick": function (e) {
+                    var data = $scope.states.play[1].data;
+                    if (!data.attacking) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                        if (!territory) return;
-                        if (territory.owner != $scope.players[$scope.turnOwner]) return;
+                        if (map.getOwnerOfTerritory($scope.players, territory.id).name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
+                        data['attacking'] = territory;
                         
-                        territory.armies++;
-                        if (--territory.owner.armies.availableThisTurn <= 0) $scope.nextTurn();
-                    }
-                }, 
-                1: {
-                    'mapClick': function (e) {
+                        console.log("set attacking to " + territory.id);
                         
-                    }
-                }, 
-                2: {
-                    'mapClick': function (e) {
+                    } else if (!data.defending) {
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
+                        data['defending'] = territory;
                         
-                    }
-                }, 
-                3: {
-                    'mapClick': function (e) {
+                        console.log(data);
+                        console.log(data.attacking);
+                        console.log(data.attacking.id);
+                        console.log("set defending to " + territory.id);
+                        console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
                         
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?")*1;// eventually Toast.prompt
+                        if (isNaN(die)) throw new Exception("Not a number");
+                        var armies = map.getDeedForTerritory(territory);
+                        if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
+                        data.attackingDie = die;
+                        
+                        console.log("set attacking die to " + die);
+                        
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?")*1;// eventually Toast.prompt
+                        if (isNaN(die)) throw new Exception("Not a number");
+                        var armies = map.getDeedForTerritory(territory);
+                        if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive");
+                        data.defendingDie = die;
+                        
+                        console.log("set defending die to " + die);
+                        
+                    } else {
+                        // send attack
+                        var d = $q.defer();
+                        getCurrentPlayer().$attack({
+                            to: territory.id,
+                            armies: 4
+                        }, d.resolve, d.reject);
+                        return d.promise;
                     }
                 }
+            }, 
+            2: {// fortify
+                "mapClick": function (e) {
+                    
+                }
             },
-            'deinit': function () {
-                $scope.setState('play');
+            3: {// end turn
+                "mapClick": function (e) {
+                    
+                }
             }
         }
     }
     
-    $scope.setState('setup');
+    $scope.automateSetup = function () {
+        $scope.turnOrder.$automateSetup({}, function () {
+            $scope.players = Player.query();
+            
+        }, Toast.error);
+    };
     
-    var playerColors = ['#0971B2', '#FFFC19', '#B21212', '#11C422', '#AC15B2', '#B26012'];
-    
-    $scope.players = modelloader.get('players');
-    for (var i=0 ; i < $scope.players.length ; i++) {
-        $scope.players[i].color = (i < 5) ? playerColors[i] : generateRandomColor();
-        $scope.players[i].armies = {
-            'availableThisTurn': 0,
-            'available': $scope.players[i].armies,
-            'total': $scope.players[i].armies
-        };
-        $scope.players[i].getTerritories = function () {
-            var owned = [];
-            for (var j=0 ; j < map.polygons.length ; j++) {
-                if (map.polygons[j].owner.name == this.name) {
-                    owned.push(map.polygons[j]);
-                }
-            }
-            return owned;
-        };
-    }
-    
-    var polygons = modelloader.get('territories');
-    var map = new Map(document.getElementById('map'), polygons, {});
-    map.draw();
+    $scope.automatePlacearmies = function () {
+        $scope.turnOrder.$automatePlacearmies({}, function () {
+            $scope.players = Player.query();
+        }, Toast.error);
+    };
     
     $scope.onMapClick = function (e) {
-        $scope.states[$scope.state].actions[$scope.currentAction].mapClick(e);
-    };
+        handleAction($scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick, [e]);
+    }
     
-    $scope.automateTerritorySelection = function () {
-        for (var i=0 ; i < map.polygons.length ; i++) {
-            map.polygons[i].owner = $scope.players[i % $scope.players.length];
+    function handleAction(func, args) {
+        var d = $q.defer();
+        try {
+            var value = func.apply(null, args);
+            if (value === undefined || !value.hasOwnProperty("then")) return;
+            d.resolve(value);
+        } catch (e) {
+            d.reject(e);
         }
-        map.draw();
-        $scope.states.setup.deinit();
-    };
+        
+        var a;
+        
+        d.promise.then(function () {
+            var p = $q.defer();
+            a = new Date().getTime();
+            $scope.players = Player.query({}, p.resolve, p.reject);
+            return p.promise;
+            
+        }).then(function (data) {
+            console.log(new Date().getTime() - a);
+            console.log($scope.players[0].territories);
+            map.draw($scope.players);
+            nextAction();
+            
+        }, function (error) {
+            console.error("yikes!");
+            console.log(error);
+            Toast.error(error);
+        });
+    }
     
-    $scope.automateArmySelection = function (playerIndex) {
-        var player = $scope.players[playerIndex || $scope.turnOwner];
-        
-        var territories = player.getTerritories();
-        var armies = player.armies.availableThisTurn;
-        var each = Math.floor(armies / territories.length);
-        
-        if (!territories[0].armies) territories[0].armies = 0;
-        territories[0].armies += armies - (territories.length-1)*each;
-        
-        for (var i=1 ; i < territories.length ; i++) {
-            if (!territories[i].armies) territories[i].armies = 0;
-            territories[i].armies += each;
+    var map;
+    $scope.map = Map.get({}, function () {
+        $scope.players = Player.query({}, function () {
+            map = new CanvasMap(document.getElementById("map"), $scope.map, $scope.players, {});
+        });
+    });
+    
+    $scope.$watch("players", function () {
+        if (map) {
+            console.log("redraw");
+            map.draw($scope.players);
         }
-        map.draw();
-        $scope.nextTurn();
-    };
+    }, true);
+    
 });

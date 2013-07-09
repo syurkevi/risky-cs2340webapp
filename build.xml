@@ -19,6 +19,9 @@
 		<fileset dir="${catalina.home}/lib">
 			<include name="*.jar"/>
 		</fileset>
+        <fileset dir="lib">
+          <include name="*.jar"/>
+        </fileset>
 
 	</path>
 
@@ -29,7 +32,7 @@
 	<target name="compile" description="Compile Java sources">
 		<!-- Compile Java classes as necessary -->
 		<mkdir dir="${build.home}/WEB-INF/classes"/>
-		<javac srcdir="${src.home}" destdir="${build.home}/WEB-INF/classes" includeantruntime="false">
+		<javac srcdir="${src.home}" destdir="${build.home}/WEB-INF/classes" includeantruntime="false" debug="true">
 			<classpath refid="compile.classpath"/>
 		</javac>
 	</target>
@@ -37,6 +40,9 @@
 	<target name="prepare" depends="compile">
 		<copy todir="${build.home}">
 			<fileset dir="${src.home}/webapp"/>
+		</copy>
+		<copy todir="${build.home}/WEB-INF/lib/">
+			<fileset dir="${basedir}/lib"/>
 		</copy>
 	</target>
 
