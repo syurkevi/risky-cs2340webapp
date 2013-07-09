@@ -30,3 +30,9 @@ body {
 
 .action-bar {
     font-size: 85%;}
+
+.action-bar > div {
+    padding: .25em;}
+
+.highlighted {
+    background-color: #ddd;}

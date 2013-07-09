@@ -143,20 +143,6 @@ public class PlayerController extends ApiServlet {
         throw new Exception("Could not seize territory");
     }
     
-    @ApiParams({"request", "to", "armies"})
-    public Object fortifyTerritory(HttpServletRequest request, String to, String armies) throws Exception {
-        Player player = Player.get(request);
-        TerritoryDeed toDeed = Territory.get(request, to);
-        
-        if (!toDeed.playerId.equals(player.id)) {
-            throw new Exception("You do not own this territory");
-        }
-        
-        int number = Integer.parseInt(armies);
-        player.fortifyTerritory(null, toDeed, number);
-        return player;
-    }
-    
     @ApiParams({"request", "from", "to", "armies"})
     public Object fortifyTerritory(HttpServletRequest request, String from, String to, String armies) throws Exception {
         Player player = Player.get(request);

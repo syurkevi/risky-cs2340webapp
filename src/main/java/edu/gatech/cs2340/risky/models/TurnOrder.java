@@ -91,6 +91,7 @@ public class TurnOrder {
     protected void handleActionTransition() {
         Lobby lobby = Lobby.get(this.lobbyId);
         Player player = lobby.getPlayers().get(this.playerIndex);
+        
         if ("setup".equals(this.state)) {
             
         } else if ("placearmies".equals(this.state)) {
@@ -98,6 +99,7 @@ public class TurnOrder {
         } else if ("play".equals(this.state)) {
             switch (this.action) {
             case 0:
+                System.out.println("dsl;klajsfllksajdflkasdfj;lksajf;lkjsd;lfkjsaf;lkj " + this.playerIndex + " " + player.name + " " + player.id);
                 player.armiesAvailableThisTurn += (int) Math.max(3.0, Math.ceil(player.territories.size()/3.0));
                 break;
             }
@@ -131,6 +133,11 @@ public class TurnOrder {
             player.territories.put(territoryId, deed);
             player.placeArmiesOnTerritory(1, territoryId);
         }
+        
+        this.state = this.states[1];
+        this.playerIndex = 0;
+        this.action = 0;
+        handleActionTransition();
     }
     
     public void automatePlacearmies() throws Exception {
@@ -147,12 +154,17 @@ public class TurnOrder {
                 Object territoryId = entry.getKey();
                 int amount = each;
                 if (i == 0) {// account for armies lost due to integer division
-                    amount = available - each * player.territories.size();
+                    amount = available - each * (player.territories.size() - 1);
                 }
                 player.placeArmiesOnTerritory(amount, territoryId);
                 i++;
             }
         }
+        
+        this.state = this.states[2];
+        this.playerIndex = 0;
+        this.action = 0;
+        handleActionTransition();
     }
     
     public static TurnOrder get(HttpServletRequest request) {

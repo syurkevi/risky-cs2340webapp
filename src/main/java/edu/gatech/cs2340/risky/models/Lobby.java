@@ -1,6 +1,7 @@
 package edu.gatech.cs2340.risky.models;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,6 +41,7 @@ public class Lobby extends Model {
         for (Object playerId : this.players) {
             players.add(playerDb.read(playerId));
         }
+        Collections.sort(players);
         return players;
     }
     

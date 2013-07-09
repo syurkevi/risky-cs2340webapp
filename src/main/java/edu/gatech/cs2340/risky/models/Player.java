@@ -10,7 +10,7 @@ import edu.gatech.cs2340.risky.RiskyServlet;
 import edu.gatech.cs2340.risky.database.ArrayListDbImpl;
 import edu.gatech.cs2340.risky.database.ModelDb;
 
-public class Player extends Model {
+public class Player extends Model implements Comparable {
     
     private static String[] colors = {"#cc7719", "#e0d21b", "#841f87", "#235adb", "#cc2819", "#878787"};
     private static int instanceCount = 0;
@@ -44,12 +44,14 @@ public class Player extends Model {
     public void allocateArmies(int number) {
         this.armies += number;
         this.armiesAvailableThisTurn += number;
+        System.out.println("giving " + number + " to player");
     }
     
     public int placeArmiesOnTerritory(int number, Object territoryId) {
         number = Math.min(number, this.armiesAvailableThisTurn);
         territories.get(territoryId).armies += number;
         this.armiesAvailableThisTurn -= number;
+        System.out.println("player " + this.id + " giving " + number + " to " + territoryId);
         return number;// number of armies actually attacked with
     }
     
@@ -119,7 +121,17 @@ public class Player extends Model {
         return playerDb.read(id);
     }
     
+    public static Player get(Integer id) {
+        ModelDb<Player> playerDb = Database.getDb(Player.class, new ArrayListDbImpl<Player>());
+        return playerDb.read(id);
+    }
+    
     public static ModelDb<Player> getDb() {
         return Database.getDb(Player.class, new ArrayListDbImpl<Player>());
+    }
+
+    @Override
+    public int compareTo(Object arg0) {
+        return (Integer)this.id - (Integer)((Player)arg0).id;
     }
 }

@@ -40,10 +40,9 @@
             </div>
         </div>
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'play'" ng-class="action{{currentAction}}">
-            <div class="span4">
+            <div class="span4" ng-class="turnOrder.action == 0 | iif : 'highlighted' : ''">
                 <h4>Place armies</h4>
-                <div>Click territories to place an army</div>
-                <div>Hit 'u' to undo an placement</div>
+                <div>Click a territory to place an army</div>
             </div>
             <div class="span4">
                 <h4>Attack</h4>

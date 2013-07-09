@@ -32,10 +32,12 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     
+                    var d = $q.defer();
                     getCurrentPlayer().$fortify({
                         to: territory.id,
                         armies: 4
-                    }, resolve, reject);
+                    }, d.resolve, d.reject);
+                    return d.promise;
                 }
             }
         },
@@ -54,7 +56,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             }, 
             1: {// attack
                 "data": {},
-                "mapClick": function (resolve, reject, e) {
+                "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     if (!data.attacking) {
                         data.attacking = territory.id;
@@ -70,10 +72,12 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         
                     } else {
                         // send attack
+                        var d = $q.defer();
                         getCurrentPlayer().$attack({
                             to: territory.id,
                             armies: 4
-                        }, resolve, reject);
+                        }, d.resolve, d.reject);
+                        return d.promise;
                     }
                 }
             }, 
@@ -91,25 +95,24 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     }
     
     $scope.automateSetup = function () {
-        handleAction(function () {
-            var d = $q.defer();
-            $scope.turnOrder.$automateSetup({}, d.resolve, d.reject);
-            return d.promise;
-        });
+        $scope.turnOrder.$automateSetup({}, function () {
+            $scope.players = Player.query();
+            
+        }, Toast.error);
     };
     
     $scope.automatePlacearmies = function () {
-        handleAction(function () {
-            var d = $q.defer();
-            $scope.turnOrder.$automatePlacearmies({}, d.resolve, d.reject);
-            return d.promise;
-        });
+        $scope.turnOrder.$automatePlacearmies();
     };
     
     $scope.onMapClick = function (e) {
+        handleAction($scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick, [e]);
+    }
+    
+    function handleAction(func, args) {
         var d = $q.defer();
         try {
-            d.resolve($scope.states[$scope.turnOrder.state][$scope.turnOrder.action].mapClick(e));
+            d.resolve(func.apply(null, args));
         } catch (e) {
             d.reject(e);
         }
@@ -133,7 +136,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             Toast.error(error);
         });
     }
-    
     
     var map;
     $scope.map = Map.get({}, function () {

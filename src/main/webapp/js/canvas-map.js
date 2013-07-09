@@ -32,6 +32,8 @@ CanvasMap.prototype.labelTerritory = function (territory, player) {
         }
     }
     
+    text = text + " (" + territory.id + ")";
+    
     var center = this.calculateCenter(territory);
     var x = center[0];
     var y = center[1];
