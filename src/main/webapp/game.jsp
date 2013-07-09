@@ -33,13 +33,6 @@
             </div>
         </div>
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'placearmies'" ng-class="action{{currentAction}}">
-            <div class="span3">
-                <h4>Place armies</h4>
-                <div>{{players[turnOrder.playerIndex].armiesAvailableThisTurn}} armies left</div>
-                <div><a class="btn btn-primary btn-mini" ng-click="automateArmySelection()">Automate</a></div>
-            </div>
-        </div>
-        <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'placearmies'" ng-class="action{{currentAction}}">
             <div class="span4">
                 <h4>Place armies</h4>
                 <div>{{players[turnOrder.playerIndex].armiesAvailableThisTurn}} armies left</div>
@@ -66,6 +59,19 @@
         <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'gameover'" ng-class="action{{currentAction}}">
             <div class="span12">
                 <h4>A WinRAR is you!</h4>
+            </div>
+        </div>
+    </div>
+    <div class="toasts" style="position: fixed; bottom: 32px; left: 50%;">
+        <div id="toast{{toast.id}}" class="alert alert-block alert-{{toast.type}}" ng-repeat="toast in toasts" style="position: relative; left: -50%;width: 480px; min-height: 48px; margin: 2px auto; animation: pop-in 0.5s;">
+            <button class="btn btn-mini btn-{{toast.type}} pull-right" ng-show="toast.buttons.length == undefined" onclick="clearElement(this.parentNode);"><span class="icon-remove"></span></button>
+            <strong>{{toast.message}}</strong>
+            <div class="btn-group" ng-show="toast.buttons.length > 0">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Armies<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="button in toast.buttons" id="{{button.value}}">{{button.name}}</li>
+                </ul>
+                <!--button class="btn" ng-repeat="button in toast.buttons" ng-click="alert('button.value')">{{button.name}}</button-->
             </div>
         </div>
     </div>
