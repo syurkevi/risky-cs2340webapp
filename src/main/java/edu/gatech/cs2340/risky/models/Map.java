@@ -12,11 +12,11 @@ import edu.gatech.cs2340.risky.database.HashMapDbImpl;
 
 public class Map extends Model {
     public ArrayList<Territory> territories;
-    public HashMap<Object, TerritoryDeed> deeds;
+    public HashMap<String, TerritoryDeed> deeds;
     
     public Map() {
         this.territories = new ArrayList<Territory>();
-        this.deeds = new HashMap<Object, TerritoryDeed>();
+        this.deeds = new HashMap<String, TerritoryDeed>();
     }
     
     public void addTerritory(Territory t) {

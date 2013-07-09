@@ -129,7 +129,7 @@ public class TurnOrder {
             Object territoryId = map.territories.get(i).id;
             TerritoryDeed deed = new TerritoryDeed(player.id);
             deed.playerId = player.id;
-            map.deeds.put(territoryId, deed);
+            map.deeds.put(territoryId.toString(), deed);
             player.territories.put(territoryId, deed);
             player.placeArmiesOnTerritory(1, territoryId);
         }
