@@ -102,7 +102,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     };
     
     $scope.automatePlacearmies = function () {
-        $scope.turnOrder.$automatePlacearmies();
+        $scope.turnOrder.$automatePlacearmies({}, function () {
+            $scope.players = Player.query();
+        }, Toast.error);
     };
     
     $scope.onMapClick = function (e) {
