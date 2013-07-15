@@ -104,11 +104,11 @@ function pointInPoly(point, polygon) {
     return c;
 }
 
-function clearElement(e,t) {
+function clearElement(e,t) { 
     var delay = (t)?t:0, element = (e && e.nodeType)?e:document.getElementById(e);
     setTimeout(function(){
         element.style.animation="pop-out 0.8s ease-in";
-        setTimeout(function(){element.style.display="none"},400);
+        setTimeout(function(){element.style.display="none"},700);
         //setTimeout(function(){element.style.display="none"},3400);
     },delay);
     //var display = getComputedStyle(e,null);

@@ -23,8 +23,10 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     }, d.resolve, d.reject);
                     return d.promise;
                 }
-            },
-            1: {// place army
+            }
+        },
+        "placearmies":{
+            0: {// place army
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     
@@ -41,9 +43,8 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             0: {// place armies
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                    
+                    Toast.notify("territory fortified");
                     var d = $q.defer();
-                    Toast.notify("fortify a territory");
                     getCurrentPlayer().$fortify({
                         to: territory.id,
                         armies: 4
