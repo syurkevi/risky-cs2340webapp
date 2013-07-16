@@ -64,7 +64,9 @@ risky.service("Toast", function ($rootScope) {
 }).factory("TurnOrder", function ($resource) {
     return $resource("/risky/api/turnOrder", {}, {
         "nextAction": {method: "POST", params: {action: "nextAction"}},
-        "nextTurn": {method: "POST", params: {action: "nextTurn"}}
+        "nextTurn": {method: "POST", params: {action: "nextTurn"}},
+        "automateSetup": {method: "POST", params: {action: "automateSetup"}},
+        "automatePlacearmies": {method: "POST", params: {action: "automatePlacearmies"}}
     });
 });
 

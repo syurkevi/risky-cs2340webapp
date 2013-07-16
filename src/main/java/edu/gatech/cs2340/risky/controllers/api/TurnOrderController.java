@@ -39,4 +39,18 @@ public class TurnOrderController extends ApiServlet {
         return order;
     }
     
+    @ApiParams({"request"})
+    public Object automateSetup(HttpServletRequest request) throws Exception {
+        TurnOrder order = TurnOrder.get(request);
+        order.automateSetup();
+        return order;
+    }
+    
+    @ApiParams({"request"})
+    public Object automatePlacearmies(HttpServletRequest request) throws Exception {
+        TurnOrder order = TurnOrder.get(request);
+        order.automatePlacearmies();
+        return order;
+    }
+    
 }

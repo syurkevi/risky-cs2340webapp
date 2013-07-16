@@ -2,6 +2,7 @@ package edu.gatech.cs2340.risky.controllers.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +13,6 @@ import edu.gatech.cs2340.risky.database.ModelDb;
 import edu.gatech.cs2340.risky.models.Lobby;
 import edu.gatech.cs2340.risky.models.Map;
 import edu.gatech.cs2340.risky.models.Player;
-import edu.gatech.cs2340.risky.models.Territory;
 import edu.gatech.cs2340.risky.models.TerritoryDeed;
 
 @WebServlet(urlPatterns = {
@@ -143,25 +143,19 @@ public class PlayerController extends ApiServlet {
         throw new Exception("Could not seize territory");
     }
     
-    @ApiParams({"request", "to", "armies"})
-    public Object fortifyTerritory(HttpServletRequest request, String to, String armies) throws Exception {
-        Player player = Player.get(request);
-        TerritoryDeed toDeed = Territory.get(request, to);
-        
-        if (!toDeed.playerId.equals(player.id)) {
-            throw new Exception("You do not own this territory");
-        }
-        
-        int number = Integer.parseInt(armies);
-        player.fortifyTerritory(null, toDeed, number);
-        return player;
-    }
-    
     @ApiParams({"request", "from", "to", "armies"})
     public Object fortifyTerritory(HttpServletRequest request, String from, String to, String armies) throws Exception {
         Player player = Player.get(request);
-        TerritoryDeed fromDeed = Territory.get(request, from);
-        TerritoryDeed toDeed = Territory.get(request, to);
+        Map map = Map.get(request);
+        TerritoryDeed fromDeed = map.deeds.get(from);
+        TerritoryDeed toDeed = map.deeds.get(to);
+        
+        System.out.println(to);
+        System.out.println(to.getClass().getName());
+        
+        for (Entry<String, TerritoryDeed> deed : map.deeds.entrySet()) {
+            System.out.println(deed.getKey() + " " + deed.getValue().playerId);
+        }
         
         if (!toDeed.playerId.equals(player.id)) {
             throw new Exception("Not your territory");

@@ -42,9 +42,35 @@ public class MapFactory {
             {{32, 26}, {36, 24}, {38, 22}, {40, 24}, {37, 27}, {33, 27}}
         };
         
+        Object[][] adjacencies = {
+                {1, 3, 22},//0
+                {2, 3},
+                {3, 4, 5},//2
+                {4, 20},
+                {9, 23},//4
+                {6, 7, 9},
+                {7, 8},//6
+                {8, 9},
+                {9, 10, 11, 12},//8
+                {10},
+                {12, 13, 23},//10
+                {15, 14, 12},
+                {13, 14, 15},//12
+                {14, 15, 16, 23},
+                {15},//14
+                {16},
+                {17},//16
+                {23, 19, 18},
+                {21, 20, 19},//18
+                {20},
+                {21},//20
+                {22},
+                {},//22
+                {},
+        };
+        
         for (int i=0 ; i < vertexeses.length ; i++) {
-            Territory t = new Territory(i, vertexeses[i]);
-            
+            Territory t = new Territory(i, vertexeses[i], adjacencies[i]);
             m.addTerritory(t);
         }
         
