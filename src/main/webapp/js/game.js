@@ -3,6 +3,8 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.lobby = Lobby.get();
     $scope.turnOrder = TurnOrder.get();
     $scope.players = Player.query();
+    $scope.map = Map.get();
+    
     function getCurrentPlayer() {
         return $scope.players[$scope.turnOrder.playerIndex];
     }
@@ -25,7 +27,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 }
             }
         },
-        "placearmies":{
+        "placearmies": {
             0: {// place army
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
@@ -43,7 +45,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             0: {// place armies
                 "mapClick": function (e) {
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                    Toast.notify("territory fortified");
+                    
                     var d = $q.defer();
                     getCurrentPlayer().$fortify({
                         to: territory.id,
@@ -56,51 +58,50 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 "data": {},
                 "mapClick": function (e) {
                     var data = $scope.states.play[1].data;
-                    if (!data.attacking) {
-                        Toast.notify(getCurrentPlayer()+" is attacking!");
-                        Toast.notify("chose attack origin");
+                    if (!data.attacking) {// get the territory to attack from
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
                         data['attacking'] = territory;
                         
-                        Toast.notify("attacking territory " + territory.id);
+                        console.log("set attacking to " + territory.id);
                         
-                    } else if (!data.defending) {
+                    } else if (!data.defending) {// get the territory to defend from
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
                         data['defending'] = territory;
                         
-                        //Toast.notify(data);
-                        //Toast.notify(data.attacking);
-                        //Toast.notify(data.attacking.id);
-                        Toast.notify("defending territory " + territory.id);
-                        //Toast.notify(map.getOwnerOfTerritory($scope.players, data.attacking.id));
-                        var armiesButton=[]
-                        for(var i = 0; i < 5; i++) {
-                            armiesButton.push({"name":""+(i+1),"value":i+1});
-                        }
-                        var die = Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?",armiesButton)*1;// eventually Toast.prompt
+                        console.log(data);
+                        console.log(data.attacking);
+                        console.log(data.attacking.id);
+                        console.log("set defending to " + territory.id);
+                        console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
+                        
+                        // get attacking number of die
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?")*1;// @SY make this a Toast.prompt, or however you've implemented
                         if (isNaN(die)) throw new Exception("Not a number");
                         var armies = map.getDeedForTerritory(territory);
                         if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
                         data.attackingDie = die;
                         
-                        Toast.notify("set attacking die to " + die);
+                        console.log("set attacking die to " + die);
                         
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?")*1;// eventually Toast.prompt
+                        // get number of defending die
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?")*1;// @SY and here too
                         if (isNaN(die)) throw new Exception("Not a number");
                         var armies = map.getDeedForTerritory(territory);
-                        if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive"); // Does not return anythig yet (not even a promise)
+                        if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive");
                         data.defendingDie = die;
                         
-                        Toast.notify("set defending die to " + die);
+                        console.log("set defending die to " + die);
                         
                     } else {
                         // send attack
                         var d = $q.defer();
                         getCurrentPlayer().$attack({
-                            to: territory.id,
-                            armies: 4
+                            from: data.attacking.id,
+                            to: data.defending.id, // could this just be $attack(data, d.resolve ....?
+                            attackingDie: data.attackingDie,
+                            defendingDie: data.defendingDie
                         }, d.resolve, d.reject);
                         return d.promise;
                     }
