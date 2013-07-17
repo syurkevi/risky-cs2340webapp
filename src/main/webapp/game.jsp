@@ -65,16 +65,16 @@
     </div>
     <div class="toasts" ng-controller="ToastController">
         <div id="toast{{toast.id}}" class="toast alert alert-block alert-{{toast.type}}" ng-repeat="toast in toasts" >
-            <button class="btn btn-mini btn-{{toast.type}} pull-right" ng-show="toast.type != 'success'" ng-click="closeToast(toast.id)"><span class="icon-remove"></span></button>
+            <button class="btn btn-mini btn-{{toast.type}} pull-right" ng-show="toast.type != 'success'" ng-click="toastClose(toast.id)"><span class="icon-remove"></span></button>
             <strong>{{toast.message}}</strong>
             <div class="pagination pagination-small" ng-show="toast.type == 'success'">
                 <ul>
                     <li ng-class="toast.firstvalue"><a href="#" ng-click="selectValue($index,1)">&laquo;</a></li>
-                    <li ng-repeat="value in toast.values" ng-class="value.selected"><a href="#" ng-bind="value" ng-click="selectValue($parent.$index,$index)"></a></li>
-                    <li ng-class="toast.lastvalue"><a href="#" ng-click="selectValue($index,toast.value.length)">&raquo;</a></li>
+                    <li ng-repeat="value in toast.values" ng-class="value.selected"><a href="#" ng-bind="value" ng-click="selectValue($parent.$index,$index+1)"></a></li>
+                    <li ng-class="toast.lastvalue"><a href="#" ng-click="selectValue($index,0)">&raquo;</a></li>
                 </ul>
+                <button class="btn btn-primary btn-small" ng-click="toastReply(toast.id); toastClose(toast.id);">Execute {{toast.selected}}</button>
             </div>
-            <button class="btn btn-primary btn-small" ng-click="toastReply($index)">Execute</button>
             <!--div class="btn-group" ng-show="toast.buttons.length > 0">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Armies<span class="caret"></span></a>
                 <ul class="dropdown-menu">

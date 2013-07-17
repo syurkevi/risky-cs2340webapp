@@ -7,9 +7,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     /*var rbuttons=[]
     for(var i = 0; i < 10; i++) {
         rbuttons.push({"name":i+(i===1)?" army":" armies","value":i});
-    }*/
+    }
     var toastest = Toast.request("Attack with how many dies?",[1,25]);
-    toastest.then(function(e){alert(e);});
+    toastest.then(function(e){alert(e);});*/
     
     function getCurrentPlayer() {
         return $scope.players[$scope.turnOrder.playerIndex];
@@ -82,24 +82,29 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         console.log("set defending to " + territory.id);
                         console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
                         
-                        Toast.request("Attack with how many dies?",[3,15]);
                         // get attacking number of die
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many die?")*1;
-                        if (isNaN(die)) throw new Exception("Not a number");
-                        var armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id]; // map.getDeedForTerritory(territory.id);
-                        if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
-                        data.attackingDie = die;
-                        
-                        console.log("set attacking die to " + die);
-                        
+                        var attack_armies = map.getOwnerOfTerritory($scope.players, data.attacking.id).territories[data.attacking.id].armies; // map.getDeedForTerritory(territory.id);
+                        var attack_promise = Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many dice?", [1,attack_armies-1]);
+                        var defend_armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id].armies; // map.getDeedForTerritory(territory.id);
+                        var defend_promise = Toast.request(map.getOwnerOfTerritory($scope.players, territory.id).name + ", defend with how many dice?", [1,Math.min(defend_armies, 2)]);
+
+                        attack_promise.then(function (die) { // TODO: proper promise flow.
+                            if (isNaN(die)) throw new Exception("Not a number");
+                            if (die < 1 || die >= attack_armies) throw new Exception("Cannot use that many dice. Must be between 1 exclusive and " + (attack_armies-1) + " inclusive");
+                            data.attackingDie = die;
+                            
+                            console.log("set attacking die to " + die);
+                        });
+
                         // get number of defending die
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many die?")*1;// @SY and here too
-                        if (isNaN(die)) throw new Exception("Not a number");
-                        var armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id]; // map.getDeedForTerritory(territory.id);
-                        if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive");
-                        data.defendingDie = die;
-                        
-                        console.log("set defending die to " + die);
+                        //var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many die?")*1;// @SY and here too
+                        defend_promise.then(function (defdie) {
+                            if (isNaN(defdie)) throw new Exception("Not a number");
+                            if (defdie < 0 || defdie > 3 /* 2? */) throw new Exception("Cannot use that many dice. Must be between 1 and " + Math.min(defend_armies, 2) + " inclusive");
+                            data.defendingDie = defdie;
+                            
+                            console.log("set defending die to " + defdie);
+                        });
                         
                     } else {
                         // send attack
