@@ -53,9 +53,11 @@
             </div>
             <div class="span4" ng-class="turnOrder.action == 1 | iif : 'highlighted' : ''">
                 <h4>Attack</h4>
-                <div>Attack who?</div>
-                <div>Where from?</div>
-                <div>Repeat as necessary</div>
+                <div>Attack from {{states.play[1].data.attacking.id | oor : 'where?'}}</div>
+                <div>Attack {{states.play[1].data.defending.id | oor : 'where?'}}</div>
+                <div>Attack with {{states.play[1].data.attackingDie | oor : '0'}} die</div>
+                <div>Defend with {{states.play[1].data.defendingDie | oor : '0'}} die</div>
+                <div ng-show="$scope.states.play[1].data.attacking && $scope.states.play[1].data.defending && $scope.states.play[1].data.attackingDie && $scope.states.play[1].data.defendingDie">Repeat as necessary</div>
             </div>
             <div class="span4" ng-class="turnOrder.action == 2 | iif : 'highlighted' : ''">
                 <h4>Fortify</h4>
@@ -70,16 +72,17 @@
             </div>
         </div>
     </div>
-    <div class="toasts" style="position: fixed; bottom: 32px; left: 50%;">
-        <div id="toast{{toast.id}}" class="alert alert-block alert-{{toast.type}}" ng-repeat="toast in toasts" style="position: relative; left: -50%;width: 480px; min-height: 48px; margin: 2px auto; animation: pop-in 0.5s;">
+    
+    <div class="toasts">
+        <div id="toast{{id}}" class="toast alert alert-block alert-{{toast.type}}" ng-repeat="(id, toast) in toasts">
             <button class="btn btn-mini btn-{{toast.type}} pull-right" ng-show="toast.buttons.length == undefined" onclick="clearElement(this.parentNode);"><span class="icon-remove"></span></button>
             <strong>{{toast.message}}</strong>
             <div class="btn-group" ng-show="toast.buttons.length > 0">
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Armies<span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li ng-repeat="button in toast.buttons" id="{{button.value}}">{{button.name}}</li>
+                    <li ng-repeat="button in toast.buttons" id="{{button.value}}" ng-click="toast.q.resolve(button)">{{button.name}}</li>
                 </ul>
-                <!--button class="btn" ng-repeat="button in toast.buttons" ng-click="alert('button.value')">{{button.name}}</button-->
+                <button class="btn" ng-repeat="button in toast.buttons" ng-click="alert('button.value')">{{button.name}}</button>
             </div>
         </div>
     </div>

@@ -27,6 +27,8 @@
 
 	<target name="clean" description="Delete old build and dist directories">
 		<delete dir="${build.home}"/>
+        <delete dir="${catalina.home}/webapps/${app.name}" />
+		<mkdir dir="${catalina.home}/webapps/${app.name}"/>
 	</target>
 
 	<target name="compile" description="Compile Java sources">
@@ -47,8 +49,8 @@
 	</target>
 	
 	<target name="deploy" depends="prepare">
-		<mkdir dir="${catalina.home}/webapps/${app.name}"/>
-		<copy todir="${catalina.home}/webapps/${app.name}">
+		<mkdir dir="${catalina.base}/webapps/${app.name}"/>
+		<copy todir="${catalina.base}/webapps/${app.name}">
 			<fileset dir="${build.home}"/>
 		</copy>
 	</target>

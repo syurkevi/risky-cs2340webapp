@@ -60,44 +60,42 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 "mapClick": function (e) {
                     var data = $scope.states.play[1].data;
                     if (!data.attacking) {
-                        Toast.notify(getCurrentPlayer()+" is attacking!");
+                        Toast.notify(getCurrentPlayer().name + " is attacking!");
                         Toast.notify("chose attack origin");
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
-                        data['attacking'] = territory;
+                        data["attacking"] = territory;
                         
-                        Toast.notify("attacking territory " + territory.id);
+                        Toast.notify("Attacking from territory " + territory.id + ". Where are you attacking?");
                         
                     } else if (!data.defending) {// get the territory to defend from
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
-                        data['defending'] = territory;
+                        data["defending"] = territory;
                         
-                        //Toast.notify(data);
-                        //Toast.notify(data.attacking);
-                        //Toast.notify(data.attacking.id);
-                        Toast.notify("defending territory " + territory.id);
-                        //Toast.notify(map.getOwnerOfTerritory($scope.players, data.attacking.id));
-                        var armiesButton=[]
-                        for(var i = 0; i < 5; i++) {
-                            armiesButton.push({"name":""+(i+1),"value":i+1});
+                        Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
+                        
+                        function generateNumericButtons(min, max) {
+                            var buttons = [];
+                            for (var i=min ; i <= max ; i++) {
+                                buttons.push({"name": i+"", "value": i});
+                            }
+                            return buttons;
                         }
-                        var die = Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?",armiesButton)*1;// eventually Toast.prompt
-                        if (isNaN(die)) throw new Exception("Not a number");
-                        var armies = map.getDeedForTerritory(territory);
-                        if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
-                        data.attackingDie = die;
                         
-                        Toast.notify("set attacking die to " + die);
+                        var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
+                        var maxDefendingArmies = map.getDeedForTerritory(data.defending).armies;
                         
-                        // get number of defending die
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?")*1;// @SY and here too
-                        if (isNaN(die)) throw new Exception("Not a number");
-                        var armies = map.getDeedForTerritory(territory);
-                        if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive");
-                        data.defendingDie = die;
-                        
-                        Toast.notify("set defending die to " + die);
+                        // then ask for the number of die to attack and defend with
+                        Toast.request(undefined, map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?", generateNumericButtons(1, Math.min(maxAttackingArmies, 3))).then(function (value) {
+                            console.log(value);
+                            data.attackingDie = value;
+                            return Toast.request(undefined, map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?", generateNumericButtons(1, Math.min(maxDefendingArmies, 2)));
+                            
+                        }).then(function (value) {
+                            console.log(value);
+                            data.defendingDie = value;
+                        });
                         
                     } else {
                         // send attack
@@ -167,8 +165,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             nextAction();
             
         }, function (error) {
-            console.error("yikes!");
-            console.log(error);
             Toast.error(error);
         });
     }
@@ -181,10 +177,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     });
     
     $scope.$watch("players", function () {
-        if (map) {
-            console.log("redraw");
-            map.draw($scope.players);
-        }
+        if (map) map.draw($scope.players);
     }, true);
     
 });

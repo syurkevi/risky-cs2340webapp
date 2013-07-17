@@ -1,7 +1,9 @@
 var risky = angular.module("risky", ["ngResource"]);
-risky.service("Toast", function ($rootScope) {
+risky.service("Toast", function ($rootScope, $q) {
     var toast = {};
-    toast.send = function (id, type, message) {
+    toast.send = function (id, type, message, bundle) {
+        bundle = bundle || {};
+        
         if (arguments.length === 1) {
             console.log(id);
         } else if (message === undefined) {
@@ -17,21 +19,33 @@ risky.service("Toast", function ($rootScope) {
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
         if (!$rootScope.toasts) $rootScope.toasts=[];
-        $rootScope.toasts.push({"id":$rootScope.toasts.length, "type":type, "message":message});
-        setTimeout(function(){clearElement("toast"+($rootScope.toasts.length-1),1000)},1000); 
+        
+        var q = $q.defer();
+        var toast = {"id":$rootScope.toasts.length, "type":type, "message":message, "q": q};
+        
+        for (var property in bundle) {// copy properties of the bundle to the toast
+            toast[property] = bundle[property];
+        }
+        
+        $rootScope.toasts[toast.id] = toast;
+        if (typeof bundle.timeout == "undefined" || bundle.timeout > 0) {
+            setTimeout(function () {
+                clearElement("toast" + toast.id, bundle.timeout || 2000);
+            });
+        }
+        
+        return q.promise;
     };
     toast.notify = function (id, message) {
-        toast.send(id, "notice", message);
+        return toast.send(id, "notice", message);
     };
     toast.error = function (id, message) {
-        toast.send(id, "error", message);
+        return toast.send(id, "error", message);
     };
-    /*
-    toast.request = function (message, requestinfo) {
+    toast.request = function (id, message, requestinfo) {
         // requestinfo = [{"name":name,"value":value},{...},...]
-        if (!$rootScope.toasts) $rootScope.toasts=[]$scope.players.;
-        $rootScope.toasts.push({"id": $rootScope.toasts.length, "type":"success", "message":message, "buttons":requestinfo});
-    };*/
+        return toast.send(id, "request", message, {"buttons":requestinfo, timeout: 0});
+    };
     return toast;
     
 }).directive("swatch", function ($timeout) {
@@ -81,6 +95,10 @@ risky.filter("iif", function () {// ternary operator for {{}}'d things
     return function(input, trueValue, falseValue) {
         return input ? trueValue : falseValue;
     };
+}).filter("oor", function () {// for something || default
+    return function(input, elseValue) {
+        return input || elseValue;
+    };
 });
 
 // Array Remove - By John Resig (MIT Licensed)
@@ -104,12 +122,13 @@ function pointInPoly(point, polygon) {
     return c;
 }
 
-function clearElement(e,t) {
-    var delay = (t)?t:0, element = (e && e.nodeType)?e:document.getElementById(e);
-    setTimeout(function(){
-        element.style.animation="pop-out 0.8s ease-in";
-        setTimeout(function(){element.style.display="none"},400);
-        //setTimeout(function(){element.style.display="none"},3400);
+function clearElement(e, t) {
+    var element = (e && e.nodeType) ? e : document.getElementById(e);
+    var delay = t || 0;
+    
+    setTimeout(function () {
+        element.style.animation = "pop-out 0.8s ease-in";
+        setTimeout(function () {element.style.display="none"}, 800);
     },delay);
     //var display = getComputedStyle(e,null);
 }
