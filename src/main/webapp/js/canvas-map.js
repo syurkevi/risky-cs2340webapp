@@ -22,8 +22,12 @@ CanvasMap.prototype.getOwnershipMap = function (players) {
     return map;
 };
 
-CanvasMap.prototype.getDeedForTerritory = function (players, territory) {
-    return this.getOwnerOfTerritory(players).territories[territory];
+CanvasMap.prototype.getDeedForTerritory = function (territory) {
+    for (var i=0 ; i < this.players.length ; i++) {
+        if (this.players[i].territories[territory.id]) {
+            return this.players[i].territories[territory.id];
+        }
+    }
 };
 
 CanvasMap.prototype.getOwnerOfTerritory = function (players, territory) {
@@ -91,7 +95,7 @@ CanvasMap.prototype.drawTerritory = function (territory, player) {
 CanvasMap.prototype.draw = function (players) {
     this.canvas.width = this.canvas.width;// clear canvas
     this.context.strokeStyle = "#333";
-    //console.log(players[0].territories);
+    
     var ownershipMap = this.getOwnershipMap(players);
     
     if (!this.territories) return;
