@@ -4,12 +4,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.turnOrder = TurnOrder.get();
     $scope.players = Player.query();
     $scope.map = Map.get();
-    /*var rbuttons=[]
-    for(var i = 0; i < 10; i++) {
-        rbuttons.push({"name":i+(i===1)?" army":" armies","value":i});
-    }
-    var toastest = Toast.request("Attack with how many dies?",[1,25]);
-    toastest.then(function(e){alert(e);});*/
     
     function getCurrentPlayer() {
         return $scope.players[$scope.turnOrder.playerIndex];
@@ -53,6 +47,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     
                     var d = $q.defer();
+                    Toast.notify("fortify a territory");
                     getCurrentPlayer().$fortify({
                         to: territory.id,
                         armies: 4
@@ -64,46 +59,33 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 "data": {},
                 "mapClick": function (e) {
                     var data = $scope.states.play[1].data;
-                    if (!data.attacking) {// get the territory to attack from
+                    if (!data.attacking) {
+                        Toast.notify(getCurrentPlayer().name + " is attacking!");
+                        Toast.notify("chose attack origin");
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
-                        data['attacking'] = territory;
+                        data["attacking"] = territory;
                         
-                        console.log("set attacking to " + territory.id);
+                        Toast.notify("Attacking from territory " + territory.id + ". Where are you attacking?");
                         
                     } else if (!data.defending) {// get the territory to defend from
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
-                        data['defending'] = territory;
+                        data["defending"] = territory;
                         
-                        console.log(data);
-                        console.log(data.attacking);
-                        console.log(data.attacking.id);
-                        console.log("set defending to " + territory.id);
-                        console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
+                        Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
                         
-                        // get attacking number of die
-                        var attack_armies = map.getOwnerOfTerritory($scope.players, data.attacking.id).territories[data.attacking.id].armies; // map.getDeedForTerritory(territory.id);
-                        var attack_promise = Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many dice?", [1,attack_armies-1]);
-                        var defend_armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id].armies; // map.getDeedForTerritory(territory.id);
-                        var defend_promise = Toast.request(map.getOwnerOfTerritory($scope.players, territory.id).name + ", defend with how many dice?", [1,Math.min(defend_armies, 2)]);
+                        var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
+                        var maxDefendingArmies = map.getDeedForTerritory(data.defending).armies;
 
-                        attack_promise.then(function (die) { // TODO: proper promise flow.
-                            if (isNaN(die)) throw new Exception("Not a number");
-                            if (die < 1 || die >= attack_armies) throw new Exception("Cannot use that many dice. Must be between 1 exclusive and " + (attack_armies-1) + " inclusive");
-                            data.attackingDie = die;
-                            
-                            console.log("set attacking die to " + die);
-                        });
-
-                        // get number of defending die
-                        //var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many die?")*1;// @SY and here too
-                        defend_promise.then(function (defdie) {
-                            if (isNaN(defdie)) throw new Exception("Not a number");
-                            if (defdie < 0 || defdie > 3 /* 2? */) throw new Exception("Cannot use that many dice. Must be between 1 and " + Math.min(defend_armies, 2) + " inclusive");
-                            data.defendingDie = defdie;
-                            
-                            console.log("set defending die to " + defdie);
+                        // then ask for the number of dice to attack and defend with
+                        Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many dice?", [1,maxAttackingArmies]).then(function (value) {
+                            console.log(value);
+                            data.attackingDie = value;
+                            return Toast.request(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many dice?", [1,Math.min(maxDefendingArmies, 2)]);
+                        }).then(function (value) {
+                            console.log(value);
+                            data.defendingDie = value;
                         });
                         
                     } else {
@@ -174,8 +156,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             nextAction();
             
         }, function (error) {
-            console.error("yikes!");
-            console.log(error);
             Toast.error(error);
         });
     }
@@ -188,10 +168,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     });
     
     $scope.$watch("players", function () {
-        if (map) {
-            console.log("redraw");
-            map.draw($scope.players);
-        }
+        if (map) map.draw($scope.players);
     }, true);
     
 });

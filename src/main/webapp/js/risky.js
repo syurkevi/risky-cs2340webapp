@@ -1,7 +1,9 @@
 var risky = angular.module("risky", ["ngResource"]);
-risky.service("Toast", function ($rootScope,$q) {
+risky.service("Toast", function ($rootScope, $q) {
     var toast = {};
-    toast.send = function (id, type, message) {
+    toast.send = function (id, type, message/*, bundle*/) {
+        //bundle = bundle || {};
+        
         if (arguments.length === 1) {
             console.log(id);
         } else if (message === undefined) {
@@ -16,27 +18,21 @@ risky.service("Toast", function ($rootScope,$q) {
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
+
         $rootScope.$broadcast("new-toast",{"type":type, "message":message}); // event sent to ToastController
-        //if (!$rootScope.toasts) $rootScope.toasts=[];
-        //$rootScope.toasts.push({"id":$rootScope.toasts.length, "type":type, "message":message});
-        //$rootScope.$broadcast("toasty");
-        //setTimeout(function(){clearElement("toast"+($rootScope.toasts.length-1),1000)},1000); 
-    };
+     };
     toast.notify = function (id, message) {
         toast.send(id, "notice", message);
     };
     toast.error = function (id, message) {
         toast.send(id, "error", message);
     };
-    
     toast.request = function (message, requestinfo) { // Currently only set up for number inputs as a range
-        // requestinfo = [{"name":name,"value":value},{...},...]
-        //if (!$rootScope.toasts) $rootScope.toasts=[];
+        // requestinfo = [range-min,range-max] inclusive
         var deferred = $q.defer();
         $rootScope.$broadcast("new-toast",{"type":"success", "message":message, "values":requestinfo});
         $rootScope.$on("toast-reply",function (event,response) {deferred.resolve(response);});
         return deferred.promise;
-        //$rootScope.toasts.push({"id": $rootScope.toasts.length, "type":"success", "message":message, "buttons":requestinfo});
     };
     return toast;
     
@@ -86,6 +82,10 @@ risky.service("Toast", function ($rootScope,$q) {
 risky.filter("iif", function () {// ternary operator for {{}}'d things
     return function(input, trueValue, falseValue) {
         return input ? trueValue : falseValue;
+    };
+}).filter("oor", function () {// for something || default
+    return function(input, elseValue) {
+        return input || elseValue;
     };
 });
 

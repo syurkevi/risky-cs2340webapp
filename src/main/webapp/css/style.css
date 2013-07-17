@@ -1,7 +1,27 @@
+@keyframes pop-in {
+    from {bottom: -32px; opacity: 0; min-height: 0; max-height: 1px; width: 120px; left: -87px;}
+    to {bottom: 0; opacity: 1; min-height: 48px; max-height: 96px; width: 480px; left: -267px;}
+}
+
+@keyframes pop-out {
+    from {bottom: 0; margin-top: 2px; opacity: 1;}
+    to {bottom: 32px; margin-top: -80px; opacity: 0; display: none;}
+}
+
+/* tag-wide styles */
 body {
     margin: 0 auto;
     padding: 1em;
     max-width: 800px;
+}
+
+/* application-neutral class-level styles */
+.right-align {
+    text-align: right;
+}
+
+.left-align {
+    text-align: left;
 }
 
 .oneof2 {
@@ -12,42 +32,6 @@ body {
 .input-micro {
     height: 20px;
     width: 30px;
-}
-
-.color-swatch {
-    display: inline-block;
-    height: 1em;
-    width: 1em;
-}
-
-.row-fluid .no-left-gutter {
-    margin-left: 0;
-}
-
-.row-fluid [class*="span"] > *:first-child {
-    margin-top: 0;
-}
-
-.right-align {
-    text-align: right;
-}
-
-.left-align {
-    text-align: left;
-}
-
-.action-bar {
-    font-size: 85%;
-}
-
-@keyframes pop-in {
-    from {bottom: -32px; opacity: 0; min-height: 0; max-height: 1px; width: 120px; left: -87px;}
-    to {bottom: 0; opacity: 1; min-height: 48px; max-height: 96px; width: 480px; left: -267px;}
-}
-
-@keyframes pop-out {
-    from {bottom: 0; margin-top: 2px; opacity: 1;}
-    to {bottom: 32px; margin-top: -80px; opacity: 0; display: none;}
 }
 
 .toasts {
@@ -65,3 +49,26 @@ body {
     margin: 2px auto;
     animation: pop-in 0.5s;
 }
+.color-swatch {
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+}
+
+/* application-specific overrides */
+.row-fluid .no-left-gutter {
+    margin-left: 0;
+}
+
+.row-fluid [class*="span"] > *:first-child {
+    margin-top: 0;
+}
+
+/* application-specific one-off styles */
+.action-bar {
+    font-size: 85%;
+}
+
+.highlighted {
+    background-color: #ddd;
+    padding: 5px;}
