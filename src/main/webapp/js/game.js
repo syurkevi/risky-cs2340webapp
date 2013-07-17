@@ -82,14 +82,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         console.log("set defending to " + territory.id);
                         console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
                         
-                        // Toast.request("Attack with how many dies?",["button1","button2"],"button3");
-                        /*var rbuttons=[]
-                        for(var i = 0; i < 10; i++) {
-                            rbuttons.push({"name":i+(i===1)?" army":" armies","value":i});
-                        }*/
-                        Toast.request("Attack with how many dies?",[1,10]);
+                        Toast.request("Attack with how many dies?",[3,15]);
                         // get attacking number of die
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many die?")*1;// @SY make this a Toast.prompt, or however you've implemented
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many die?")*1;
                         if (isNaN(die)) throw new Exception("Not a number");
                         var armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id]; // map.getDeedForTerritory(territory.id);
                         if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
