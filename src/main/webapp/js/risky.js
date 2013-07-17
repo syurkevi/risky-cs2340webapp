@@ -9,15 +9,16 @@ risky.service("Toast", function ($rootScope) {
             id = undefined;
         }
         
-        // TODO: inject a <div id="{{id}}" class="toast toast-{{type}}">{{message}}</div> into <div class="toasts"></div>
-        
         var type = (type === "error") ? "error" : "log";
         console[type](message);
+        type = (type === "error") ? "danger" : "info";
         
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
-        alert(message);// remove once that TODO is TODONE
+        if (!$rootScope.toasts) $rootScope.toasts=[];
+        $rootScope.toasts.push({"id":$rootScope.toasts.length, "type":type, "message":message});
+        setTimeout(function(){clearElement("toast"+($rootScope.toasts.length-1),1000)},1000); 
     };
     toast.notify = function (id, message) {
         toast.send(id, "notice", message);
@@ -25,6 +26,12 @@ risky.service("Toast", function ($rootScope) {
     toast.error = function (id, message) {
         toast.send(id, "error", message);
     };
+    /*
+    toast.request = function (message, requestinfo) {
+        // requestinfo = [{"name":name,"value":value},{...},...]
+        if (!$rootScope.toasts) $rootScope.toasts=[]$scope.players.;
+        $rootScope.toasts.push({"id": $rootScope.toasts.length, "type":"success", "message":message, "buttons":requestinfo});
+    };*/
     return toast;
     
 }).directive("swatch", function ($timeout) {
@@ -95,4 +102,14 @@ function pointInPoly(point, polygon) {
         }
     }
     return c;
+}
+
+function clearElement(e,t) {
+    var delay = (t)?t:0, element = (e && e.nodeType)?e:document.getElementById(e);
+    setTimeout(function(){
+        element.style.animation="pop-out 0.8s ease-in";
+        setTimeout(function(){element.style.display="none"},400);
+        //setTimeout(function(){element.style.display="none"},3400);
+    },delay);
+    //var display = getComputedStyle(e,null);
 }

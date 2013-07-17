@@ -51,4 +51,15 @@ public class LobbyController extends ApiServlet {
         return Database.delete(lobby);
     }
     
+    @ApiParams({"request"})
+    public Object automateTerritorySelection(HttpServletRequest request) throws Exception {
+        Lobby lobby = Lobby.get(request);
+        try {
+            lobby.assignTerritories();
+            return lobby;
+        } catch (Exception e) {
+            throw new Exception("No player territory automation");
+        }
+    }
+    
 }

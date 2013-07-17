@@ -16,13 +16,13 @@
 
     <h3>Players</h3>
     <p>
-        <div ng-repeat="player in players">
-            <span>#<span>{{$index}}</span></span>: <input type="text" ng-model="player.name" /><!-- JSPs can't have hashtag followed by an opening curly brace -->
-            <a class="btn btn-danger" ng-click="removePlayer($index)"><i class="icon-remove"></i></a>
-        </div>
         <div class="input-append">
             <input type="text" ng-model="playerName" />
             <a class="btn btn-success" ng-click="addPlayer()">add player</a>
+        </div>
+        <div ng-repeat="player in players">
+            <span>#<!-->{{$index+1}}</span>: <input type="text" ng-model="player.name" /><!-- JSPs can't have hashtag followed by an opening curly brace -->
+            <a class="btn btn-warning" ng-click="removePlayer($index)"><span class="icon-remove"></span></a>
         </div>
     </p>
 

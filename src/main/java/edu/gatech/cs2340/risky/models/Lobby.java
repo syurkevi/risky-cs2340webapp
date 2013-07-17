@@ -75,6 +75,46 @@ public class Lobby extends Model {
         }
     }
     
+    public void assignTerritories(){
+        Map map = Map.get(this.mapId);
+        int numofTerritories = map.territories.size();
+        int territoriesPerPlayer = numofTerritories/players.size();
+        int territoriesExtra = numofTerritories%players.size();
+       
+        //make sure ids will be assigned randomly
+        ArrayList<Integer> terrIds=new ArrayList<Integer>();
+        for(int i=0;i<numofTerritories;++i) {
+            terrIds.add(i);
+        }
+        Collections.shuffle(terrIds);
+        
+        int t_index=0;
+        ModelDb<Player> playerDb = Database.getDb(Player.class);
+        //distribute main bulk of territories
+        for(Object p : players) {
+            Player player=playerDb.read(p);
+            for(int i=0;i<territoriesPerPlayer;++i) {
+                TerritoryDeed deed = new TerritoryDeed(player.id);
+                deed.playerId = player.id;
+                int territory = terrIds.get(t_index++);
+
+                map.deeds.put(Integer.toString(territory), deed);
+                player.territories.put(territory, deed);
+            }
+        }
+        //distribute left over territories
+        for(int i=0; i<territoriesExtra; ++i){
+            Object p = players.get(i);
+            Player player=playerDb.read(p);
+            TerritoryDeed deed = new TerritoryDeed(player.id);
+            deed.playerId = player.id;
+            int territory = terrIds.get(t_index++);
+
+            map.deeds.put(Integer.toString(territory), deed);
+            player.territories.put(territory, deed);
+        }
+    }
+    
     public int calculateArmies(int numPlayers) {
         switch (numPlayers) {
         case 3:
