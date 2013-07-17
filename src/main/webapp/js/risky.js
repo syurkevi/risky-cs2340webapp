@@ -1,5 +1,5 @@
 var risky = angular.module("risky", ["ngResource"]);
-risky.service("Toast", function ($rootScope) {
+risky.service("Toast", function ($rootScope,$q) {
     var toast = {};
     toast.send = function (id, type, message) {
         if (arguments.length === 1) {
@@ -16,9 +16,11 @@ risky.service("Toast", function ($rootScope) {
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
-        if (!$rootScope.toasts) $rootScope.toasts=[];
-        $rootScope.toasts.push({"id":$rootScope.toasts.length, "type":type, "message":message});
-        setTimeout(function(){clearElement("toast"+($rootScope.toasts.length-1),1000)},1000); 
+        $rootScope.$broadcast("new-toast",{"type":type, "message":message}); // event sent to ToastController
+        //if (!$rootScope.toasts) $rootScope.toasts=[];
+        //$rootScope.toasts.push({"id":$rootScope.toasts.length, "type":type, "message":message});
+        //$rootScope.$broadcast("toasty");
+        //setTimeout(function(){clearElement("toast"+($rootScope.toasts.length-1),1000)},1000); 
     };
     toast.notify = function (id, message) {
         toast.send(id, "notice", message);
@@ -26,12 +28,16 @@ risky.service("Toast", function ($rootScope) {
     toast.error = function (id, message) {
         toast.send(id, "error", message);
     };
-    /*
-    toast.request = function (message, requestinfo) {
+    
+    toast.request = function (message, requestinfo) { // Currently only set up for number inputs as a range
         // requestinfo = [{"name":name,"value":value},{...},...]
-        if (!$rootScope.toasts) $rootScope.toasts=[]$scope.players.;
-        $rootScope.toasts.push({"id": $rootScope.toasts.length, "type":"success", "message":message, "buttons":requestinfo});
-    };*/
+        //if (!$rootScope.toasts) $rootScope.toasts=[];
+        var deferred = $q.defer();
+        $rootScope.$broadcast("new-toast",{"type":"success", "message":message, "values":requestinfo});
+        $rootScope.$on("toast-reply",function (event,response) {deferred.resolve(response);});
+        return deferred.promise;
+        //$rootScope.toasts.push({"id": $rootScope.toasts.length, "type":"success", "message":message, "buttons":requestinfo});
+    };
     return toast;
     
 }).directive("swatch", function ($timeout) {
@@ -102,14 +108,4 @@ function pointInPoly(point, polygon) {
         }
     }
     return c;
-}
-
-function clearElement(e,t) { 
-    var delay = (t)?t:0, element = (e && e.nodeType)?e:document.getElementById(e);
-    setTimeout(function(){
-        element.style.animation="pop-out 0.8s ease-in";
-        setTimeout(function(){element.style.display="none"},700);
-        //setTimeout(function(){element.style.display="none"},3400);
-    },delay);
-    //var display = getComputedStyle(e,null);
 }

@@ -4,6 +4,12 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.turnOrder = TurnOrder.get();
     $scope.players = Player.query();
     $scope.map = Map.get();
+    /*var rbuttons=[]
+    for(var i = 0; i < 10; i++) {
+        rbuttons.push({"name":i+(i===1)?" army":" armies","value":i});
+    }*/
+    var toastest = Toast.request("Attack with how many dies?",[1,25]);
+    toastest.then(function(e){alert(e);});
     
     function getCurrentPlayer() {
         return $scope.players[$scope.turnOrder.playerIndex];
@@ -76,19 +82,25 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         console.log("set defending to " + territory.id);
                         console.log(map.getOwnerOfTerritory($scope.players, data.attacking.id));
                         
+                        // Toast.request("Attack with how many dies?",["button1","button2"],"button3");
+                        /*var rbuttons=[]
+                        for(var i = 0; i < 10; i++) {
+                            rbuttons.push({"name":i+(i===1)?" army":" armies","value":i});
+                        }*/
+                        Toast.request("Attack with how many dies?",[1,10]);
                         // get attacking number of die
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking).name + ", attack with how many die?")*1;// @SY make this a Toast.prompt, or however you've implemented
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many die?")*1;// @SY make this a Toast.prompt, or however you've implemented
                         if (isNaN(die)) throw new Exception("Not a number");
-                        var armies = map.getDeedForTerritory(territory);
+                        var armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id]; // map.getDeedForTerritory(territory.id);
                         if (die < 1 || die >= armies) throw new Exception("Cannot use that many die. Must be between 1 exclusive and " + (armies-1) + " inclusive");
                         data.attackingDie = die;
                         
                         console.log("set attacking die to " + die);
                         
                         // get number of defending die
-                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?")*1;// @SY and here too
+                        var die = prompt(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many die?")*1;// @SY and here too
                         if (isNaN(die)) throw new Exception("Not a number");
-                        var armies = map.getDeedForTerritory(territory);
+                        var armies = map.getOwnerOfTerritory($scope.players, territory.id).territories[territory.id]; // map.getDeedForTerritory(territory.id);
                         if (die < 0 || die > 3) throw new Exception("Cannot use that many die. Must be between 1 and " + Math.min(armies, 2) + " inclusive");
                         data.defendingDie = die;
                         
