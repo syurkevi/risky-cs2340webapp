@@ -1,8 +1,13 @@
 var risky = angular.module("risky", ["ngResource"]);
 risky.service("Toast", function ($rootScope, $q) {
     var toast = {};
+<<<<<<< HEAD
     toast.send = function (id, type, message, bundle) {
         bundle = bundle || {};
+=======
+    toast.send = function (id, type, message/*, bundle*/) {
+        //bundle = bundle || {};
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
         
         if (arguments.length === 1) {
             console.log(id);
@@ -18,6 +23,7 @@ risky.service("Toast", function ($rootScope, $q) {
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
+<<<<<<< HEAD
         if (!$rootScope.toasts) $rootScope.toasts=[];
         
         var q = $q.defer();
@@ -36,15 +42,29 @@ risky.service("Toast", function ($rootScope, $q) {
         
         return q.promise;
     };
+=======
+
+        $rootScope.$broadcast("new-toast",{"type":type, "message":message}); // event sent to ToastController
+     };
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     toast.notify = function (id, message) {
         return toast.send(id, "notice", message);
     };
     toast.error = function (id, message) {
         return toast.send(id, "error", message);
     };
+<<<<<<< HEAD
     toast.request = function (id, message, requestinfo) {
         // requestinfo = [{"name":name,"value":value},{...},...]
         return toast.send(id, "request", message, {"buttons":requestinfo, timeout: 0});
+=======
+    toast.request = function (message, requestinfo) { // Currently only set up for number inputs as a range
+        // requestinfo = [range-min,range-max] inclusive
+        var deferred = $q.defer();
+        $rootScope.$broadcast("new-toast",{"type":"success", "message":message, "values":requestinfo});
+        $rootScope.$on("toast-reply",function (event,response) {deferred.resolve(response);});
+        return deferred.promise;
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     };
     return toast;
     
@@ -121,6 +141,7 @@ function pointInPoly(point, polygon) {
     }
     return c;
 }
+<<<<<<< HEAD
 
 function clearElement(e, t) {
     var element = (e && e.nodeType) ? e : document.getElementById(e);
@@ -132,3 +153,5 @@ function clearElement(e, t) {
     },delay);
     //var display = getComputedStyle(e,null);
 }
+=======
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6

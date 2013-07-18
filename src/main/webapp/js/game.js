@@ -72,6 +72,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
                         data["defending"] = territory;
+<<<<<<< HEAD
                         
                         Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
                         
@@ -92,6 +93,19 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                             data.attackingDie = value;
                             return Toast.request(undefined, map.getOwnerOfTerritory($scope.players, data.defending).name + ", defend with how many die?", generateNumericButtons(1, Math.min(maxDefendingArmies, 2)));
                             
+=======
+                        
+                        Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
+                        
+                        var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
+                        var maxDefendingArmies = map.getDeedForTerritory(data.defending).armies;
+
+                        // then ask for the number of dice to attack and defend with
+                        Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many dice?", [1,maxAttackingArmies]).then(function (value) {
+                            console.log(value);
+                            data.attackingDie = value;
+                            return Toast.request(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many dice?", [1,Math.min(maxDefendingArmies, 2)]);
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
                         }).then(function (value) {
                             console.log(value);
                             data.defendingDie = value;
