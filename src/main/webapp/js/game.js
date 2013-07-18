@@ -73,6 +73,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
                         data["defending"] = territory;
 <<<<<<< HEAD
+<<<<<<< HEAD
                         
                         Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
                         
@@ -97,6 +98,11 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         
                         Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
                         
+=======
+                        
+                        Toast.notify("Defender, man your station, " + territory.id + " is being attacked!");
+                        
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
                         var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
                         var maxDefendingArmies = map.getDeedForTerritory(data.defending).armies;
 
@@ -105,6 +111,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                             console.log(value);
                             data.attackingDie = value;
                             return Toast.request(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many dice?", [1,Math.min(maxDefendingArmies, 2)]);
+<<<<<<< HEAD
+>>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
+=======
 >>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
                         }).then(function (value) {
                             console.log(value);
