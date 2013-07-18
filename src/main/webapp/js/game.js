@@ -46,7 +46,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                     
                     var d = $q.defer();
-                    Toast.notify("fortify a territory");
                     getCurrentPlayer().$fortify({
                         to: territory.id,
                         armies: 4
@@ -68,18 +67,17 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     }
                     
                     function getAttackingTerritory(e) {
-                        Toast.notify(getCurrentPlayer().name + " is attacking!");
-                        Toast.notify("chose attack origin");
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                        if (map.getOwnerOfTerritory($scope.players, territory.id).name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
+                        var name = getPlayerName(territory);
+                        if (name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
                         data["attacking"] = territory;
                         
-                        Toast.notify("Attacking from territory #" + territory.id + ". Where are you attacking?");
+                        Toast.notify("Attacking from territory #" + territory.id + ". " + name + ", where are you attacking?");
                     }
                     
                     function requestAttackingDie() {
                         var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
-                        return Toast.request(map.getOwnerOfTerritory($scope.players, data.attacking.id).name + ", attack with how many dice?", {
+                        return Toast.request(getPlayerName(data.attacking) + ", attack with how many dice?", {
                             requestType: "select",
                             options: optionRangeFactory(1, Math.min(maxAttackingArmies, 3))
                         });
@@ -87,7 +85,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     
                     function requestDefendingDie() {
                         var maxDefendingArmies = map.getDeedForTerritory(data.defending).armies;
-                        return Toast.request(map.getOwnerOfTerritory($scope.players, data.defending.id).name + ", defend with how many dice?", {
+                        return Toast.request(getPlayerName(data.defending) + ", defend with how many dice?", {
                             requestType: "select",
                             options: optionRangeFactory(1, Math.min(maxDefendingArmies, 2))
                         });
@@ -95,14 +93,14 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     
                     function getTargetTerritory(e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                        if (map.getOwnerOfTerritory($scope.players, territory.id).name == getCurrentPlayer().name) throw new Exception("You own this territory");
+                        if (getPlayerName(territory) == getCurrentPlayer().name) throw new Exception("You own this territory");
                         console.log(data.attacking.adjacencies);
                         console.log("versus");
                         console.log(territory.id);
                         if (data.attacking.adjacencies.indexOf(territory.id) < 0) throw new Exception("That territory is not adjacent");
                         data["defending"] = territory;
                         
-                        Toast.notify("Defender, man your station, #" + territory.id + " is being attacked!");
+                        Toast.notify(getPlayerName(data.defending) + ", man your station, #" + territory.id + " is being attacked!");
 
                         // then ask for the number of dice to attack and defend with
                         return requestAttackingDie().then(function (attackingDie) {
@@ -125,6 +123,10 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                             defendingDie: data.defendingDie
                         }, d.resolve, d.reject);
                         return d.promise;
+                    }
+                    
+                    function getPlayerName(territory) {
+                        return map.getOwnerOfTerritory($scope.players, territory.id).name;
                     }
                     
                     function optionRangeFactory(min, max) {

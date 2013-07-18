@@ -8,6 +8,15 @@ function CanvasMap(canvas, map, players, config) {
     };
 }
 
+CanvasMap.prototype.getTerritoryAt = function (point) {
+    for (var i=0 ; i < this.territories.length ; i++) {
+        if (pointInPoly(point, this.territories[i])) {
+            return this.territories[i];
+        }
+    }
+    throw new Error("Not a territory");
+};
+
 CanvasMap.prototype.getOwnershipMap = function (players) {
     var map = {};// territoryId -> player
     
@@ -123,13 +132,4 @@ CanvasMap.prototype.calculateCenter = function (territory) {
     center[0] *= this.config.scale / territory.vertexes.length;
     center[1] *= this.config.scale / territory.vertexes.length;
     return center;
-};
-
-CanvasMap.prototype.getTerritoryAt = function (point) {
-    for (var i=0 ; i < this.territories.length ; i++) {
-        if (pointInPoly(point, this.territories[i])) {
-            return this.territories[i];
-        }
-    }
-    throw new Error("Not a territory");
 };

@@ -14,7 +14,7 @@ body {
 
 /* application-neutral class-level styles */
 #content {
-    position: relative;}
+    /*position: relative;*//* royally mucks-about with mapping the location of a click on the map to a territory*/}
 
 .occlude {
     background-color: rgba(0, 0, 0, 0.25);
@@ -23,6 +23,9 @@ body {
     top: 0;
     left: 0;
     width: 100%;}
+
+.washed-out {
+    color: lightgrey;}
 
 .right-align {
     text-align: right;}
