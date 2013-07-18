@@ -1,6 +1,7 @@
 function CanvasMap(canvas, map, players, config) {
     this.canvas = canvas;
     this.context = this.canvas.getContext("2d");
+    this.map = map;
     this.territories = map.territories;
     this.players = players;
     this.config = {
@@ -32,17 +33,15 @@ CanvasMap.prototype.getOwnershipMap = function (players) {
 };
 
 CanvasMap.prototype.getDeedForTerritory = function (territory) {
-    for (var i=0 ; i < this.players.length ; i++) {
-        if (this.players[i].territories[territory.id]) {
-            return this.players[i].territories[territory.id];
-        }
-    }
+    console.log(this.map);
+    console.log(this.map.deeds);
+    console.log(this.map.deeds[0]);
+    console.log(territory.id);
+    return this.map.deeds[territory.id];
 };
 
 CanvasMap.prototype.getOwnerOfTerritory = function (players, territory) {
     var ownership = this.getOwnershipMap(players);
-    console.log(ownership);
-    console.log(territory);
     return ownership[territory];
 };
 

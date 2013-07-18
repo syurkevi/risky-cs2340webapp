@@ -63,19 +63,19 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         
                     } else if (!data.defending) {// get the territory to defend from
                         return getTargetTerritory(e);
-                        
                     }
                     
                     function getAttackingTerritory(e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         var name = getPlayerName(territory);
-                        if (name != getCurrentPlayer().name) throw new Exception("You do not own this territory");
+                        if (name != getCurrentPlayer().name) throw new Error("You do not own this territory");
                         data["attacking"] = territory;
                         
                         Toast.notify("Attacking from territory #" + territory.id + ". " + name + ", where are you attacking?");
                     }
                     
                     function requestAttackingDie() {
+                        console.log(map.getDeedForTerritory(data.attacking));
                         var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
                         return Toast.request(getPlayerName(data.attacking) + ", attack with how many dice?", {
                             requestType: "select",
@@ -93,11 +93,8 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     
                     function getTargetTerritory(e) {
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
-                        if (getPlayerName(territory) == getCurrentPlayer().name) throw new Exception("You own this territory");
-                        console.log(data.attacking.adjacencies);
-                        console.log("versus");
-                        console.log(territory.id);
-                        if (data.attacking.adjacencies.indexOf(territory.id) < 0) throw new Exception("That territory is not adjacent");
+                        if (getPlayerName(territory) == getCurrentPlayer().name) throw new Error("You own this territory");
+                        if (data.attacking.adjacencies.indexOf(territory.id) < 0) throw new Error("That territory is not adjacent");
                         data["defending"] = territory;
                         
                         Toast.notify(getPlayerName(data.defending) + ", man your station, #" + territory.id + " is being attacked!");
@@ -157,6 +154,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.automateSetup = function () {
         $scope.turnOrder.$automateSetup({}, function () {
             $scope.players = Player.query();
+            $scope.map = Map.get();
             
         }, Toast.error);
     };
@@ -164,12 +162,14 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     $scope.automatePlacearmies = function () {
         $scope.turnOrder.$automatePlacearmies({}, function () {
             $scope.players = Player.query();
+            $scope.map = Map.get();
         }, Toast.error);
     };
     
     $scope.nextTurn = function () {
         $scope.turnOrder.$nextTurn();
         $scope.players = Player.query();
+        $scope.map = Map.get();
     };
     
     $scope.onMapClick = function (e) {
@@ -188,12 +188,15 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
         
         d.promise.then(function () {
             var p = $q.defer();
-            a = new Date().getTime();
             $scope.players = Player.query({}, p.resolve, p.reject);
             return p.promise;
             
-        }).then(function (data) {
-            console.log($scope.players[0].territories);
+        }).then(function () {
+            var p = $q.defer();
+            $scope.map = Map.get({}, p.resolve, p.reject);
+            return p.promise;
+            
+        }).then(function () {
             map.draw($scope.players);
             nextAction();
             
