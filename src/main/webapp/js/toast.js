@@ -1,4 +1,4 @@
-risky.controller("ToastController", function ($scope,$timeout,Toast) {
+risky.controller("ToastController", function ($scope, $timeout, Toast) {
     $scope.toasts = [];
 
     $scope.$on("new-toast",function (event, toast) { 

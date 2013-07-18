@@ -1,8 +1,9 @@
 var risky = angular.module("risky", ["ngResource"]);
 risky.service("Toast", function ($rootScope, $q) {
     var toast = {};
-    toast.send = function (id, type, message/*, bundle*/) {
-        //bundle = bundle || {};
+    if (!$rootScope.toasts) $rootScope.toasts = {};
+    toast.send = function (id, type, message, bundle) {
+        bundle = bundle || {};
         
         if (arguments.length === 1) {
             console.log(id);
@@ -11,28 +12,52 @@ risky.service("Toast", function ($rootScope, $q) {
             id = undefined;
         }
         
+        id = id || $rootScope.toasts.length;
+        
         var type = (type === "error") ? "error" : "log";
-        console[type](message);
+        //console[type](message);
         type = (type === "error") ? "danger" : "info";
         
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
-
-        $rootScope.$broadcast("new-toast",{"type":type, "message":message}); // event sent to ToastController
+        
+        var q = $q.defer();
+        
+        bundle.type = type;
+        bundle.message = message;
+        bundle.q = q;
+        bundle.hasEgo = (bundle.hasEgo != void 0) ? bundle.hasEgo : false;
+        bundle.closeable = (bundle.closeable != void 0) ? bundle.closeable : true;
+        bundle.close = function () {
+            delete $rootScope.toasts[id];
+        };
+        bundle.respond = function (value) {
+            bundle.q.resolve(value);
+            $rootScope.occlude = false;
+            bundle.close();
+        }
+        
+        if (bundle.hasEgo) {
+            $rootScope.occlude = true;
+        }
+        $rootScope.toasts[id] = bundle;
+        
+        return q.promise;
      };
     toast.notify = function (id, message) {
-        toast.send(id, "notice", message);
+        return toast.send(id, "notice", message);
     };
     toast.error = function (id, message) {
-        toast.send(id, "error", message);
+        return toast.send(id, "error", message);
     };
-    toast.request = function (message, requestinfo) { // Currently only set up for number inputs as a range
-        // requestinfo = [range-min,range-max] inclusive
-        var deferred = $q.defer();
-        $rootScope.$broadcast("new-toast",{"type":"success", "message":message, "values":requestinfo});
-        $rootScope.$on("toast-reply",function (event,response) {deferred.resolve(response);});
-        return deferred.promise;
+    toast.request = function (message, bundle) {
+        bundle = bundle || {};
+        bundle.isRequest = true;
+        bundle.timeout = 0;
+        bundle.closeable = false;
+        bundle.hasEgo = true;
+        return toast.send(void 0, "warning", message, bundle);
     };
     return toast;
     
@@ -85,7 +110,7 @@ risky.filter("iif", function () {// ternary operator for {{}}'d things
     };
 }).filter("oor", function () {// for something || default
     return function(input, elseValue) {
-        return input || elseValue;
+        return (input != void 0) ? input : elseValue;
     };
 });
 
