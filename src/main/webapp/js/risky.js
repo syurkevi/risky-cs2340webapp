@@ -1,18 +1,8 @@
 var risky = angular.module("risky", ["ngResource"]);
 risky.service("Toast", function ($rootScope, $q) {
     var toast = {};
-<<<<<<< HEAD
-<<<<<<< HEAD
-    toast.send = function (id, type, message, bundle) {
-        bundle = bundle || {};
-=======
     toast.send = function (id, type, message/*, bundle*/) {
         //bundle = bundle || {};
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
-=======
-    toast.send = function (id, type, message/*, bundle*/) {
-        //bundle = bundle || {};
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
         
         if (arguments.length === 1) {
             console.log(id);
@@ -28,60 +18,21 @@ risky.service("Toast", function ($rootScope, $q) {
         if (message.data && message.data.cause && message.data.cause.message) message = message.data.cause.message;
         if (message.data && message.data.message) message = message.data.message;
         if (message.message) message = message.message;
-<<<<<<< HEAD
-<<<<<<< HEAD
-        if (!$rootScope.toasts) $rootScope.toasts=[];
-        
-        var q = $q.defer();
-        var toast = {"id":$rootScope.toasts.length, "type":type, "message":message, "q": q};
-        
-        for (var property in bundle) {// copy properties of the bundle to the toast
-            toast[property] = bundle[property];
-        }
-        
-        $rootScope.toasts[toast.id] = toast;
-        if (typeof bundle.timeout == "undefined" || bundle.timeout > 0) {
-            setTimeout(function () {
-                clearElement("toast" + toast.id, bundle.timeout || 2000);
-            });
-        }
-        
-        return q.promise;
-    };
-=======
 
         $rootScope.$broadcast("new-toast",{"type":type, "message":message}); // event sent to ToastController
      };
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
-=======
-
-        $rootScope.$broadcast("new-toast",{"type":type, "message":message}); // event sent to ToastController
-     };
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     toast.notify = function (id, message) {
-        return toast.send(id, "notice", message);
+        toast.send(id, "notice", message);
     };
     toast.error = function (id, message) {
-        return toast.send(id, "error", message);
+        toast.send(id, "error", message);
     };
-<<<<<<< HEAD
-<<<<<<< HEAD
-    toast.request = function (id, message, requestinfo) {
-        // requestinfo = [{"name":name,"value":value},{...},...]
-        return toast.send(id, "request", message, {"buttons":requestinfo, timeout: 0});
-=======
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     toast.request = function (message, requestinfo) { // Currently only set up for number inputs as a range
         // requestinfo = [range-min,range-max] inclusive
         var deferred = $q.defer();
         $rootScope.$broadcast("new-toast",{"type":"success", "message":message, "values":requestinfo});
         $rootScope.$on("toast-reply",function (event,response) {deferred.resolve(response);});
         return deferred.promise;
-<<<<<<< HEAD
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     };
     return toast;
     
@@ -158,20 +109,3 @@ function pointInPoly(point, polygon) {
     }
     return c;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-function clearElement(e, t) {
-    var element = (e && e.nodeType) ? e : document.getElementById(e);
-    var delay = t || 0;
-    
-    setTimeout(function () {
-        element.style.animation = "pop-out 0.8s ease-in";
-        setTimeout(function () {element.style.display="none"}, 800);
-    },delay);
-    //var display = getComputedStyle(e,null);
-}
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6

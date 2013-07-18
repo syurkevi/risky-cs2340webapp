@@ -1,15 +1,4 @@
 @keyframes pop-in {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    from {bottom: -32px; opacity: 0; min-height: 0; max-height: 1px; width: 120px;}
-    to {bottom: 0; opacity: 1; min-height: 48px; max-height: 96px; width: 480px;} }
-
-@keyframes pop-out {
-    from {bottom: 0; margin-top: 2px; opacity: 1;}
-    to {bottom: 32px; margin-top: -80px; opacity: 0; display: none;} }
-=======
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     from {bottom: -32px; opacity: 0; min-height: 0; max-height: 1px; width: 120px; left: -87px;}
     to {bottom: 0; opacity: 1; min-height: 48px; max-height: 96px; width: 480px; left: -267px;}
 }
@@ -18,31 +7,12 @@
     from {bottom: 0; margin-top: 2px; opacity: 1;}
     to {bottom: 32px; margin-top: -80px; opacity: 0; display: none;}
 }
-<<<<<<< HEAD
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
 
 /* tag-wide styles */
 body {
     margin: 0 auto;
     padding: 1em;
-    max-width: 800px;}
-
-/* application-neutral class-level styles */
-.right-align {
-    text-align: right;}
-
-.left-align {
-    text-align: left;}
-
-/* application-neutral class-level styles */
-.right-align {
-    text-align: right;
-}
-
-.left-align {
-    text-align: left;
+    max-width: 800px;
 }
 
 /* application-neutral class-level styles */
@@ -56,36 +26,17 @@ body {
 
 .oneof2 {
     float: left;
-    width: 50%;}
+    width: 50%;
+}
 
 .input-micro {
     height: 20px;
-<<<<<<< HEAD
-    width: 30px;}
-=======
     width: 30px;
 }
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
 
 .toasts {
     position: fixed;
     bottom: 32px;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    left: 50%;}
-
-.toast {
-    position: relative;
-    left: -50%;
-    width: 480px;
-    min-height: 48px;
-    margin: 2px auto;
-    animation: pop-in 0.5s;}
-
-/* application-specific class-level styles */
-=======
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
     left: 50%;
     width: 0;
 }
@@ -98,35 +49,25 @@ body {
     margin: 2px auto;
     animation: pop-in 0.5s;
 }
-<<<<<<< HEAD
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
-=======
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
 .color-swatch {
     display: inline-block;
     height: 1em;
-    width: 1em;}
+    width: 1em;
+}
 
 /* application-specific overrides */
 .row-fluid .no-left-gutter {
-    margin-left: 0;}
+    margin-left: 0;
+}
 
 .row-fluid [class*="span"] > *:first-child {
-<<<<<<< HEAD
-    margin-top: 0;}
-=======
     margin-top: 0;
 }
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
 
 /* application-specific one-off styles */
 .action-bar {
-<<<<<<< HEAD
-    font-size: 85%;}
-=======
     font-size: 85%;
 }
->>>>>>> ed484432fff058039e7201aef6d25e3ed4671fd6
 
 .highlighted {
     background-color: #ddd;
