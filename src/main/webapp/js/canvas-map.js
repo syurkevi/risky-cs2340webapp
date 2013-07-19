@@ -33,10 +33,13 @@ CanvasMap.prototype.getOwnershipMap = function (players) {
 };
 
 CanvasMap.prototype.getDeedForTerritory = function (territory) {
+    console.log("getDeedForTerritory");
     console.log(this.map);
     console.log(this.map.deeds);
     console.log(this.map.deeds[0]);
     console.log(territory.id);
+    console.log("\tplayers");
+    console.log(this.players);
     return this.map.deeds[territory.id];
 };
 
@@ -100,12 +103,14 @@ CanvasMap.prototype.drawTerritory = function (territory, player) {
     this.labelTerritory(territory, player);
 };
 
-CanvasMap.prototype.draw = function (players) {
+CanvasMap.prototype.draw = function (map, players) {
     this.canvas.width = this.canvas.width;// clear canvas
     this.context.strokeStyle = "#333";
-    
+    console.log(players);
+    this.map = map;
+    this.players = players;
     var ownershipMap = this.getOwnershipMap(players);
-    
+    console.log(ownershipMap);
     if (!this.territories) return;
     for (var i=0 ; i < this.territories.length ; i++) {
         var territory = this.territories[i];

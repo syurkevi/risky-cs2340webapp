@@ -75,7 +75,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                     }
                     
                     function requestAttackingDie() {
+                        console.log("Deed:");
                         console.log(map.getDeedForTerritory(data.attacking));
+                        console.log(map.getDeedForTerritory(data.attacking.id));
                         var maxAttackingArmies = map.getDeedForTerritory(data.attacking).armies-1;
                         return Toast.request(getPlayerName(data.attacking) + ", attack with how many dice?", {
                             requestType: "select",
@@ -114,11 +116,14 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         // send attack
                         var d = $q.defer();
                         getCurrentPlayer().$attack({
-                            from: data.attacking.id,
-                            to: data.defending.id, // could this just be $attack(data, d.resolve ....?
+                            attacking: data.attacking.id,
+                            defending: data.defending.id, // could this just be $attack(data, d.resolve ....?
                             attackingDie: data.attackingDie,
                             defendingDie: data.defendingDie
                         }, d.resolve, d.reject);
+                        
+                        $scope.states.play[1].data = {};
+                        
                         return d.promise;
                     }
                     
@@ -141,9 +146,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 }
             }, 
             2: {// fortify
-                "mapClick": function (e) {
-                    
-                }
+                "mapClick": function (e) {}
             },
             3: {// end turn
                 "mapClick": function (e) {}
@@ -189,16 +192,20 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
         d.promise.then(function () {
             var p = $q.defer();
             $scope.players = Player.query({}, p.resolve, p.reject);
+            console.log("Update players");
             return p.promise;
             
         }).then(function () {
             var p = $q.defer();
             $scope.map = Map.get({}, p.resolve, p.reject);
+            console.log("Update map");
             return p.promise;
             
         }).then(function () {
-            map.draw($scope.players);
-            nextAction();
+            map.draw($scope.map, $scope.players);
+            if (!($scope.turnOrder.state == "play" && $scope.turnOrder.action == 1)) {// don't jump to next action if attacking (therefore R16)
+                nextAction();
+            }
             
         }, function (error) {
             Toast.error(error);
@@ -213,7 +220,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
     });
     
     $scope.$watch("players", function () {
-        if (map) map.draw($scope.players);
+        if (map) map.draw($scope.map, $scope.players);
     }, true);
     
 });
