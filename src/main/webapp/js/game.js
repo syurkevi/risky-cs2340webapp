@@ -69,6 +69,9 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
                         var name = getPlayerName(territory);
                         if (name != getCurrentPlayer().name) throw new Error("You do not own this territory");
+                        var maxAttackingArmies = map.getDeedForTerritory(territory).armies;
+                        if (maxAttackingArmies <= 1) throw new Error("Not enough dice");
+                        if(!hasAttackable(territory)) throw new Error("No enemies around here");
                         data["attacking"] = territory;
                         
                         Toast.notify("Attacking from territory #" + territory.id + ". " + name + ", where are you attacking?");
@@ -110,6 +113,13 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                             data.defendingDie = defendingDie;
                             return sendAttack(e);
                         });
+                    }
+                    function hasAttackable(territory){
+                        for(var i=0;i<territory.adjacencies.length;++i){
+                            if (map.getOwnerOfTerritory($scope.players,territory.adjacencies[i]).name != getCurrentPlayer().name) return true;
+                        }
+                        return false
+                        
                     }
                     
                     function sendAttack(e) {
