@@ -66,7 +66,7 @@ public class Lobby extends Model {
     }
     
     public boolean hasTooManyPlayers() {
-        return this.players.size() >= MAX_PLAYERS;
+        return this.players.size() > MAX_PLAYERS;
     }
     
     public void allocateArmies() {

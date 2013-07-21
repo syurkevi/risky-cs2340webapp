@@ -58,7 +58,7 @@ public class Battle extends Model {
             }
         }
         
-        //record.defendingCasualties = 10; //left in for easier testing
+        record.defendingCasualties = 10; //left in for easier testing
         
         return record;
     }

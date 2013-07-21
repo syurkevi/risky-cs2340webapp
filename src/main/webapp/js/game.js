@@ -112,6 +112,8 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         }).then(function (defendingDie) {
                             data.defendingDie = defendingDie;
                             return sendAttack(e);
+                        }).then(function (){
+                            return updateArmies();
                         });
                     }
                     function hasAttackable(territory){
@@ -119,7 +121,6 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                             if (map.getOwnerOfTerritory($scope.players,territory.adjacencies[i]).name != getCurrentPlayer().name) return true;
                         }
                         return false
-                        
                     }
                     
                     function sendAttack(e) {
@@ -150,6 +151,22 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         }
                         return options;
                     }
+
+                    function updateArmies(){
+                        for(var i=0;i<$scope.players.length;++i) {
+                            var p_territories={};
+                            p_territories=$scope.players[i].territories;
+                            var armies=0;
+                            for (var t in p_territories) {
+                                armies+=p_territories[t].armies;
+                            }
+
+                            $scope.players[i].armies=armies;
+                            $scope.players[i].$updateArmies({
+                                    "armies": armies
+                            });
+                        }
+                    }
                 },
                 "skipAttacks": function () {
                     nextAction();
@@ -161,6 +178,11 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             3: {// end turn
                 "mapClick": function (e) {}
             }
+        },
+        "gameover": {
+            0: {
+                "mapClick": function (){alert($scope.players[0].name+" has taken over the world!");}
+            }
         }
     }
     
@@ -171,7 +193,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             
         }, Toast.error);
     };
-    
+     
     $scope.automatePlacearmies = function () {
         $scope.turnOrder.$automatePlacearmies({}, function () {
             $scope.players = Player.query();
