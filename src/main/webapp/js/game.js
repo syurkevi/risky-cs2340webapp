@@ -73,6 +73,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         if (maxAttackingArmies <= 1) throw new Error("Not enough dice");
                         if(!hasAttackable(territory)) throw new Error("No enemies around here");
                         data["attacking"] = territory;
+                        data["attacker"] = name;
                         
                         Toast.notify("Attacking from territory #" + territory.id + ". " + name + ", where are you attacking?");
                     }
@@ -103,6 +104,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         if (getPlayerName(territory) == getCurrentPlayer().name) throw new Error("You own this territory");
                         if (data.attacking.adjacencies.indexOf(territory.id) < 0) throw new Error("That territory is not adjacent");
                         data["defending"] = territory;
+                        data["defender"] = getPlayerName(territory);
                         
                         Toast.notify(getPlayerName(data.defending) + ", man your station, #" + territory.id + " is being attacked!");
 
@@ -134,7 +136,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                         attackerGain=diffAttacker<0?" lost: ":" gained: ";
                         defenderGain=diffDefender<0?" lost: ":" gained: ";
                         
-                        Toast.notify("Attacker"+attackerGain+Math.abs(diffAttacker) + " , Defender"+defenderGain+Math.abs(diffDefender) +" ");
+                        Toast.notify(data["attacker"]+attackerGain+Math.abs(diffAttacker) +" at territory "+data["attacking"].id+" , "+data["defender"]+defenderGain+Math.abs(diffDefender) +" at territory "+data["defending"].id);
                         $scope.states.play[1].data = {};
                     }
                     function sendAttack(e) {
