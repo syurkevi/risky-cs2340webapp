@@ -151,6 +151,11 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             3: {// end turn
                 "mapClick": function (e) {}
             }
+        },
+        "gameover": {
+            0: {
+                "mapClick": function (e) {}
+            }
         }
     }
     

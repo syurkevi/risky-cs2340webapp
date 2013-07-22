@@ -73,7 +73,7 @@
             
             <!-- gameover -->
             <div class="span10 row-fluid no-left-gutter action-bar" ng-show="turnOrder.state == 'gameover'" ng-class="action{{currentAction}}">
-                <div class="span12">
+                <div class="span12" ng-class="turnOrder.action == 0 | iif : 'highlighted' : ''">
                     <h4>A WinRAR is you!</h4>
                 </div>
             </div>

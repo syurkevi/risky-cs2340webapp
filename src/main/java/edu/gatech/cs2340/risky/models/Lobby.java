@@ -129,7 +129,7 @@ public class Lobby extends Model {
         return 0;
     }
     
-    public int getWinner() {
+    public int getWinner() throws Exception {
         ArrayList<Player> players = this.getPlayers();
         Map map = Map.get(this.mapId);
         for (int i=0 ; i< players.size() ; i++) {
@@ -137,7 +137,15 @@ public class Lobby extends Model {
                 return i;
             }
         }
-        return -1;
+        throw new Exception("No winner");
+    }
+    
+    public boolean hasWinner() {
+        try {
+            this.getWinner();
+            return true;
+        } catch (Exception e) {}
+        return false;
     }
     
     public void populateValidWith(Lobby l) {

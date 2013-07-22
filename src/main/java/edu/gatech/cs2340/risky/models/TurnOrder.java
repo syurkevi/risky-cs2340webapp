@@ -106,7 +106,7 @@ public class TurnOrder {
         return this.playerIndex;
     }
     
-    protected void handleActionTransition() {
+    protected void handleActionTransition() throws Exception {
         Lobby lobby = Lobby.get(this.lobbyId);
         Player player = lobby.getPlayers().get(this.playerIndex);
         
@@ -117,6 +117,12 @@ public class TurnOrder {
         } else if ("play".equals(this.state)) {
             switch (this.action) {
             case 0:
+                if (lobby.hasWinner()) {
+                    this.state = states[3];
+                    this.action = 0;
+                    this.playerIndex = lobby.getWinner();
+                    return;
+                }
                 System.out.println("dsl;klajsfllksajdflkasdfj;lksajf;lkjsd;lfkjsaf;lkj " + this.playerIndex + " " + player.name + " " + player.id);
                 player.armiesAvailableThisTurn += (int) Math.max(3.0, Math.ceil(player.territories.size()/3.0));
                 break;
