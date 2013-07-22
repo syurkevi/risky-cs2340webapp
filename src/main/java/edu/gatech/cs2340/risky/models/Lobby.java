@@ -140,6 +140,10 @@ public class Lobby extends Model {
         return -1;
     }
     
+    public boolean hasWinner() {
+        return (this.getWinner()<0)?false:true;
+    }
+    
     public void populateValidWith(Lobby l) {
         this.title = l.title;
     }

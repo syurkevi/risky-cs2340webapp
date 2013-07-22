@@ -181,7 +181,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
         },
         "gameover": {
             0: {
-                "mapClick": function (){alert($scope.players[0].name+" has taken over the world!");}
+                "mapClick": function (e) {}
             }
         }
     }
@@ -193,7 +193,7 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
             
         }, Toast.error);
     };
-     
+    
     $scope.automatePlacearmies = function () {
         $scope.turnOrder.$automatePlacearmies({}, function () {
             $scope.players = Player.query();
