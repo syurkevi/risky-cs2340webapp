@@ -64,6 +64,7 @@
                 <div class="span3" class="washed-out" ng-class="turnOrder.action == 2 | iif : 'highlighted' : ''">
                     <h4>Fortify</h4>
                     <div>You have one shot to seize everything you ever wanted. Capture it; don't let it slip!</div>
+                    <div><a class="btn btn-warning btn-mini" ng-click="states.play[2].skipFortify()">No fortification!</a></div>
                 </div>
                 <div class="span3" ng-class="turnOrder.action == 3 | iif : 'highlighted' : ''">
                     <h4>End Turn</h4>
