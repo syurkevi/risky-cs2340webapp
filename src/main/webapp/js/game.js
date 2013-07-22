@@ -173,7 +173,82 @@ risky.controller("GameController", function ($scope, $q, Toast, Lobby, TurnOrder
                 }
             }, 
             2: {// fortify
-                "mapClick": function (e) {}
+                "data":{},
+                "mapClick": function (e) {
+                    var data = $scope.states.play[2].data; 
+                    if (!data.source) {
+                        return getSourceTerritory(e);
+                        
+                    } else if (!data.fortify) {
+                        return getTargetTerritory(e);
+                    }
+                    
+                    function getSourceTerritory(e) {
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        var name = getPlayerName(territory);
+                        if (name != getCurrentPlayer().name) throw new Error("You do not own this territory");
+                        var maxAttackingArmies = map.getDeedForTerritory(territory).armies;
+                        if (maxAttackingArmies <= 1) throw new Error("Not enough armies");
+                        if(!hasAdjacent(territory)) throw new Error("Nowhere to fortify from here");
+                        data["source"] = territory;
+                        
+                        Toast.notify("Moving armies from territory #" + territory.id);
+                    }
+                    
+                    function requestFortifyAmount() {
+                        var maxFortifyArmies = map.getDeedForTerritory(data.source).armies-1;
+                        return Toast.request(getPlayerName(data.source) + ", Move how many armies?", {
+                            requestType: "select",
+                            options: optionRangeFactory(1, maxFortifyArmies)
+                        });
+                    }
+                    
+                    
+                    function getTargetTerritory(e) {
+                        var territory = map.getTerritoryAt(map.toMapPoint([e.pageX, e.pageY]));
+                        if (getPlayerName(territory) != getCurrentPlayer().name) throw new Error("You do not own this territory");
+                        if (data.source.adjacencies.indexOf(territory.id) < 0) throw new Error("That territory is not adjacent");
+                        data["fortify"] = territory;
+                        
+                        return requestFortifyAmount().then(function (fortifyAmount) {
+                            data.fortifyAmount = fortifyAmount;
+                            return fortify(e);
+                        });
+                    }
+
+                    function hasAdjacent(territory){
+                        for(var i=0;i<territory.adjacencies.length;++i){
+                            if (map.getOwnerOfTerritory($scope.players,territory.adjacencies[i]).name == getCurrentPlayer().name) return true;
+                        }
+                        return false
+                    }
+                    
+                    function fortify(e) {
+                        var d = $q.defer();
+                        getCurrentPlayer().$fortify({
+                            from: data.source.id,
+                            to: data.fortify.id,
+                            armies: data.fortifyAmount,
+                        }, d.resolve, d.reject);
+                        $scope.states.play[2].data = {};
+                        return d.promise;
+                    }
+                    
+                    function getPlayerName(territory) {
+                        return map.getOwnerOfTerritory($scope.players, territory.id).name;
+                    }
+                    
+                    function optionRangeFactory(min, max) {
+                        var options = [];
+                        if (min <= max) {
+                            for (var i=min ; i <= max ; i++) {
+                                options.push(i);
+                            }
+                        }
+                        return options;
+                    }
+
+                }
             },
             3: {// end turn
                 "mapClick": function (e) {}
