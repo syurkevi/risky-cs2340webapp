@@ -2,7 +2,6 @@ Risky
 ========================
 CS2340 re-imagination of the board game Risk as a web application.
 Special emphasis on clean coding, agile methods, and design pattern based development.
------------------------
 
 
 Requires 
